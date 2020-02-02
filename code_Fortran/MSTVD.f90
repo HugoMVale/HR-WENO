@@ -15,17 +15,17 @@ SUBROUTINE MSTVD3(DU,neq,dt,t,tout,U,istate,Uold,Lold)
 !
 !VARIABLES:
 !
-!DU			function with the derivatives
-!neq		number of equations
-!dt			time step
+!DU         function with the derivatives
+!neq        number of equations
+!dt         time step
 !t			time; on return it will be the current value of t (close to tout)
-!tout		time where next output is desired
-!U			dependent variables at t(n)
-!Unew		value of U(n+1)
-!L			derivative of U at t(n)
-!istate		index to specify the state of the calculation (1 for the first call)
-!Uold		vector with the 4 previous values of U
-!Lold		vector with the 4 previous values of L
+!tout       time where next output is desired
+!U          dependent variables at t(n)
+!Unew       value of U(n+1)
+!L          derivative of U at t(n)
+!istate     index to specify the state of the calculation (1 for the first call)
+!Uold       vector with the 4 previous values of U
+!Lold       vector with the 4 previous values of L
 !
 !----------------------------------------------------------------------------------------------
 

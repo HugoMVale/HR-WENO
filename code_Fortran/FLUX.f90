@@ -9,8 +9,8 @@ FUNCTION GODUNOV(uL,uR,G)
 !VARIABLES:
 !
 !G      Growth rate (Flux = G.u)
-!uL     left  side of reconstructed of u (u_{i^+1/2}^-)
-!uR     right side of reconstructed of u (u_{i^+1/2}^+)
+!uL     left  side of reconstructed value of u (u_{i^+1/2}^-)
+!uR     right side of reconstructed value of u (u_{i^+1/2}^+)
 !
 !----------------------------------------------------------------------------------------------
 
