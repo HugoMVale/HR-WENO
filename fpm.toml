@@ -15,4 +15,3 @@ library = false
 
 [dev-dependencies]
 test-drive = { git = "https://github.com/zoziha/test-drive", branch = "add-support-array" }
-# test-drive = { path = "../test-drive" }

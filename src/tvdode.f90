@@ -63,17 +63,17 @@ module tvdode
         if (t > tout) return
         
         if (order < 1 .OR. order > 3) then
-            msg = "Invalid input 'order' in rktvd"
+            msg = "Invalid input 'order' in 'rktvd'. Valid set: {1, 2, 3}."
             error stop msg
         end if
         
         if (itask < 1 .OR. itask > 2) then
-            msg = "Invalid input 'itask' in rktvd"
+            msg = "Invalid input 'itask' in 'rktvd'. Valid set: {1, 2}."
             error stop msg
         end if
 
         if (istate < 1 .OR. istate > 2) then
-            msg = "Invalid value 'istate' in rktvd"
+            msg = "Invalid value 'istate' in 'rktvd'. Valid set: {1, 2}."
             error stop msg
         end if
 
@@ -162,18 +162,18 @@ module tvdode
         if (t > tout) return
 
         if (size(uold,2) /= 4 .OR. size(udotold,2) /= 4) then
-            msg = "Invalid dimensions of arrays 'uold' or 'udotold' in mstvd3"
+            msg = "Invalid dimensions of arrays 'uold' or 'udotold' in 'mstvd3'."
             error stop msg
         end if
 
         if (istate < 1 .OR. istate > 2) then
-            msg = "Invalid input 'istate' in mstvd3"
+            msg = "Invalid input 'istate' in 'mstvd3'. Valid set: {1, 2}."
             error stop msg
         end if
 
         !> The first 4 starting values must be computed with a single-step method: we chose 
         !> the RK method of the same order.
-        !> The factor 2 in 't+2*dt' is not important, it just needs to be larger than one
+        !> The factor 2 in 't+2*dt' is not important, it just needs to be larger than 1.0
         !> so that one full 'dt' step can be computed.
         if (istate == 1) then
 
@@ -229,5 +229,5 @@ module tvdode
     end subroutine mstvd3
     !>#########################################################################################
 
-end module TVDODE
+end module tvdode
 !>#############################################################################################

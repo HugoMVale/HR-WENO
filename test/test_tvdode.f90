@@ -1,7 +1,6 @@
 module test_tvdode
 !>----------------------------------------------------------------------------------------------
 !> Test for module 'tvdode' using test-drive.
-!> Hugo Vale
 !>----------------------------------------------------------------------------------------------
     use tvdode, only : rktvd123, mstvd3
     use iso_fortran_env, only : real64, error_unit
@@ -39,6 +38,7 @@ module test_tvdode
         rtol = [2.0e-2_rk, 1.0e-3_rk, 1.0e-3_rk]
         
         !> Analytical solution at t=tout
+        !> We use a simple series of 1st order ode's
         tout = 1_rk
         do i = 1, size(u)
           a(i) = 1.0_rk + real(i-1,rk)
@@ -59,7 +59,7 @@ module test_tvdode
           !> Check error
           call check(error, u, uref, rel=.true., thr=rtol(order))
           
-          !> Detailed comparison for debugging
+          !> Show results if test fails (for debugging)
           if (allocated(error)) then
             write(error_unit, '(2(a6), 2(a26))') "order", "i", "u(i)", "uref(i)"
             do i = 1, size(u)
@@ -69,7 +69,7 @@ module test_tvdode
 
       end do
 
-    end subroutine
+    end subroutine test_rktvd123
 
     subroutine test_mstvd3(error)
       type(error_type), allocatable, intent(out) :: error
@@ -97,7 +97,7 @@ module test_tvdode
       !> Check error
       call check(error, u, uref, rel=.true., thr=1.0e-3_rk)
 
-      !> Detailed comparison for debugging
+      !> Show results if test fails (for debugging)
       if (allocated(error)) then
         write(error_unit, '(a4, 2(a26))') "i", "u(i)", "uref(i)"
         do i = 1, size(u)
@@ -105,7 +105,7 @@ module test_tvdode
         end do
       end if
 
-    end subroutine
+    end subroutine test_mstvd3
 
     pure subroutine fu(t, u, udot)
       !> Simple linear u'(u) to test ode solvers 
