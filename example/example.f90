@@ -1,4 +1,4 @@
-program example_hrweno
+program example_1d
 !>----------------------------------------------------------------------------------------------
 !> This program illustrates the application of modules 'weno' and 'tvdode' for solving a 1D
 !> hyperbolic equation (Burger's equation):
@@ -69,36 +69,37 @@ program example_hrweno
     contains
 
     pure subroutine fu(t, v, vdot)
-    !------------------------------------------------------------------------------------------
-    ! This
-    !------------------------------------------------------------------------------------------
+    !>------------------------------------------------------------------------------------------
+    !> This subroutine computes the right hand side of:
+    !>
+    !>                    du(i,t)/dt = -1/dx(i)*(f(i+1/2,t) - f(i-1/2,t))
+    !>
+    !> INTERNAL VARIABLES:
+    !> vl            vector(1:nc) with reconstructed value at left boundary of cell i (v_{i-1/2}^+)
+    !> vr            vector(1:nc) with reconstructed value at right boundary of cell i (v_{i+1/2}^-)
+    !>------------------------------------------------------------------------------------------
     real(rk), intent(in) :: t, v(:)
     real(rk), intent(out) :: vdot(:)
+    real(rk), dimension(size(v)) :: vl, vr, fl, fr
     real(rk), parameter :: eps = 1e-6_rk
     integer :: i
-    !//////////////////////////////////////////////////////////////////////////////////////////
-
+   
     !> Allocate u arrays, including gost cells for u
     !allocate(u(1-(k-1):nc+(k-1)), ul(nc), ur(nc))
-    
-    !WHAT is u and upoint??
+     
+        !> Reconstructed values at cell boundaries
+        !> REPLACE BY WENO
+        vl(1) = v(1)
+        vl(2:nc) = v(1:nc-1)
+        vr = v
 
-    ! if (first) then
+        !> Fluxes at cell boundaries
+        !> REPLACE BY LAX
+        fl = flux(vl, t)
+        fr = flux(vr, t)
 
-    !     first = .FALSE.
-
-    !     !CALL CALC_CIRJ(k,M,x(2:M+1),c) !bulshit
-
-    !     !u(-1:0) = 0.0d0
-    !     !u(nmax+1:nmax+2) = 0.0d0
-
-    !     !H(0)  = 0.0d0
-
-    ! end if
-
-        do i = 1, nc
-            vdot(i) = (0 - 0)/dx(i)
-        end do
+        !> Evaluate du/dt
+        vdot = - (fr - fl)/dx
 
     end subroutine fu
     !##########################################################################################
@@ -137,7 +138,7 @@ program example_hrweno
         !> Open files and write headers and grid
         case (1)
 
-            print *, "Running test..."
+            print *, "Running example..."
             print *, "Start: ", fdate()
 
             !> Write grid
@@ -146,7 +147,7 @@ program example_hrweno
 
             write (1,'(1x, a5, 2(a15))') "i", "x(i)", "dx(i)"
             do i = 1, nc 
-                write (1,'(1x, i5, 2(e15.5))') i, x(i), dx(i)
+                write (1,'(1x, i5, 2(es15.5))') i, x(i), dx(i)
             end do
 
             !> Write header u
@@ -161,9 +162,9 @@ program example_hrweno
 
         !> Write values
         case (2)
-            write (2,'(1x, e15.5)', advance="no") time
+            write (2,'(1x, es15.5)', advance="no") time
             do i = 1, nc
-                write (2,'(e15.5)', advance="no") u(i)
+                write (2,'(es15.5)', advance="no") u(i)
             end do
             write (2,*) ""
 
@@ -172,7 +173,6 @@ program example_hrweno
             close (1)
             close (2)
             print *, "End  : ", fdate()
-            print '(a13, i5)', "RHS Evals.: ", fevals
             print *
 
         end select

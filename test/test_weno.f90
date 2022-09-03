@@ -46,8 +46,8 @@ module test_weno
 
           !> Set cell average value including ghost cells
           !> Just a reactangular pulse __|¯¯|__
-          v = 0_rk
-          v(nc/3:2*nc/3) = 1_rk
+          v = 0
+          v(nc/3:2*nc/3) = 1
 
           !> Call procedure
           call weno35(k, v, vl, vr, eps)
@@ -76,8 +76,8 @@ module test_weno
       integer :: i, k, nc
 
       !> Allocate and define an abritrary uniform grid
-      xmin = 0_rk
-      xmax = 3_rk
+      xmin = 0._rk
+      xmax = 3._rk
       nc = 30
       allocate(xedges(0:nc))
       do i = 0, nc
@@ -123,8 +123,8 @@ module test_weno
       integer :: i, k, nc
 
       !> Allocate and define an abritrary non-uniform grid
-      xmin = 0_rk
-      xmax = 1_rk
+      xmin = 0._rk
+      xmax = 1._rk
       nc = 30
       allocate(xedges(0:nc))
       do i = 0, nc
@@ -149,8 +149,8 @@ module test_weno
 
         !> Set cell average value including ghost cells
         !> Just a reactangular pulse __|¯¯|__
-        v = 0_rk
-        v(nc/3:2*nc/3) = 1_rk
+        v = 0
+        v(nc/3:2*nc/3) = 1
 
         !> Call procedures
         call calc_c(k, xedges, c)

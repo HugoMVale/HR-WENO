@@ -35,13 +35,13 @@ module test_tvdode
 
         istate = 1
         itask = 1
-        rtol = [2.0e-2_rk, 1.0e-3_rk, 1.0e-3_rk]
+        rtol = [2e-2_rk, 1e-3_rk, 1e-3_rk]
 
         !> Analytical solution at t=tout
         !> We use a simple series of 1st order ode's
         tout = 1_rk
         do i = 1, size(u)
-          a(i) = 1.0_rk + real(i-1,rk)
+          a(i) = 1._rk + real(i-1,rk)
           uref(i) = exp(a(i))*tout
         end do
 
@@ -49,8 +49,8 @@ module test_tvdode
         do order = 1, 3
 
           !> Initial conditions and ode settings
-          u = 1_rk
-          t = 0_rk
+          u = 1._rk
+          t = 0._rk
           dt = (tout/3000)*order
 
           !> Numerical solution at t=tout
@@ -82,13 +82,13 @@ module test_tvdode
       !> Analytical solution at t=tout
       tout = 1_rk
       do i = 1, size(u)
-        a(i) = 1.0_rk + real(i-1,rk)
+        a(i) = 1._rk + real(i-1,rk)
         uref(i) = exp(a(i))*tout
       end do
 
       !> Initial conditions and ode settings
-      u = 1_rk
-      t = 0_rk
+      u = 1._rk
+      t = 0._rk
       dt = tout/1000
 
       !> Numerical solution at t=tout

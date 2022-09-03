@@ -150,9 +150,9 @@ module tvdode
     real(rk), intent(in) :: tout, dt
     integer, intent (inout) :: istate
     real(rk), dimension(size(u)) :: ui, udot
-    integer, parameter :: order=3
+    integer, parameter :: order = 3
     character(:), allocatable :: msg
-    integer :: itask_rktvd, istate_rktvd
+    integer :: itask_rktvd, istate_rktvd, i
 
         !> Check input conditions
         if (isdone(t, tout, dt)) return
@@ -176,22 +176,11 @@ module tvdode
             itask_rktvd = 2
             istate_rktvd = 1
 
-            uold(:,4) = u
-            call fu(t, u, udotold(:,4))
-
-            call rktvd123(fu, u, t, t+2*dt, dt, order, itask_rktvd, istate_rktvd)
-            uold(:,3) = u
-            call fu(t, u, udotold(:,3))
-
-            call rktvd123(fu, u, t, t+2*dt, dt, order, itask_rktvd, istate_rktvd)
-            uold(:,2) = u
-            call fu(t, u, udotold(:,2))
-
-            call rktvd123(fu, u, t, t+2*dt, dt, order, itask_rktvd, istate_rktvd)
-            uold(:,1) = u
-            call fu(t, u, udotold(:,1))
-
-            call rktvd123(fu, u, t, t+2*dt, dt, order, itask_rktvd, istate_rktvd)
+            do i = 4, 1, -1
+                uold(:,i) = u
+                call fu(t, u, udotold(:,i))
+                call rktvd123(fu, u, t, t+2*dt, dt, order, itask_rktvd, istate_rktvd)
+            end do
 
             istate = 2
 
@@ -207,25 +196,21 @@ module tvdode
             ui = (25*u + 50*dt*udot + 7*uold(:,4) + 10*dt*udotold(:,4))/32
             t = t + dt
 
-            !> Shift u values one step into the past
-            uold(:,4) = uold(:,3)
-            uold(:,3) = uold(:,2)
-            uold(:,2) = uold(:,1)
+            !> Shift u and udot values one step into the past
+            do i = 3, 1, -1
+                udotold(:,i+1) = udotold(:,i)
+                uold(:,i+1) = uold(:,i)
+            end do
+            udotold(:,1) = udot
             uold(:,1) = u
             u  = ui
-
-            !> Shift udot values one step into the past
-            udotold(:,4) = udotold(:,3)
-            udotold(:,3) = udotold(:,2)
-            udotold(:,2) = udotold(:,1)
-            udotold(:,1) = udot
-
+            
         end do
 
     end subroutine mstvd3
     !>#########################################################################################
 
-    function isdone(t, tout, dt)
+    pure function isdone(t, tout, dt)
     !>-----------------------------------------------------------------------------------------
     !> This function helps check if the integration is finished.
     !>
@@ -237,7 +222,7 @@ module tvdode
     real(rk), intent(in) :: t, tout, dt
     logical :: isdone
 
-        isdone = (t - tout)*sign(1.0_rk,dt) > 0.0_rk
+        isdone = (t - tout)*sign(1._rk,dt) > 0._rk
 
     end function isdone
     !>#########################################################################################
