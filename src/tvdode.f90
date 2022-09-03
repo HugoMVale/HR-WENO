@@ -40,7 +40,7 @@ module tvdode
     !> itask      flag incating the task to be performed
     !>            1   normal integration until tout
     !>            2   single dt step
-    !> istate     flag incating the state of the integration
+    !> istate     flag indicating the state of the integration
     !>            1   first call for a problem
     !>            2   subsequent call for a problem
     !>
@@ -64,15 +64,16 @@ module tvdode
 
         if (istate ==1) then          
             if (order < 1 .OR. order > 3) then
-                msg = "Invalid input 'order' in 'rktvd'. Valid set: {1, 2, 3}."
+                msg = "Invalid input 'order' in 'rktvd123'. Valid set: {1, 2, 3}."
                 error stop msg
             end if
             if (itask < 1 .OR. itask > 2) then
-                msg = "Invalid input 'itask' in 'rktvd'. Valid set: {1, 2}."
+                msg = "Invalid input 'itask' in 'rktvd123'. Valid set: {1, 2}."
                 error stop msg
             end if
+            istate = 2
         else if (istate < 1 .OR. istate > 2) then
-            msg = "Invalid value 'istate' in 'rktvd'. Valid set: {1, 2}."
+            msg = "Invalid value 'istate' in 'rktvd123'. Valid set: {1, 2}."
             error stop msg
         end if
 
@@ -116,12 +117,6 @@ module tvdode
 
         end select
 
-        !> If we got so far, all must be ok
-        !> To be extended
-        if (istate == 1) then
-            istate = 2
-        end if
-
     end subroutine rktvd123
     !>#########################################################################################
 
@@ -140,7 +135,9 @@ module tvdode
     !> t             time; on return it will be the current value of t (close to tout)
     !> tout          time where next output is desired
     !> dt            time step
-    !> istate        index to specify the state of the calculation (1 for the first call)
+    !> istate        flag indicating the state of the integration
+    !>               1   first call for a problem
+    !>               2   subsequent call for a problem
     !> uold          array(N,4) with the 4 previous values of u(t)
     !> udotold       array(N,4) with the 4 previous values of utot(t)
     !>
@@ -160,12 +157,12 @@ module tvdode
         !> Check input conditions
         if (t > tout) return
 
-        if (size(uold,2) /= 4 .OR. size(udotold,2) /= 4) then
-            msg = "Invalid dimensions of arrays 'uold' or 'udotold' in 'mstvd3'."
-            error stop msg
-        end if
-
-        if (istate < 1 .OR. istate > 2) then
+        if (istate == 1) then
+            if (size(uold,2) /= 4 .OR. size(udotold,2) /= 4) then
+                msg = "Invalid dimensions of arrays 'uold' or 'udotold' in 'mstvd3'."
+                error stop msg
+            end if
+        else if (istate < 1 .OR. istate > 2) then
             msg = "Invalid input 'istate' in 'mstvd3'. Valid set: {1, 2}."
             error stop msg
         end if
