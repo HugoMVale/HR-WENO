@@ -1,9 +1,9 @@
 module weno
-!>----------------------------------------------------------------------------------------------
+!>---------------------------------------------------------------------------------------------
 !> This module contains a collection of high-resolution weighted essentially non-oscillatory
 !> (WENO) schemes for uniform and *arbitrary* finite volume grids.
 !> Source: ICASE 97-65 by Shu, 1997.
-!>----------------------------------------------------------------------------------------------
+!>---------------------------------------------------------------------------------------------
     use, intrinsic :: iso_fortran_env, only : real64
     implicit none
     private
@@ -26,7 +26,7 @@ module weno
     abstract interface
         pure function flux(u, t)
             import :: rk
-            real(rk) :: flux 
+            real(rk) :: flux
             real(rk), intent(in) :: u, t
         end function
     end interface
@@ -34,28 +34,29 @@ module weno
     contains
 
     pure subroutine weno35(k, v, vl, vr, eps, cnu)
-    !>------------------------------------------------------------------------------------------
+    !>-----------------------------------------------------------------------------------------
     !> This subroutine implements the (2k-1)th order WENO method for *arbitrary* finite volume
     !> grids described in ICASE 97-65 (Shu, 1997).
     !>
     !>          |---1---| ...  |---(i-1)---|-------(i)-------|---(i+1)---| .... |--nc--|
     !>                                      ^               ^
-    !>                                     vl(i)           vr(i)
+    !>                                      vl(i)           vr(i)
+    !>                                    v_{i-1/2}^+     v_{i+1/2}^-
     !>
-    !>           
+    !>
     !> ARGUMENTS:
     !> k             order of reconstruction within the cell (k = 2 or 3)
-    !> v             vector(1-(k-1):nc+(k-1)) with average cell values, including (k-1) ghost 
+    !> v             vector(1-(k-1):nc+(k-1)) with average cell values, including (k-1) ghost
     !>               cells on each side
     !> vl            vector(1:nc) with reconstructed value at left boundary of cell i (v_{i-1/2}^+)
     !> vr            vector(1:nc) with reconstructed value at right boundary of cell i (v_{i+1/2}^-)
     !> eps           numerical smoothing factor
-    !> cnu(j,r,i)    optional array(0:k-1,-1:k-1,1:nc) of constants for a *non-uniform* grid 
+    !> cnu(j,r,i)    optional array(0:k-1,-1:k-1,1:nc) of constants for a *non-uniform* grid
     !>               (see calc_cgrid)
     !>
     !> INTERNAL VARIABLES:
     !> nc            number of cells
-    !>------------------------------------------------------------------------------------------
+    !>-----------------------------------------------------------------------------------------
     integer, intent (in) :: k
     real(rk), intent(in) :: eps, v(2-k:)
     real(rk), intent(out) :: vl(:), vr(:)
@@ -79,9 +80,9 @@ module weno
                 msg = "Invalid input 'k' in 'weno35'. Valid set: {2, 3}."
                 error stop msg
         end select
-        
+
         !> Check if user supplied grid
-        if (present(cnu)) then 
+        if (present(cnu)) then
             usrgrid = .true.
         else
             usrgrid = .false.
@@ -92,14 +93,14 @@ module weno
         !> Todo: change to 'do concurrent'
         nc = size(vl)
         do i = 1, nc
-            
+
             !> Equations 2.10, 2.51
             if (usrgrid) c = cnu(:,:,i)
             do r = 0, k-1
                 vrr(r) = sum(c(:,r)*v(i-r:i-r+k-1))
                 vlr(r) = sum(c(:,r-1)*v(i-r:i-r+k-1))
             end do
-            
+
             select case(k)
                 !> Equation 2.62
                 case(2)
@@ -120,7 +121,7 @@ module weno
                             + 1._rk/4*(v(i-2) - 4*v(i-1) + 3*v(i))**2
 
             end select
-            
+
             !> Equations 2.58-2.59 and procedure 2.2-4
             alfa = d/(eps + beta)**2
             alfatilde = d(k-1:0:-1)/(eps + beta)**2
@@ -135,12 +136,12 @@ module weno
 
 
     end subroutine weno35
-    !>##########################################################################################
+    !>#########################################################################################
 
 
     pure subroutine calc_c(k, xedges, c)
-    !>------------------------------------------------------------------------------------------
-    !> This subroutine computes the array of constants 'c(j,r,i)' required to use weno35 with 
+    !>-----------------------------------------------------------------------------------------
+    !> This subroutine computes the array of constants 'c(j,r,i)' required to use weno35 with
     !> arbitrary (i.e., non-uniform) grids.
     !> Source: ICASE 97-65 by Shu, 1997.
     !>
@@ -149,12 +150,12 @@ module weno
     !> xedges(i)     vector(0:nc) of cell edges
     !                xedges(i) value of x at right boundary of cell i (x_{i+1/2})
     !                xedges(i-1) value of x at left boundary of cell i (x_{i-1/2})
-    !> c(j,r,i)      array(0:k-1,-1:k-1,1:nc) of constants for a non-uniform grid             
+    !> c(j,r,i)      array(0:k-1,-1:k-1,1:nc) of constants for a non-uniform grid
     !>-----------------------------------------------------------------------------------------
     integer, intent (in) :: k
     real(rk), intent(in) :: xedges(0:)
     real(rk), intent(out) :: c(0:,-1:,:)
-    
+
     real(rk) :: prod1, prod2, sum1, sum2, dx
     real(rk), allocatable, target :: xext(:)
     real(rk), dimension(:), pointer :: xl, xr
@@ -188,11 +189,11 @@ module weno
             error stop msg
         end if
 
-        !> Allocate extended grid with (k+1) ghost cells on each side      
+        !> Allocate extended grid with (k+1) ghost cells on each side
         ng = k+1
         allocate(xext(0-ng:nc+ng))
         xext(0:nc) = xedges
-        
+
         !> Extend to the left linearly
         dx = xext(1) - xext(0)
         do i = -1, lbound(xext,1), -1
@@ -211,7 +212,7 @@ module weno
 
         !> Compute array of constants 'c' for each grid position
         !> Equation 2.20, page 6.
-        do i = 1, nc 
+        do i = 1, nc
 
             do r = -1, k-1
 
@@ -255,11 +256,11 @@ module weno
         end do
 
     end subroutine calc_c
-    !>##########################################################################################
+    !>#########################################################################################
 
 
     pure function lax_friedrichs(f, uL, uR, t, alpha)
-    !>------------------------------------------------------------------------------------------
+    !>-----------------------------------------------------------------------------------------
     !> Lax-Friedrichs flux.
     !> Equation 2.72, page 21.
     !>
@@ -269,14 +270,14 @@ module weno
     !> uR     right side of reconstructed of u (u_{i^+1/2}^+)
     !> t      time
     !> alpha  max(abs(f'(u)))
-    !>------------------------------------------------------------------------------------------
+    !>-----------------------------------------------------------------------------------------
     real(rk) :: lax_friedrichs
     procedure(flux) :: f
     real(rk), intent (in) :: uL, uR, t, alpha
-    
+
         lax_friedrichs = (f(uL,t) + f(uR,t) - alpha*(uR - uL))/2
 
     end function lax_friedrichs
-    !>##########################################################################################
+    !>#########################################################################################
 
 end module weno

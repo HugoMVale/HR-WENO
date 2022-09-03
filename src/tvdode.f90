@@ -10,13 +10,13 @@ module tvdode
     implicit none
     private
 
-    public :: rktvd123, mstvd3, integrand
+    public :: rktvd123, mstvd3
 
     integer, parameter :: rk = real64
 
     abstract interface
         pure subroutine integrand(t, u, udot)
-            import :: rk 
+            import :: rk
             real(rk), intent(in) :: t, u(:)
             real(rk), intent(out) :: udot(:)
         end subroutine
@@ -37,7 +37,7 @@ module tvdode
     !> tout       time where next output is desired
     !> dt         time step
     !> order      order of the method (1, 2 or 3)
-    !> itask      flag incating the task to be performed 
+    !> itask      flag incating the task to be performed
     !>            1   normal integration until tout
     !>            2   single dt step
     !> istate     flag incating the state of the integration
@@ -61,18 +61,17 @@ module tvdode
 
        !> Check input conditions
         if (t > tout) return
-        
-        if (order < 1 .OR. order > 3) then
-            msg = "Invalid input 'order' in 'rktvd'. Valid set: {1, 2, 3}."
-            error stop msg
-        end if
-        
-        if (itask < 1 .OR. itask > 2) then
-            msg = "Invalid input 'itask' in 'rktvd'. Valid set: {1, 2}."
-            error stop msg
-        end if
 
-        if (istate < 1 .OR. istate > 2) then
+        if (istate ==1) then          
+            if (order < 1 .OR. order > 3) then
+                msg = "Invalid input 'order' in 'rktvd'. Valid set: {1, 2, 3}."
+                error stop msg
+            end if
+            if (itask < 1 .OR. itask > 2) then
+                msg = "Invalid input 'itask' in 'rktvd'. Valid set: {1, 2}."
+                error stop msg
+            end if
+        else if (istate < 1 .OR. istate > 2) then
             msg = "Invalid value 'istate' in 'rktvd'. Valid set: {1, 2}."
             error stop msg
         end if
@@ -148,7 +147,7 @@ module tvdode
     !> INTERNAL VARIABLES:
     !> ui            vector(N) with intermediate value of u(t)
     !> udot          vector(N) with evaluated derivative of u(t)
-    !>------------------------------------------------------------------------------------------
+    !>-----------------------------------------------------------------------------------------
     procedure(integrand) :: fu
     real(rk), intent(inout) :: u(:), t, uold(:,:), udotold(:,:)
     real(rk), intent(in) :: tout, dt
@@ -156,7 +155,7 @@ module tvdode
     real(rk), dimension(size(u)) :: ui, udot
     integer, parameter :: order=3
     character(:), allocatable :: msg
-    integer :: itask_rktvd, istate_rktvd 
+    integer :: itask_rktvd, istate_rktvd
 
         !> Check input conditions
         if (t > tout) return
@@ -171,7 +170,7 @@ module tvdode
             error stop msg
         end if
 
-        !> The first 4 starting values must be computed with a single-step method: we chose 
+        !> The first 4 starting values must be computed with a single-step method: we chose
         !> the RK method of the same order.
         !> The factor 2 in 't+2*dt' is not important, it just needs to be larger than 1.0
         !> so that one full 'dt' step can be computed.
@@ -210,7 +209,7 @@ module tvdode
             call fu(t, u, udot)
             ui = (25*u + 50*dt*udot + 7*uold(:,4) + 10*dt*udotold(:,4))/32
             t = t + dt
-            
+
             !> Shift u values one step into the past
             uold(:,4) = uold(:,3)
             uold(:,3) = uold(:,2)

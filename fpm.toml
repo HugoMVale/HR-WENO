@@ -1,9 +1,11 @@
 name = "hrweno"
 version = "0.1.0"
-license = "license"
+license = "Apache-2.0 OR MIT"
 author = "HugoMVale"
 maintainer = "57530119+HugoMVale@users.noreply.github.com"
 copyright = "Copyright 2022, HugoMVale"
+homepage = "https://github.com/HugoMVale/HR-WENO"
+keywords = ["weno", "tvd", "pde"]
 
 [build]
 # auto-executables = true
