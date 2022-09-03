@@ -2,7 +2,7 @@ module test_tvdode
 !>---------------------------------------------------------------------------------------------
 !> Test for module 'tvdode' using test-drive.
 !>---------------------------------------------------------------------------------------------
-    use tvdode, only : rktvd123, mstvd3
+    use tvdode, only : rktvd, mstvd
     use iso_fortran_env, only : real64, error_unit
     use testdrive, only : new_unittest, unittest_type, error_type, check
     implicit none
@@ -22,13 +22,13 @@ module test_tvdode
         type(unittest_type), allocatable, intent(out) :: testsuite(:)
 
         testsuite = [ &
-        new_unittest("rktvd123", test_rktvd123), &
-        new_unittest("mstvd3", test_mstvd3) &
+        new_unittest("rktvd", test_rktvd), &
+        new_unittest("mstvd", test_mstvd) &
         ]
 
     end subroutine
 
-    subroutine test_rktvd123(error)
+    subroutine test_rktvd(error)
         type(error_type), allocatable, intent(out) :: error
         integer :: order, itask, istate
         real(rk) :: t, tout, dt, u(10), uref(10), rtol(3)
@@ -55,7 +55,7 @@ module test_tvdode
           dt = (tout/3000)*order
 
           !> Numerical solution at t=tout
-          call rktvd123(fu, u, t, tout, dt, order, itask, istate)
+          call rktvd(fu, u, t, tout, dt, order, itask, istate)
 
           !> Check error
           call check(error, u, uref, rel=.true., thr=rtol(order))
@@ -70,9 +70,9 @@ module test_tvdode
 
       end do
 
-    end subroutine test_rktvd123
+    end subroutine test_rktvd
 
-    subroutine test_mstvd3(error)
+    subroutine test_mstvd(error)
       type(error_type), allocatable, intent(out) :: error
       integer :: istate
       real(rk) :: t, tout, dt, u(10), uref(10), uold(10,4), udotold(10,4)
@@ -93,7 +93,7 @@ module test_tvdode
       dt = tout/1000
 
       !> Numerical solution at t=tout
-      call mstvd3(fu, u, t, tout, dt, uold, udotold, istate)
+      call mstvd(fu, u, t, tout, dt, uold, udotold, istate)
 
       !> Check error
       call check(error, u, uref, rel=.true., thr=1.0e-3_rk)
@@ -106,7 +106,7 @@ module test_tvdode
         end do
       end if
 
-    end subroutine test_mstvd3
+    end subroutine test_mstvd
 
     pure subroutine fu(t, u, udot)
       !> Simple linear u'(u) to test ode solvers

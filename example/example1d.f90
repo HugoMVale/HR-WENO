@@ -15,8 +15,8 @@ program example_1d
 !>                               x(i-1/2)               x(i+1/2)
 !>                                  |<---    dx(i)     --->|
 !>----------------------------------------------------------------------------------------------
-    use tvdode, only : rktvd123
-    use weno, only : weno35
+    use tvdode, only : rktvd
+    use hrschemes, only : weno, lax_friedrichs
     use iso_fortran_env, only : real64, error_unit
     implicit none
 
@@ -34,7 +34,7 @@ program example_1d
       xedges(ii) = xmin + (xmax - xmin)*ii/nc
     end do
 
-    !> Cell width and center (general case)
+    !> Cell width and center (general grid)
     dx = xedges(1:nc) - xedges(0:nc-1)
     x = xedges(0:nc-1) + dx/2
 
@@ -56,7 +56,7 @@ program example_1d
     
     do ii = 0, num_time_points
         time_out = time_end*ii/num_time_points
-        call rktvd123(fu, u, time, time_out, dt, order, itask, istate)
+        call rktvd(fu, u, time, time_out, dt, order, itask, istate)
         call output(2)
     end do
 
@@ -122,6 +122,7 @@ program example_1d
     end function flux
     !##########################################################################################
 
+
     elemental real(rk) function ic(z)
     !>------------------------------------------------------------------------------------------
     !> Initial condition. Here we used a limited linear profile.
@@ -137,6 +138,7 @@ program example_1d
     
     end function ic
     !##########################################################################################
+
 
     subroutine output(message)
     !>------------------------------------------------------------------------------------------

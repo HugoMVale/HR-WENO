@@ -1,14 +1,14 @@
-module test_weno
+module test_hrschemes
 !>---------------------------------------------------------------------------------------------
 !> Test for module 'weno' using test-drive.
 !>---------------------------------------------------------------------------------------------
-    use weno, only : weno35, calc_c, c2, c3
+    use hrschemes, only : weno, calc_c, c1, c2, c3
     use iso_fortran_env, only : real64, error_unit
     use testdrive, only : new_unittest, unittest_type, error_type, check
     implicit none
     private
 
-    public :: collect_tests_weno
+    public :: collect_tests_hrschemes
 
     integer, parameter :: rk = real64
     logical, parameter :: verbose = .false.
@@ -16,19 +16,19 @@ module test_weno
     contains
 
     !> Collect all exported unit tests
-    subroutine collect_tests_weno(testsuite)
+    subroutine collect_tests_hrschemes(testsuite)
         !> Collection of tests
         type(unittest_type), allocatable, intent(out) :: testsuite(:)
 
         testsuite = [ &
-        new_unittest("weno35 with uniform grid", test_weno35_uniform), &
+        new_unittest("weno with uniform grid", test_weno_uniform), &
         new_unittest("calc_c", test_calc_c), &
-        new_unittest("weno35 with non-uniform grid", test_weno35_nonuniform) &
+        new_unittest("weno with non-uniform grid", test_weno_nonuniform) &
         ]
 
     end subroutine
 
-    subroutine test_weno35_uniform(error)
+    subroutine test_weno_uniform(error)
         type(error_type), allocatable, intent(out) :: error
         real(rk), dimension(:), allocatable :: v, vl, vr
         real(rk) :: eps, atol
@@ -37,7 +37,7 @@ module test_weno
         !> Run check for each order
         eps = 1e-6_rk
         atol = 1e-9_rk
-        do k = 2, 3
+        do k = 1, 3
 
           !> Allocate arrays
           if(allocated(v)) deallocate(v)
@@ -51,7 +51,7 @@ module test_weno
           v(nc/3:2*nc/3) = 1
 
           !> Call procedure
-          call weno35(k, v, vl, vr, eps)
+          call weno(k, v, vl, vr, eps)
 
           !> Check error
           call check(error, v(1:nc), vl, thr=atol)
@@ -67,7 +67,7 @@ module test_weno
 
       end do
 
-    end subroutine test_weno35_uniform
+    end subroutine test_weno_uniform
 
 
     subroutine test_calc_c(error)
@@ -87,7 +87,7 @@ module test_weno
 
       !> Run check for each order
       rtol = 1e-9_rk
-      do k = 2, 3
+      do k = 1, 3
 
         !> Allocate c array
         if(allocated(c)) deallocate(c)
@@ -99,6 +99,8 @@ module test_weno
         !> Get reference solution
         if(allocated(cref)) deallocate(cref)
         select case(k)
+          case(1)
+            cref = c1
           case(2)
             cref = c2
           case(3)
@@ -108,7 +110,7 @@ module test_weno
         !> Check error
         do i = 1, nc
           call check(error, reshape(c(:,:,i),[size(cref)]), &
-               reshape(cref,[size(cref)]), rel=.true., thr=rtol)
+                    reshape(cref,[size(cref)]), rel=.true., thr=rtol)
           if (allocated(error)) return
         end do
 
@@ -117,7 +119,7 @@ module test_weno
     end subroutine test_calc_c
 
 
-    subroutine test_weno35_nonuniform(error)
+    subroutine test_weno_nonuniform(error)
       type(error_type), allocatable, intent(out) :: error
       real(rk), allocatable :: v(:), vl(:), vr(:), xedges(:), c(:,:,:)
       real(rk) :: eps, atol, xmin, xmax
@@ -136,7 +138,7 @@ module test_weno
       !> Run check for each order
       eps = 1e-6_rk
       atol = 1e-9_rk
-      do k = 2, 3
+      do k = 1, 3
 
         !> Allocate 'c' array
         if(allocated(c)) deallocate(c)
@@ -155,7 +157,7 @@ module test_weno
 
         !> Call procedures
         call calc_c(k, xedges, c)
-        call weno35(k, v, vl, vr, eps, c)
+        call weno(k, v, vl, vr, eps, c)
 
         !> Check error
         call check(error, v(1:nc), vl, thr=atol)
@@ -171,6 +173,6 @@ module test_weno
 
     end do
 
-  end subroutine test_weno35_nonuniform
+  end subroutine test_weno_nonuniform
 
-end module test_weno
+end module test_hrschemes

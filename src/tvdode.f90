@@ -10,7 +10,7 @@ module tvdode
     implicit none
     private
 
-    public :: rktvd123, mstvd3
+    public :: rktvd, mstvd
 
     integer, parameter :: rk = real64
 
@@ -24,7 +24,7 @@ module tvdode
 
     contains
 
-    subroutine rktvd123(fu, u, t, tout, dt, order, itask, istate)
+    subroutine rktvd(fu, u, t, tout, dt, order, itask, istate)
     !>-----------------------------------------------------------------------------------------
     !> This subroutine implements the optimal 1st, 2nd and 3rd order TVD RK methods described
     !> in ICASE 97-65 (Shu, 1997).
@@ -64,16 +64,16 @@ module tvdode
 
         if (istate ==1) then          
             if (order < 1 .or. order > 3) then
-                msg = "Invalid input 'order' in 'rktvd123'. Valid set: {1, 2, 3}."
+                msg = "Invalid input 'order' in 'rktvd'. Valid range: 1 <= k <= 3."
                 error stop msg
             end if
             if (itask < 1 .or. itask > 2) then
-                msg = "Invalid input 'itask' in 'rktvd123'. Valid set: {1, 2}."
+                msg = "Invalid input 'itask' in 'rktvd'. Valid set: {1, 2}."
                 error stop msg
             end if
             istate = 2
         else if (istate < 1 .or. istate > 2) then
-            msg = "Invalid value 'istate' in 'rktvd123'. Valid set: {1, 2}."
+            msg = "Invalid value 'istate' in 'rktvd'. Valid set: {1, 2}."
             error stop msg
         end if
 
@@ -117,11 +117,10 @@ module tvdode
 
         end select
 
-    end subroutine rktvd123
+    end subroutine rktvd
     !>#########################################################################################
 
-
-    subroutine mstvd3(fu, u, t, tout, dt, uold, udotold, istate)
+    subroutine mstvd(fu, u, t, tout, dt, uold, udotold, istate)
     !>-----------------------------------------------------------------------------------------
     !> This subroutine implements a 5-step, 3rd order TVD multi-step method described
     !> in ICASE 97-65 (Shu, 1997). In theory, this method should have an efficiency 1.5 times
@@ -179,7 +178,7 @@ module tvdode
             do i = 4, 1, -1
                 uold(:,i) = u
                 call fu(t, u, udotold(:,i))
-                call rktvd123(fu, u, t, t+2*dt, dt, order, itask_rktvd, istate_rktvd)
+                call rktvd(fu, u, t, t+2*dt, dt, order, itask_rktvd, istate_rktvd)
             end do
 
             istate = 2
@@ -207,7 +206,7 @@ module tvdode
             
         end do
 
-    end subroutine mstvd3
+    end subroutine mstvd
     !>#########################################################################################
 
     pure function isdone(t, tout, dt)
@@ -222,10 +221,10 @@ module tvdode
     real(rk), intent(in) :: t, tout, dt
     logical :: isdone
 
-        isdone = (t - tout)*sign(1._rk,dt) > 0._rk
+        isdone = (t - tout)*sign(1._rk, dt) > 0._rk
 
     end function isdone
     !>#########################################################################################
-     
+  
 end module tvdode
 !>#############################################################################################

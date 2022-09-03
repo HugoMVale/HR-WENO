@@ -1,4 +1,4 @@
-module weno
+module hrschemes
 !>---------------------------------------------------------------------------------------------
 !> This module contains a collection of high-resolution weighted essentially non-oscillatory
 !> (WENO) schemes for uniform and *arbitrary* finite volume grids.
@@ -8,20 +8,21 @@ module weno
     implicit none
     private
 
-    public :: weno35, calc_c, flux, c2, c3
+    public :: weno, calc_c, lax_friedrichs, c1, c2, c3
 
     integer, parameter :: rk = real64
 
     !> Parameter arrays for ENO and WENO methods
-    real(rk), dimension(0:1), parameter :: d2 = [2._rk/3_rk, 1._rk/3_rk]
-    real(rk), dimension(0:2), parameter :: d3 = [0.3_rk, 0.6_rk, 0.1_rk]
-    real(rk), dimension(0:1,-1:1), parameter :: &
-        c2 = reshape ([ 3._rk/2, -1._rk/2, 1._rk/2, 1._rk/2, -1._rk/2, 3._rk/2 ], &
-        [2,3], order=[1,2])
-    real(rk), dimension(0:2,-1:2), parameter :: &
-        c3 = reshape ([11._rk/6, -7._rk/6, 1._rk/3, 1._rk/3, 5._rk/6, -1._rk/6, &
-        -1._rk/6, 5._rk/6, 1._rk/3, 1._rk/3, -7._rk/6, 11._rk/6], [3,4], &
-        order=[1,2])
+    real(rk), parameter :: d1(0:0) = 1._rk, &
+                           d2(0:1) = [2._rk/3_rk, 1._rk/3_rk], &
+                           d3(0:2) = [0.3_rk, 0.6_rk, 0.1_rk]
+    real(rk), parameter :: &
+        c1(0:0,-1:0) = reshape([1._rk, 1._rk], [1,2], order=[1,2]), &
+        c2(0:1,-1:1) = reshape ([3._rk/2, -1._rk/2, 1._rk/2, 1._rk/2, -1._rk/2, 3._rk/2 ], &
+                       [2,3], order=[1,2]), &
+        c3(0:2,-1:2) = reshape ([11._rk/6, -7._rk/6, 1._rk/3, 1._rk/3, 5._rk/6, -1._rk/6, &
+                       -1._rk/6, 5._rk/6, 1._rk/3, 1._rk/3, -7._rk/6, 11._rk/6], &
+                       [3,4], order=[1,2])
 
     abstract interface
         pure function flux(u, t)
@@ -33,7 +34,7 @@ module weno
 
     contains
 
-    pure subroutine weno35(k, v, vl, vr, eps, cnu)
+    subroutine weno(k, v, vl, vr, eps, c)
     !>-----------------------------------------------------------------------------------------
     !> This subroutine implements the (2k-1)th order WENO method for *arbitrary* finite volume
     !> grids described in ICASE 97-65 (Shu, 1997).
@@ -45,14 +46,14 @@ module weno
     !>
     !>
     !> ARGUMENTS:
-    !> k             order of reconstruction within the cell (k = 2 or 3)
-    !> v             vector(1-(k-1):nc+(k-1)) with average cell values, including (k-1) ghost
+    !> k             order of reconstruction within the cell (k = 1, 2 or 3)
+    !> v             vector(1-(k-1):nc+(k-1)) with *average* cell values, including (k-1) ghost
     !>               cells on each side
     !> vl            vector(1:nc) with reconstructed value at left boundary of cell i (v_{i-1/2}^+)
     !> vr            vector(1:nc) with reconstructed value at right boundary of cell i (v_{i+1/2}^-)
     !> eps           numerical smoothing factor
-    !> cnu(j,r,i)    optional array(0:k-1,-1:k-1,1:nc) of constants for a *non-uniform* grid
-    !>               (see calc_cgrid)
+    !> c(j,r,i)      optional array(0:k-1,-1:k-1,1:nc) of constants for a *non-uniform* grid
+    !>               (see calc_c)
     !>
     !> INTERNAL VARIABLES:
     !> nc            number of cells
@@ -60,29 +61,32 @@ module weno
     integer, intent (in) :: k
     real(rk), intent(in) :: eps, v(2-k:)
     real(rk), intent(out) :: vl(:), vr(:)
-    real(rk), intent(in), target, optional :: cnu(0:,-1:,:)
+    real(rk), intent(in), target, optional :: c(0:,-1:,:)
 
     real(rk), dimension(0:k-1) :: vlr, vrr, w, wtilde, alfa, alfatilde, beta
-    real(rk), allocatable :: d(:), c(:,:)
+    real(rk), allocatable :: d(:), ci(:,:)
     integer :: i, r, nc
     logical :: usrgrid
     character(:), allocatable :: msg
 
         !> Select constant parameters according to order of the method
         select case (k)
+            case(1)
+                d = d1
+                ci = c1
             case(2)
                 d = d2
-                c = c2
+                ci = c2
             case(3)
                 d = d3
-                c = c3
+                ci = c3
             case default
-                msg = "Invalid input 'k' in 'weno35'. Valid set: {2, 3}."
+                msg = "Invalid input 'k' in 'weno35'. Valid range: 1 <= k <= 3."
                 error stop msg
         end select
 
         !> Check if user supplied grid
-        if (present(cnu)) then
+        if (present(c)) then
             usrgrid = .true.
         else
             usrgrid = .false.
@@ -95,14 +99,19 @@ module weno
         do i = 1, nc
 
             !> Equations 2.10, 2.51
-            if (usrgrid) c = cnu(:,:,i)
+            if (usrgrid) ci = c(:,:,i)
             do r = 0, k-1
-                vrr(r) = sum(c(:,r)*v(i-r:i-r+k-1))
-                vlr(r) = sum(c(:,r-1)*v(i-r:i-r+k-1))
+                vrr(r) = sum(ci(:,r)*v(i-r:i-r+k-1))
+                vlr(r) = sum(ci(:,r-1)*v(i-r:i-r+k-1))
             end do
 
             select case(k)
-                !> Equation 2.62
+                
+                !> Not sure about this case
+                case(1)
+                    beta(0) = 0._rk
+
+                !> Equation 2.62    
                 case(2)
 
                     beta(0) = (v(i+1) - v(i))**2
@@ -135,7 +144,7 @@ module weno
         end do
 
 
-    end subroutine weno35
+    end subroutine weno
     !>#########################################################################################
 
 
@@ -146,7 +155,7 @@ module weno
     !> Source: ICASE 97-65 by Shu, 1997.
     !>
     !> ARGUMENTS:
-    !> k             order (>1) of reconstruction within the cell
+    !> k             order (>=1) of reconstruction within the cell
     !> xedges(i)     vector(0:nc) of cell edges
     !                xedges(i) value of x at right boundary of cell i (x_{i+1/2})
     !                xedges(i-1) value of x at left boundary of cell i (x_{i-1/2})
@@ -164,7 +173,7 @@ module weno
 
         !> Check input conditions
         if (k < 1) then
-            msg = "Invalid input 'k' in 'calc_c'. Valid range: k >= 2."
+            msg = "Invalid input 'k' in 'calc_c'. Valid range: k >= 1."
             error stop msg
         end if
 
@@ -259,24 +268,24 @@ module weno
     !>#########################################################################################
 
 
-    pure real(rk) function lax_friedrichs(f, uL, uR, t, alpha)
+    pure real(rk) function lax_friedrichs(f, vm, vp, t, alpha)
     !>-----------------------------------------------------------------------------------------
-    !> Lax-Friedrichs flux.
+    !> Monotone Lax-Friedrichs flux.
     !> Equation 2.72, page 21.
     !>
     !> ARGUMENTS:
     !> f      flux function f(u)
-    !> uL     left  side of reconstructed of u (u_{i^+1/2}^-)
-    !> uR     right side of reconstructed of u (u_{i^+1/2}^+)
+    !> vm     left  side of reconstructed of v (v_{i^+1/2}^-)
+    !> vp     right side of reconstructed of v (v_{i^+1/2}^+)
     !> t      time
-    !> alpha  max(abs(f'(u)))
+    !> alpha  max(abs(f'(v)))
     !>-----------------------------------------------------------------------------------------
     procedure(flux) :: f
-    real(rk), intent (in) :: uL, uR, t, alpha
+    real(rk), intent (in) :: vm, vp, t, alpha
 
-        lax_friedrichs = (f(uL,t) + f(uR,t) - alpha*(uR - uL))/2
+        lax_friedrichs = (f(vm, t) + f(vp, t) - alpha*(vp - vm))/2
 
     end function lax_friedrichs
     !>#########################################################################################
 
-end module weno
+end module hrschemes
