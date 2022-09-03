@@ -60,7 +60,7 @@ module tvdode
     real(rk), dimension(size(u)) :: ui, udot
 
        !> Check input conditions
-        if (isdone(t,tout,dt)) return
+        if (isdone(t, tout, dt)) return
 
         if (istate ==1) then          
             if (order < 1 .or. order > 3) then
@@ -86,7 +86,7 @@ module tvdode
                     call fu(t, u, udot)
                     u = u + dt*udot
                     t = t + dt
-                    if (isdone(t,tout,dt) .or. itask == 2) exit
+                    if (isdone(t, tout, dt) .or. itask == 2) exit
                 end do
 
         !> -------------------------------- 2nd order RK --------------------------------------
@@ -98,7 +98,7 @@ module tvdode
                     call fu(t, ui, udot)
                     u = (u + ui + dt*udot)/2
                     t = t + dt
-                    if (isdone(t,tout,dt) .or. itask == 2) exit
+                    if (isdone(t, tout, dt) .or. itask == 2) exit
                 end do
 
         !> -------------------------------- 3rd order RK --------------------------------------
@@ -112,7 +112,7 @@ module tvdode
                     call fu(t, ui, udot)
                     u = (u + 2*ui + 2*dt*udot)/3
                     t = t + dt
-                    if (isdone(t,tout,dt) .or. itask == 2) exit
+                    if (isdone(t, tout, dt) .or. itask == 2) exit
                 end do
 
         end select
@@ -155,7 +155,7 @@ module tvdode
     integer :: itask_rktvd, istate_rktvd
 
         !> Check input conditions
-        if (isdone(t,tout,dt)) return
+        if (isdone(t, tout, dt)) return
 
         if (istate == 1) then
             if (size(uold,2) /= 4 .or. size(udotold,2) /= 4) then
@@ -193,7 +193,7 @@ module tvdode
 
             call rktvd123(fu, u, t, t+2*dt, dt, order, itask_rktvd, istate_rktvd)
 
-            istate=2
+            istate = 2
 
         end if
 
@@ -201,7 +201,7 @@ module tvdode
         !> Equation (4.26), page 48.
         do
 
-            if (isdone(t,tout,dt)) exit
+            if (isdone(t, tout, dt)) exit
 
             call fu(t, u, udot)
             ui = (25*u + 50*dt*udot + 7*uold(:,4) + 10*dt*udotold(:,4))/32
