@@ -21,16 +21,15 @@ program example_1d
     implicit none
 
     integer, parameter :: rk = real64
-    integer, parameter :: nc = 20
+    integer, parameter :: nc = 100
     real(rk) :: xedges(0:nc), x(nc), dx(nc), u(nc)
     real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
-    logical :: first = .true.
-    integer :: fevals, num_time_points, order, istate, itask, ii
+    integer :: num_time_points, order, istate, itask, ii
 
     !> Define the spatial grid
     !> This example uses a linear grid, but you can try a geometric grid as well
-    xmin = -1_rk
-    xmax = 1_rk
+    xmin = -5_rk
+    xmax = 5_rk
     do ii = 0, nc
       xedges(ii) = xmin + (xmax - xmin)*ii/nc
     end do
@@ -40,22 +39,20 @@ program example_1d
     x = xedges(0:nc-1) + dx/2
 
     !> Initial condition u(x,t=0)
-    u = 0_rk
-    u(:nc/2) = 1_rk
+    u = ic(x)
 
     !> Open file where results will be stored
     call output(1)
 
     !> Call ODE time solver
     time_start = 0_rk
-    time_end = 4_rk
+    time_end = 1._rk
     dt = 1e-2_rk
     time = time_start
     num_time_points = 50
     order = 2
     istate = 1
     itask = 1
-    fevals = 0
     
     do ii = 0, num_time_points
         time_out = time_end*ii/num_time_points
@@ -98,6 +95,10 @@ program example_1d
         fl = flux(vl, t)
         fr = flux(vr, t)
 
+        !> Apply problem-specific flux constraints at domain edges
+        fl(1) = fr(1)
+        fr(nc) = fl(nc)
+
         !> Evaluate du/dt
         vdot = - (fr - fl)/dx
 
@@ -105,23 +106,37 @@ program example_1d
     !##########################################################################################
 
 
-    elemental function flux(v, t)
+    elemental real(rk) function flux(v, t)
     !>------------------------------------------------------------------------------------------
-    !> Flux function for Burger's equation.
+    !> Flux function. Here we used the flux corresponding to Burger's equation.
     !>
     !> ARGUMENTS:
     !> v     function v(x,t)
     !> t     variable t
     !>------------------------------------------------------------------------------------------
-    real(rk) :: flux
     real(rk), intent (in) :: v
     real(rk), intent (in), optional :: t
     
-        flux = 0.5_rk*v*v
+        flux = (v**2)/2
     
     end function flux
     !##########################################################################################
 
+    elemental real(rk) function ic(z)
+    !>------------------------------------------------------------------------------------------
+    !> Initial condition. Here we used a limited linear profile.
+    !>
+    !> ARGUMENTS:
+    !> z     spatial variable 
+    !>------------------------------------------------------------------------------------------
+    real(rk), intent (in) :: z
+    real(rk), parameter :: z1=-4._rk, z2=2._rk, v1=1._rk, v2=-0.5_rk   
+       
+        ic = v1 + (v2 - v1)/(z2 - z1)*(z - z1)
+        ic = max(min(ic, v1), v2)
+    
+    end function ic
+    !##########################################################################################
 
     subroutine output(message)
     !>------------------------------------------------------------------------------------------
@@ -145,26 +160,26 @@ program example_1d
             open (unit=1, file="./output/xgrid.txt", status="replace", action="write", &
                   position="rewind")
 
-            write (1,'(1x, a5, 2(a15))') "i", "x(i)", "dx(i)"
+            write (1,'(a5, 2(1x, a15))') "i", "x(i)", "dx(i)"
             do i = 1, nc 
-                write (1,'(1x, i5, 2(es15.5))') i, x(i), dx(i)
+                write (1,'(i5, 2(1x, es15.5))') i, x(i), dx(i)
             end do
 
             !> Write header u
             open (unit=2, file="./output/u.txt", status="replace", action="write", &
                   position="rewind")
 
-            write (2,'(1x, a15)', advance="no") "t"
+            write (2,'(a16)', advance="no") "t"
             do i = 1, nc
-                write (2,'(a15)', advance="no") "u("//itoa(i)//")"
+                write (2,'(1x, a16)', advance="no") "u("//itoa(i)//")"
             end do
             write (2,*) ""
 
         !> Write values
         case (2)
-            write (2,'(1x, es15.5)', advance="no") time
+            write (2,'(es16.5e3)', advance="no") time
             do i = 1, nc
-                write (2,'(es15.5)', advance="no") u(i)
+                write (2,'(1x, es16.5e3)', advance="no") u(i)
             end do
             write (2,*) ""
 

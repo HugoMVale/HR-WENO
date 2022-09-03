@@ -11,6 +11,7 @@ module test_tvdode
     public :: collect_tests_tvdode
 
     integer, parameter :: rk = real64
+    logical, parameter :: verbose = .false.
     real(rk) :: a(10)
 
     contains
@@ -60,7 +61,7 @@ module test_tvdode
           call check(error, u, uref, rel=.true., thr=rtol(order))
 
           !> Show results if test fails (for debugging)
-          if (allocated(error)) then
+          if (allocated(error) .or. verbose) then
             write(error_unit, '(2(a6), 2(a26))') "order", "i", "u(i)", "uref(i)"
             do i = 1, size(u)
               write(error_unit, '(2(i6), 2(es26.16e3))'), order, i, u(i), uref(i)
@@ -98,7 +99,7 @@ module test_tvdode
       call check(error, u, uref, rel=.true., thr=1.0e-3_rk)
 
       !> Show results if test fails (for debugging)
-      if (allocated(error)) then
+      if (allocated(error) .or. verbose) then
         write(error_unit, '(a4, 2(a26))') "i", "u(i)", "uref(i)"
         do i = 1, size(u)
           write(error_unit, '(i4, 2(es26.16e3))') i, u(i), uref(i)

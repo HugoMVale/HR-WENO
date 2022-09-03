@@ -11,6 +11,7 @@ module test_weno
     public :: collect_tests_weno
 
     integer, parameter :: rk = real64
+    logical, parameter :: verbose = .false.
 
     contains
 
@@ -57,7 +58,7 @@ module test_weno
           call check(error, v(1:nc), vr, thr=atol)
 
           !> Detailed comparison for debugging
-          if (allocated(error)) then
+          if (allocated(error) .or. verbose) then
             write (error_unit, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
             do i = 1, nc
               write (error_unit, '(2(i4),3(es26.16e3))'), k, i, v(i), vl(i), vr(i)
@@ -161,7 +162,7 @@ module test_weno
         call check(error, v(1:nc), vr, thr=atol)
 
         !> Detailed comparison for debugging
-        if (allocated(error)) then
+        if (allocated(error) .or. verbose) then
           write (error_unit, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
           do i = 1, nc
             write (error_unit, '(2(i4),3(es26.16e3))'), k, i, v(i), vl(i), vr(i)

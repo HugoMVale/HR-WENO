@@ -259,7 +259,7 @@ module weno
     !>#########################################################################################
 
 
-    pure function lax_friedrichs(f, uL, uR, t, alpha)
+    pure real(rk) function lax_friedrichs(f, uL, uR, t, alpha)
     !>-----------------------------------------------------------------------------------------
     !> Lax-Friedrichs flux.
     !> Equation 2.72, page 21.
@@ -271,7 +271,6 @@ module weno
     !> t      time
     !> alpha  max(abs(f'(u)))
     !>-----------------------------------------------------------------------------------------
-    real(rk) :: lax_friedrichs
     procedure(flux) :: f
     real(rk), intent (in) :: uL, uR, t, alpha
 
