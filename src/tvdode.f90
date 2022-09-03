@@ -24,7 +24,7 @@ module tvdode
 
     contains
 
-    pure subroutine rktvd123(fu, u, t, tout, dt, order, itask, istate)
+    subroutine rktvd123(fu, u, t, tout, dt, order, itask, istate)
     !>-----------------------------------------------------------------------------------------
     !> This subroutine implements the optimal 1st, 2nd and 3rd order TVD RK methods described
     !> in ICASE 97-65 (Shu, 1997).
@@ -60,19 +60,19 @@ module tvdode
     real(rk), dimension(size(u)) :: ui, udot
 
        !> Check input conditions
-        if (t > tout) return
+        if (isdone(t,tout,dt)) return
 
         if (istate ==1) then          
-            if (order < 1 .OR. order > 3) then
+            if (order < 1 .or. order > 3) then
                 msg = "Invalid input 'order' in 'rktvd123'. Valid set: {1, 2, 3}."
                 error stop msg
             end if
-            if (itask < 1 .OR. itask > 2) then
+            if (itask < 1 .or. itask > 2) then
                 msg = "Invalid input 'itask' in 'rktvd123'. Valid set: {1, 2}."
                 error stop msg
             end if
             istate = 2
-        else if (istate < 1 .OR. istate > 2) then
+        else if (istate < 1 .or. istate > 2) then
             msg = "Invalid value 'istate' in 'rktvd123'. Valid set: {1, 2}."
             error stop msg
         end if
@@ -86,7 +86,7 @@ module tvdode
                     call fu(t, u, udot)
                     u = u + dt*udot
                     t = t + dt
-                    if (t >= tout .OR. itask == 2) exit
+                    if (isdone(t,tout,dt) .or. itask == 2) exit
                 end do
 
         !> -------------------------------- 2nd order RK --------------------------------------
@@ -98,7 +98,7 @@ module tvdode
                     call fu(t, ui, udot)
                     u = (u + ui + dt*udot)/2
                     t = t + dt
-                    if (t >= tout .OR. itask == 2) exit
+                    if (isdone(t,tout,dt) .or. itask == 2) exit
                 end do
 
         !> -------------------------------- 3rd order RK --------------------------------------
@@ -112,7 +112,7 @@ module tvdode
                     call fu(t, ui, udot)
                     u = (u + 2*ui + 2*dt*udot)/3
                     t = t + dt
-                    if (t >= tout .OR. itask == 2) exit
+                    if (isdone(t,tout,dt) .or. itask == 2) exit
                 end do
 
         end select
@@ -121,7 +121,7 @@ module tvdode
     !>#########################################################################################
 
 
-    pure subroutine mstvd3(fu, u, t, tout, dt, uold, udotold, istate)
+    subroutine mstvd3(fu, u, t, tout, dt, uold, udotold, istate)
     !>-----------------------------------------------------------------------------------------
     !> This subroutine implements a 5-step, 3rd order TVD multi-step method described
     !> in ICASE 97-65 (Shu, 1997). In theory, this method should have an efficiency 1.5 times
@@ -155,14 +155,14 @@ module tvdode
     integer :: itask_rktvd, istate_rktvd
 
         !> Check input conditions
-        if (t > tout) return
+        if (isdone(t,tout,dt)) return
 
         if (istate == 1) then
-            if (size(uold,2) /= 4 .OR. size(udotold,2) /= 4) then
+            if (size(uold,2) /= 4 .or. size(udotold,2) /= 4) then
                 msg = "Invalid dimensions of arrays 'uold' or 'udotold' in 'mstvd3'."
                 error stop msg
             end if
-        else if (istate < 1 .OR. istate > 2) then
+        else if (istate < 1 .or. istate > 2) then
             msg = "Invalid input 'istate' in 'mstvd3'. Valid set: {1, 2}."
             error stop msg
         end if
@@ -201,7 +201,7 @@ module tvdode
         !> Equation (4.26), page 48.
         do
 
-            if (t > tout) exit
+            if (isdone(t,tout,dt)) exit
 
             call fu(t, u, udot)
             ui = (25*u + 50*dt*udot + 7*uold(:,4) + 10*dt*udotold(:,4))/32
@@ -225,5 +225,22 @@ module tvdode
     end subroutine mstvd3
     !>#########################################################################################
 
+    function isdone(t, tout, dt)
+    !>-----------------------------------------------------------------------------------------
+    !> This function helps check if the integration is finished.
+    !>
+    !> ARGUMENTS:
+    !> t             time; on return it will be the current value of t (close to tout)
+    !> tout          time where next output is desired
+    !> dt            time step
+    !>-----------------------------------------------------------------------------------------
+    real(rk), intent(in) :: t, tout, dt
+    logical :: isdone
+
+        isdone = (t - tout)*sign(1.0_rk,dt) > 0.0_rk
+
+    end function isdone
+    !>#########################################################################################
+     
 end module tvdode
 !>#############################################################################################
