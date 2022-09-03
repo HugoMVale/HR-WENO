@@ -1,6 +1,6 @@
 program example_1d
 !>----------------------------------------------------------------------------------------------
-!> This program illustrates the application of modules 'weno' and 'tvdode' for solving a 1D
+!> This program illustrates the application of modules 'hrschemes' and 'tvdode' for solving a 1D
 !> hyperbolic equation (Burger's equation):
 !>                    d/dt u(x,t) = - d/dx f(u(x,t))
 !>                    with f(u,t) = (u^2)/2
@@ -10,7 +10,7 @@ program example_1d
 !>                    du(i,t)/dt = -1/dx(i)*(f(i+1/2,t) - f(i-1/2,t))
 !>
 !>
-!>                              ul=u(i-1/2)^+            ur=u(i+1/2)^-
+!>                              ul=u(i-1/2)^+          ur=u(i+1/2)^-
 !>               --|-----(i-1)------|---------(i)----------|------(i+1)-----|--
 !>                               x(i-1/2)               x(i+1/2)
 !>                                  |<---    dx(i)     --->|
@@ -27,14 +27,14 @@ program example_1d
     integer :: num_time_points, order, istate, itask, ii
 
     !> Define the spatial grid
-    !> This example uses a linear grid, but you can try a geometric grid as well
+    !> In this example, we use a linear grid, but any smooth grid can be used
     xmin = -5_rk
     xmax = 5_rk
     do ii = 0, nc
       xedges(ii) = xmin + (xmax - xmin)*ii/nc
     end do
 
-    !> Cell width and center (general grid)
+    !> Compute cell width and center (general formulas for any grid)
     dx = xedges(1:nc) - xedges(0:nc-1)
     x = xedges(0:nc-1) + dx/2
 
@@ -46,11 +46,11 @@ program example_1d
 
     !> Call ODE time solver
     time_start = 0_rk
-    time_end = 1._rk
+    time_end = 4._rk
     dt = 1e-2_rk
     time = time_start
-    num_time_points = 50
-    order = 2
+    num_time_points = 100
+    order = 3
     istate = 1
     itask = 1
     
@@ -72,50 +72,52 @@ program example_1d
     !>                    du(i,t)/dt = -1/dx(i)*(f(i+1/2,t) - f(i-1/2,t))
     !>
     !> INTERNAL VARIABLES:
-    !> vl            vector(1:nc) with reconstructed value at left boundary of cell i (v_{i-1/2}^+)
-    !> vr            vector(1:nc) with reconstructed value at right boundary of cell i (v_{i+1/2}^-)
+    !> vl      vector(1:nc) with reconstructed value at left boundary of cell i (v_{i-1/2}^+)
+    !> vr      vector(1:nc) with reconstructed value at right boundary of cell i (v_{i+1/2}^-)
     !>------------------------------------------------------------------------------------------
     real(rk), intent(in) :: t, v(:)
     real(rk), intent(out) :: vdot(:)
-    real(rk), dimension(size(v)) :: vl, vr, fl, fr
-    real(rk), parameter :: eps = 1e-6_rk
+    
+    integer, parameter :: k = 3
+    real(rk) :: vl(nc), vr(nc), fedges(0:nc), vext(1-(k-1):nc+(k-1))
+    real(rk), parameter :: eps = 1e-6_rk,  alpha = 1._rk
     integer :: i
    
-    !> Allocate u arrays, including gost cells for u
-    !allocate(u(1-(k-1):nc+(k-1)), ul(nc), ur(nc))
-     
-        !> Reconstructed values at cell boundaries
-        !> REPLACE BY WENO
-        vl(1) = v(1)
-        vl(2:nc) = v(1:nc-1)
-        vr = v
+        !> Populate extended vector with ghost cells
+        !> There is probably a smarter way to do this
+        vext(1:nc) = v
+        vext(:0) = v(1)
+        vext(nc+1:) = v(nc)
 
-        !> Fluxes at cell boundaries
-        !> REPLACE BY LAX
-        fl = flux(vl, t)
-        fr = flux(vr, t)
+        !> Get reconstructed values at cell boundaries
+        call weno(k, vext, vl, vr, eps)
 
-        !> Apply problem-specific flux constraints at domain edges
-        fl(1) = fr(1)
-        fr(nc) = fl(nc)
+        !> Fluxes at interior cell boundaries
+        !> We use a Lax-Friedrichs method as recomended by Shu (other options possible)
+        do i = 1, nc-1
+            fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), t, alpha)
+        end do
+
+        !> Apply problem-specific flux constraints at domain boundaries
+        fedges(0) = fedges(1)
+        fedges(nc) = fedges(nc-1)
 
         !> Evaluate du/dt
-        vdot = - (fr - fl)/dx
+        vdot = - (fedges(1:) - fedges(:nc-1))/dx
 
     end subroutine fu
     !##########################################################################################
 
 
-    elemental real(rk) function flux(v, t)
+    pure real(rk) function flux(v, t)
     !>------------------------------------------------------------------------------------------
-    !> Flux function. Here we used the flux corresponding to Burger's equation.
+    !> Flux function. Here we define the flux corresponding to Burger's equation.
     !>
     !> ARGUMENTS:
     !> v     function v(x,t)
     !> t     variable t
     !>------------------------------------------------------------------------------------------
-    real(rk), intent (in) :: v
-    real(rk), intent (in), optional :: t
+    real(rk), intent (in) :: v, t
     
         flux = (v**2)/2
     
@@ -155,7 +157,7 @@ program example_1d
         !> Open files and write headers and grid
         case (1)
 
-            print *, "Running example..."
+            print *, "Running example1d..."
             print *, "Start: ", fdate()
 
             !> Write grid
