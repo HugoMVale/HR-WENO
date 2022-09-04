@@ -52,7 +52,7 @@ program example_fv_1d
 
     !> Call ODE time solver
     time_start = 0._rk
-    time_end = 10._rk
+    time_end = 12._rk
     dt = 1e-2_rk
     time = time_start
     num_time_points = 100
