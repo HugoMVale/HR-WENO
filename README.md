@@ -20,4 +20,8 @@ and the numerical results will be stored in the [`output`](/output) subfolder. Y
 
 ### 1D-FV scalar problem: Burgers' equation
 
-This example illustrates the application of procedures `wenok` and `rktvd` for solving [Burger's inviscid equation](https://en.wikipedia.org/wiki/Burgers%27_equation) using a finite volume (FV) formulation.
+This example ([`example_fv_1d.f90`](/example/example_fv_1d.f90)) illustrates the application of procedures `wenok` and `rktvd` for solving [Burger's inviscid equation](https://en.wikipedia.org/wiki/Burgers%27_equation) using a finite volume (FV) formulation. The results are depicted in the figure below and demonstrate the excellent resolution of the shock wave.
+
+<p align="center">
+  <img src="output/example1d.gif">
+</p>
