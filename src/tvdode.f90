@@ -157,11 +157,11 @@ module tvdode
     !> - Maybe include an optional work array that could be transfered to 'fu'.
     !>-----------------------------------------------------------------------------------------
     procedure(integrand) :: fu
+    integer, parameter :: order = 3
     real(rk), intent(inout) :: u(:), t, uold(:,:), udotold(:,:)
     real(rk), intent(in) :: tout, dt
     integer, intent (inout) :: istate
     real(rk), dimension(size(u)) :: ui, udot
-    integer, parameter :: order = 3
     character(:), allocatable :: msg
     integer :: itask_rktvd, istate_rktvd, i
 
@@ -178,7 +178,7 @@ module tvdode
             error stop msg
         end if
 
-        !> The first 4 starting values must be computed with a single-step method: we chose
+        !> The first starting values must be computed with a single-step method: we chose
         !> the RK method of the same order.
         !> The factor 2 in 't+2*dt' is not important, it just needs to be larger than 1.0
         !> so that one full 'dt' step can be computed.
@@ -187,7 +187,7 @@ module tvdode
             itask_rktvd = 2
             istate_rktvd = 1
 
-            do i = 4, 1, -1
+            do i = (order+1), 1, -1
                 uold(:,i) = u
                 call fu(t, u, udotold(:,i))
                 call rktvd(fu, u, t, t+2*dt, dt, order, itask_rktvd, istate_rktvd)
@@ -207,7 +207,7 @@ module tvdode
             t = t + dt
 
             !> Shift u and udot values one step into the past
-            do i = 3, 1, -1
+            do i = order, 1, -1
                 udotold(:,i+1) = udotold(:,i)
                 uold(:,i+1) = uold(:,i)
             end do
