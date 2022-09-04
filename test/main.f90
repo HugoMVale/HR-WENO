@@ -17,7 +17,7 @@ program tester
     use testdrive, only : run_testsuite, new_testsuite, testsuite_type, &
       & select_suite, run_selected, get_argument
     use test_tvdode, only : collect_tests_tvdode
-    use test_hrschemes, only : collect_tests_hrschemes
+    use test_weno, only : collect_tests_weno
 
     implicit none
     
@@ -30,7 +30,7 @@ program tester
   
     testsuites = [ &
       new_testsuite("tvdode", collect_tests_tvdode), &
-      new_testsuite("hrschemes", collect_tests_hrschemes) &
+      new_testsuite("weno", collect_tests_weno) &
       ]
   
     call get_argument(1, suite_name)

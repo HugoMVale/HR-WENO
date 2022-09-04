@@ -1,22 +1,28 @@
-program example_1d
+program example_fv_1d
 !>----------------------------------------------------------------------------------------------
-!> This program illustrates the application of modules 'hrschemes' and 'tvdode' for solving a 1D
+!>   This program illustrates the application of modules 'weno' and 'tvdode' for solving a 1D
 !> hyperbolic equation (Burger's equation):
+!>    
 !>                    d/dt u(x,t) = - d/dx f(u(x,t))
-!>                    with f(u,t) = (u^2)/2
+!>                    with f(u,t) = (u**2)/2
+!>                    and u(x,t=0) = ic(x)
 !>
-!> The spatial variable 'x' is discretized according to a finite-volume approach and the time
+!>   The spatial variable 'x' is discretized according to a finite-volume approach and the time
 !> variable 't' is left continuous (method of lines), leading to:
-!>                    du(i,t)/dt = -1/dx(i)*(f(i+1/2,t) - f(i-1/2,t))
-!>
+!>    
+!>                    du(i,t)/dt = -1/dx(i)*( f(u(x(i+1/2),t)) - f(u(x(i-1/2),t)) )
 !>
 !>                              ul=u(i-1/2)^+          ur=u(i+1/2)^-
 !>               --|-----(i-1)------|---------(i)----------|------(i+1)-----|--
 !>                               x(i-1/2)               x(i+1/2)
 !>                                  |<---    dx(i)     --->|
+!>
+!>  In this particular example, we use the 3rd order rktvd oder solver (we could equally well
+!> employ the mstvd solver). The reconstruction is done with the 5th order WENO scheme; just
+!> change parameter 'k' in procedure 'rhs' to try other orders.      
 !>----------------------------------------------------------------------------------------------
     use tvdode, only : rktvd
-    use hrschemes, only : weno, lax_friedrichs
+    use weno, only : wenok, godunov, lax_friedrichs 
     use iso_fortran_env, only : real64, error_unit
     implicit none
 
@@ -56,7 +62,7 @@ program example_1d
     
     do ii = 0, num_time_points
         time_out = time_end*ii/num_time_points
-        call rktvd(fu, u, time, time_out, dt, order, itask, istate)
+        call rktvd(rhs, u, time, time_out, dt, order, itask, istate)
         call output(2)
     end do
 
@@ -65,15 +71,16 @@ program example_1d
 
     contains
 
-    pure subroutine fu(t, v, vdot)
+    pure subroutine rhs(t, v, vdot)
     !>------------------------------------------------------------------------------------------
-    !> This subroutine computes the right hand side of:
+    !> This subroutine computes the *numerical approximation* to the right hand side of:
     !>
-    !>                    du(i,t)/dt = -1/dx(i)*(f(i+1/2,t) - f(i-1/2,t))
+    !>                   du(i,t)/dt = -1/dx(i)*( f(u(x(i+1/2),t)) - f(u(x(i-1/2),t)) )
     !>
-    !> INTERNAL VARIABLES:
-    !> vl      vector(1:nc) with reconstructed value at left boundary of cell i (v_{i-1/2}^+)
-    !> vr      vector(1:nc) with reconstructed value at right boundary of cell i (v_{i+1/2}^-)
+    !>   There are two main steps. First, we use the WENO scheme to obtain the reconstructed 
+    !> values of 'u' at the left and right cell boundaries. Note that, in general, because of
+    !> discontinuities, u_{i+1/2}^- =/= u_{(i+1)+1/2}^-. Second, we use a suitable flux method 
+    !> (e.g., Godunov, Lax-Friedrichs) to compute the flux from the reconstructed 'u' values.
     !>------------------------------------------------------------------------------------------
     real(rk), intent(in) :: t, v(:)
     real(rk), intent(out) :: vdot(:)
@@ -83,19 +90,19 @@ program example_1d
     real(rk), parameter :: eps = 1e-6_rk,  alpha = 1._rk
     integer :: i
    
-        !> Populate extended vector with ghost cells
-        !> There is probably a smarter way to do this
+        !> Populate extended 'v' vector with ghost cells
         vext(1:nc) = v
         vext(:0) = v(1)
         vext(nc+1:) = v(nc)
 
         !> Get reconstructed values at cell boundaries
-        call weno(k, vext, vl, vr, eps)
+        call wenok(k, vext, vl, vr, eps)
 
         !> Fluxes at interior cell boundaries
-        !> We use a Lax-Friedrichs method as recomended by Shu (other options possible)
+        !> One can use the Lax-Friedrichs or the Godunov method
         do i = 1, nc-1
-            fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), t, alpha)
+            !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), t, alpha)
+            fedges(i) = godunov(flux, vr(i), vl(i+1), t)
         end do
 
         !> Apply problem-specific flux constraints at domain boundaries
@@ -105,8 +112,7 @@ program example_1d
         !> Evaluate du/dt
         vdot = - (fedges(1:) - fedges(:nc-1))/dx
 
-    end subroutine fu
-    !##########################################################################################
+    end subroutine rhs
 
 
     pure real(rk) function flux(v, t)
@@ -122,7 +128,6 @@ program example_1d
         flux = (v**2)/2
     
     end function flux
-    !##########################################################################################
 
 
     elemental real(rk) function ic(z)
@@ -139,7 +144,6 @@ program example_1d
         ic = max(min(ic, v1), v2)
     
     end function ic
-    !##########################################################################################
 
 
     subroutine output(message)
@@ -147,7 +151,7 @@ program example_1d
     !> Auxiliary routine to save results to file.
     !>
     !> ARGUMENTS:
-    !> message: parameter to select output action
+    !> message   parameter to select output action
     !------------------------------------------------------------------------------------------
     integer, intent (in) :: message
     integer :: i
@@ -197,7 +201,6 @@ program example_1d
         end select
 
     end subroutine output
-    !##########################################################################################
 
 
     function itoa(i) result(res)
@@ -205,7 +208,7 @@ program example_1d
     !> Convert integer to string.
     !>
     !> ARGUMENTS:
-    !> i:    integer
+    !> i    integer
     !>------------------------------------------------------------------------------------------
       character(:), allocatable :: res
       integer, intent(in) :: i

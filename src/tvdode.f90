@@ -1,10 +1,10 @@
 module tvdode
 !>---------------------------------------------------------------------------------------------
-!> This module contains two TVD (total variation diminishing) high-order schemes for solving
+!>   This module contains two TVD (total variation diminishing) high-order schemes for solving
 !> initial value problems. It is very important to use TVD schemes for time integration. Even
 !> with a TVD spacial discretization, if the time discretization is done by a non-TVD method,
 !> the result may be oscillatory.
-!> Source: ICASE 97-65 by Shu, 1997.
+!>   Source: ICASE 97-65 by Shu, 1997.
 !>---------------------------------------------------------------------------------------------
     use, intrinsic :: iso_fortran_env, only : real64
     implicit none
@@ -26,9 +26,9 @@ module tvdode
 
     subroutine rktvd(fu, u, t, tout, dt, order, itask, istate)
     !>-----------------------------------------------------------------------------------------
-    !> This subroutine implements the optimal 1st, 2nd and 3rd order TVD RK methods described
+    !>   This subroutine implements the optimal 1st, 2nd and 3rd order TVD RK methods described
     !> in ICASE 97-65 (Shu, 1997).
-    !> The routine was built to work similarly to LSODE.
+    !>   The routine was built to work similarly to LSODE.
     !>
     !> ARGUMENTS:
     !> fu         function with the derivative u'(t)
@@ -48,8 +48,13 @@ module tvdode
     !> ui        vector(N) with intermediate value of u(t)
     !> udot      vector(N) with evaluated derivative of u(t)
     !>
+    !> NOTES:
+    !> - There are also 4th and 5th order methods, but they have lower CFL coeffiecients
+    !>   and are more difficult to implement. See Equation 4.15, page 44.
+    !>
     !> TO DO:
-    !> Adjust dt in final step to avoid overshoting tout by some fraction of dt.
+    !> - Adjust dt in final step to avoid overshoting tout by some fraction of 'dt'.
+    !> - Maybe include an optional work array that could be transfered to 'fu'.
     !>-----------------------------------------------------------------------------------------
     procedure(integrand) :: fu
     real(rk), intent(inout) :: u(:), t
@@ -118,15 +123,15 @@ module tvdode
         end select
 
     end subroutine rktvd
-    !>#########################################################################################
+
 
     subroutine mstvd(fu, u, t, tout, dt, uold, udotold, istate)
     !>-----------------------------------------------------------------------------------------
-    !> This subroutine implements a 5-step, 3rd order TVD multi-step method described
+    !>   This subroutine implements a 5-step, 3rd order TVD multi-step method described
     !> in ICASE 97-65 (Shu, 1997). In theory, this method should have an efficiency 1.5 times
     !> higher than the RK method of the same order. However, in practice they appear to be
     !> almost identical.
-    !> The routine was built to work similarly to LSODE.
+    !>   The routine was built to work similarly to LSODE.
     !>
     !> ARGUMENTS:
     !> fu            function with the derivative u'(t)
@@ -143,6 +148,13 @@ module tvdode
     !> INTERNAL VARIABLES:
     !> ui            vector(N) with intermediate value of u(t)
     !> udot          vector(N) with evaluated derivative of u(t)
+    !>
+    !> NOTES:
+    !> - There is a 2nd order multi-step method, but the corresponding CFL value is half that
+    !>   of the 2nd order RK method. Thus, thre is no reason to implement it.
+    !>
+    !> TO DO:
+    !> - Maybe include an optional work array that could be transfered to 'fu'.
     !>-----------------------------------------------------------------------------------------
     procedure(integrand) :: fu
     real(rk), intent(inout) :: u(:), t, uold(:,:), udotold(:,:)
@@ -158,11 +170,11 @@ module tvdode
 
         if (istate == 1) then
             if (size(uold,2) /= 4 .or. size(udotold,2) /= 4) then
-                msg = "Invalid dimensions of arrays 'uold' or 'udotold' in 'mstvd3'."
+                msg = "Invalid dimensions of arrays 'uold' or 'udotold' in 'mstvd'."
                 error stop msg
             end if
         else if (istate < 1 .or. istate > 2) then
-            msg = "Invalid input 'istate' in 'mstvd3'. Valid set: {1, 2}."
+            msg = "Invalid input 'istate' in 'mstvd'. Valid set: {1, 2}."
             error stop msg
         end if
 
@@ -185,7 +197,6 @@ module tvdode
 
         end if
 
-
         !> Equation (4.26), page 48.
         do
 
@@ -207,16 +218,16 @@ module tvdode
         end do
 
     end subroutine mstvd
-    !>#########################################################################################
+
 
     pure function isdone(t, tout, dt)
     !>-----------------------------------------------------------------------------------------
-    !> This function helps check if the integration is finished.
+    !> Aux function to check if the integration is finished.
     !>
     !> ARGUMENTS:
-    !> t             time; on return it will be the current value of t (close to tout)
-    !> tout          time where next output is desired
-    !> dt            time step
+    !> t        current time
+    !> tout     time where next output is desired
+    !> dt       time step
     !>-----------------------------------------------------------------------------------------
     real(rk), intent(in) :: t, tout, dt
     logical :: isdone
@@ -224,7 +235,5 @@ module tvdode
         isdone = (t - tout)*sign(1._rk, dt) > 0._rk
 
     end function isdone
-    !>#########################################################################################
   
 end module tvdode
-!>#############################################################################################

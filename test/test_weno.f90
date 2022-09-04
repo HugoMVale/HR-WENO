@@ -1,14 +1,14 @@
-module test_hrschemes
+module test_weno
 !>---------------------------------------------------------------------------------------------
 !> Test for module 'weno' using test-drive.
 !>---------------------------------------------------------------------------------------------
-    use hrschemes, only : weno, calc_c, c1, c2, c3
+    use weno, only : wenok, calc_c, c1, c2, c3
     use iso_fortran_env, only : real64, error_unit
     use testdrive, only : new_unittest, unittest_type, error_type, check
     implicit none
     private
 
-    public :: collect_tests_hrschemes
+    public :: collect_tests_weno
 
     integer, parameter :: rk = real64
     logical, parameter :: verbose = .false.
@@ -16,21 +16,22 @@ module test_hrschemes
     contains
 
     !> Collect all exported unit tests
-    subroutine collect_tests_hrschemes(testsuite)
+    subroutine collect_tests_weno(testsuite)
         !> Collection of tests
         type(unittest_type), allocatable, intent(out) :: testsuite(:)
 
         testsuite = [ &
-        new_unittest("weno with uniform grid", test_weno_uniform), &
+        new_unittest("wenok with uniform grid", test_wenok_uniform), &
         new_unittest("calc_c", test_calc_c), &
-        new_unittest("weno with non-uniform grid", test_weno_nonuniform) &
+        new_unittest("wenok with non-uniform grid", test_wenok_nonuniform) &
         ]
 
     end subroutine
 
-    subroutine test_weno_uniform(error)
+    
+    subroutine test_wenok_uniform(error)
         type(error_type), allocatable, intent(out) :: error
-        real(rk), dimension(:), allocatable :: v, vl, vr
+        real(rk), dimension(:), allocatable :: vext, vl, vr
         real(rk) :: eps, atol
         integer :: i, k, nc = 30
 
@@ -40,34 +41,34 @@ module test_hrschemes
         do k = 1, 3
 
           !> Allocate arrays
-          if(allocated(v)) deallocate(v)
+          if(allocated(vext)) deallocate(vext)
           if(allocated(vl)) deallocate(vl)
           if(allocated(vr)) deallocate(vr)
-          allocate(v(1-(k-1):nc+(k-1)), vl(nc), vr(nc))
+          allocate(vext(1-(k-1):nc+(k-1)), vl(nc), vr(nc))
 
           !> Set cell average value including ghost cells
           !> Just a reactangular pulse __|¯¯|__
-          v = 0
-          v(nc/3:2*nc/3) = 1
+          vext = 0
+          vext(nc/3:2*nc/3) = 1
 
           !> Call procedure
-          call weno(k, v, vl, vr, eps)
+          call wenok(k, vext, vl, vr, eps)
 
           !> Check error
-          call check(error, v(1:nc), vl, thr=atol)
-          call check(error, v(1:nc), vr, thr=atol)
+          call check(error, vext(1:nc), vl, thr=atol)
+          call check(error, vext(1:nc), vr, thr=atol)
 
           !> Detailed comparison for debugging
           if (allocated(error) .or. verbose) then
             write (error_unit, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
             do i = 1, nc
-              write (error_unit, '(2(i4),3(es26.16e3))'), k, i, v(i), vl(i), vr(i)
+              write (error_unit, '(2(i4),3(es26.16e3))'), k, i, vext(i), vl(i), vr(i)
             end do
           end if
 
       end do
 
-    end subroutine test_weno_uniform
+    end subroutine test_wenok_uniform
 
 
     subroutine test_calc_c(error)
@@ -119,9 +120,9 @@ module test_hrschemes
     end subroutine test_calc_c
 
 
-    subroutine test_weno_nonuniform(error)
+    subroutine test_wenok_nonuniform(error)
       type(error_type), allocatable, intent(out) :: error
-      real(rk), allocatable :: v(:), vl(:), vr(:), xedges(:), c(:,:,:)
+      real(rk), allocatable :: vext(:), vl(:), vr(:), xedges(:), c(:,:,:)
       real(rk) :: eps, atol, xmin, xmax
       integer :: i, k, nc
 
@@ -145,34 +146,34 @@ module test_hrschemes
         allocate(c(0:k-1,-1:k-1,1:nc))
 
         !> Allocate 'v' arrays
-        if(allocated(v)) deallocate(v)
+        if(allocated(vext)) deallocate(vext)
         if(allocated(vl)) deallocate(vl)
         if(allocated(vr)) deallocate(vr)
-        allocate(v(1-(k-1):nc+(k-1)), vl(nc), vr(nc))
+        allocate(vext(1-(k-1):nc+(k-1)), vl(nc), vr(nc))
 
         !> Set cell average value including ghost cells
         !> Just a reactangular pulse __|¯¯|__
-        v = 0
-        v(nc/3:2*nc/3) = 1
+        vext = 0
+        vext(nc/3:2*nc/3) = 1
 
         !> Call procedures
         call calc_c(k, xedges, c)
-        call weno(k, v, vl, vr, eps, c)
+        call wenok(k, vext, vl, vr, eps, c)
 
         !> Check error
-        call check(error, v(1:nc), vl, thr=atol)
-        call check(error, v(1:nc), vr, thr=atol)
+        call check(error, vext(1:nc), vl, thr=atol)
+        call check(error, vext(1:nc), vr, thr=atol)
 
         !> Detailed comparison for debugging
         if (allocated(error) .or. verbose) then
           write (error_unit, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
           do i = 1, nc
-            write (error_unit, '(2(i4),3(es26.16e3))'), k, i, v(i), vl(i), vr(i)
+            write (error_unit, '(2(i4),3(es26.16e3))'), k, i, vext(i), vl(i), vr(i)
           end do
         end if
 
     end do
 
-  end subroutine test_weno_nonuniform
+  end subroutine test_wenok_nonuniform
 
-end module test_hrschemes
+end module test_weno

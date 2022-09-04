@@ -1,18 +1,18 @@
-module hrschemes
+module weno
 !>---------------------------------------------------------------------------------------------
-!> This module contains a collection of high-resolution weighted essentially non-oscillatory
-!> (WENO) schemes for uniform and *arbitrary* finite volume grids.
-!> Source: ICASE 97-65 by Shu, 1997.
+!>   This module contains a collection of high-resolution weighted essentially non-oscillatory
+!> (WENO) schemes for *arbitrary* (uniform or non-uniform) finite volume/difference methods.
+!>   Source: ICASE 97-65 by Shu, 1997.
 !>---------------------------------------------------------------------------------------------
     use, intrinsic :: iso_fortran_env, only : real64
     implicit none
     private
 
-    public :: weno, calc_c, lax_friedrichs, c1, c2, c3
+    public :: wenok, calc_c, lax_friedrichs, godunov, c1, c2, c3
 
     integer, parameter :: rk = real64
 
-    !> Parameter arrays for ENO and WENO methods
+    !> Parameter arrays for WENO methods
     real(rk), parameter :: d1(0:0) = 1._rk, &
                            d2(0:1) = [2._rk/3_rk, 1._rk/3_rk], &
                            d3(0:2) = [0.3_rk, 0.6_rk, 0.1_rk]
@@ -34,32 +34,43 @@ module hrschemes
 
     contains
 
-    subroutine weno(k, v, vl, vr, eps, c)
+    pure subroutine wenok(k, vext, vl, vr, eps, c)
     !>-----------------------------------------------------------------------------------------
-    !> This subroutine implements the (2k-1)th order WENO method for *arbitrary* finite volume
-    !> grids described in ICASE 97-65 (Shu, 1997).
+    !>   This subroutine implements the (2k-1)th order WENO method for *arbitrary* (uniform or
+    !> non-uniform) finite volume/difference schemes described in ICASE 97-65 (Shu, 1997).
+    !>   Note that the procedure does not "see" the grid, so the reponsability of making sure 
+    !> that the grid is uniform (if the procedure is called without 'c') lies with the user.
+    !>   The scheme below depics a generic finite *volume* discretization and the notation
+    !> used (see ARGUMENTS).
     !>
-    !>          |---1---| ...  |---(i-1)---|-------(i)-------|---(i+1)---| .... |--nc--|
-    !>                                      ^               ^
-    !>                                      vl(i)           vr(i)
-    !>                                    v_{i-1/2}^+     v_{i+1/2}^-
+    !>    --0--|--1--| ...  |--(i-1)--|-------(i)-------|--(i+1)--| .... |--nc--|--(nc+1)---
+    !>                                 ^               ^
+    !>                                 vl(i)           vr(i)
+    !>                                 v_{i-1/2}^+     v_{i+1/2}^-
     !>
+    !>   The procedure can equally be used for finite difference methods. Tn that case, 'v'
+    !> is not the average cell value, but rather the flux! See section 2.3.2, page 22.   
     !>
     !> ARGUMENTS:
     !> k             order of reconstruction within the cell (k = 1, 2 or 3)
-    !> v             vector(1-(k-1):nc+(k-1)) with *average* cell values, including (k-1) ghost
-    !>               cells on each side
-    !> vl            vector(1:nc) with reconstructed value at left boundary of cell i (v_{i-1/2}^+)
-    !> vr            vector(1:nc) with reconstructed value at right boundary of cell i (v_{i+1/2}^-)
+    !> vext          vector(1-(k-1):nc+(k-1)) of *average* cell values (if finite volume),
+    !>               *extended* with (k-1) ghost cells on each side
+    !> vl            vector(1:nc) of reconstructed v at left boundary of cell i (v_{i-1/2}^+)
+    !> vr            vector(1:nc) of reconstructed v at right boundary of cell i (v_{i+1/2}^-)
     !> eps           numerical smoothing factor
     !> c(j,r,i)      optional array(0:k-1,-1:k-1,1:nc) of constants for a *non-uniform* grid
     !>               (see calc_c)
     !>
-    !> INTERNAL VARIABLES:
-    !> nc            number of cells
+    !> NOTES:
+    !> - For a scalar 1D problem, this procedure is called once per time step. In contrast,
+    !>   for a scalar 2D problem, it is called (nc1+nc2) times per step. So, efficiency is
+    !>   very important. The current implementation is rather general in terms of order and
+    !>   grid type, but at the cost of a number of 'select case' constructs. I wonder if it
+    !>   would be wise to make a specific version for k=2 (3rd order) and uniform grids to get
+    !>   maximum performance for multi-dimensional problems.
     !>-----------------------------------------------------------------------------------------
     integer, intent (in) :: k
-    real(rk), intent(in) :: eps, v(2-k:)
+    real(rk), intent(in) :: eps, vext(2-k:)
     real(rk), intent(out) :: vl(:), vr(:)
     real(rk), intent(in), target, optional :: c(0:,-1:,:)
 
@@ -81,7 +92,7 @@ module hrschemes
                 d = d3
                 ci = c3
             case default
-                msg = "Invalid input 'k' in 'weno35'. Valid range: 1 <= k <= 3."
+                msg = "Invalid input 'k' in 'wenok'. Valid range: 1 <= k <= 3."
                 error stop msg
         end select
 
@@ -101,33 +112,32 @@ module hrschemes
             !> Equations 2.10, 2.51
             if (usrgrid) ci = c(:,:,i)
             do r = 0, k-1
-                vrr(r) = sum(ci(:,r)*v(i-r:i-r+k-1))
-                vlr(r) = sum(ci(:,r-1)*v(i-r:i-r+k-1))
+                vrr(r) = sum(ci(:,r)*vext(i-r:i-r+k-1))
+                vlr(r) = sum(ci(:,r-1)*vext(i-r:i-r+k-1))
             end do
 
             select case(k)
                 
-                !> Not sure about this case
                 case(1)
                     beta(0) = 0._rk
 
                 !> Equation 2.62    
                 case(2)
 
-                    beta(0) = (v(i+1) - v(i))**2
-                    beta(1) = (v(i) - v(i-1))**2
+                    beta(0) = (vext(i+1) - vext(i))**2
+                    beta(1) = (vext(i) - vext(i-1))**2
 
                 !> Equation 2.63
                 case(3)
 
-                    beta(0) = 13._rk/12*(v(i) - 2*v(i+1) + v(i+2))**2  &
-                            + 1._rk/4*(3*v(i) - 4*v(i+1) + v(i+2))**2
+                    beta(0) = 13._rk/12*(vext(i) - 2*vext(i+1) + vext(i+2))**2  &
+                            + 1._rk/4*(3*vext(i) - 4*vext(i+1) + vext(i+2))**2
 
-                    beta(1) = 13._rk/12*(v(i-1) - 2*v(i) + v(i+1))**2  &
-                            + 1._rk/4*(v(i-1) - v(i+1))**2
+                    beta(1) = 13._rk/12*(vext(i-1) - 2*vext(i) + vext(i+1))**2  &
+                            + 1._rk/4*(vext(i-1) - vext(i+1))**2
 
-                    beta(2) = 13._rk/12*(v(i-2) - 2*v(i-1) + v(i))**2  &
-                            + 1._rk/4*(v(i-2) - 4*v(i-1) + 3*v(i))**2
+                    beta(2) = 13._rk/12*(vext(i-2) - 2*vext(i-1) + vext(i))**2  &
+                            + 1._rk/4*(vext(i-2) - 4*vext(i-1) + 3*vext(i))**2
 
             end select
 
@@ -144,22 +154,25 @@ module hrschemes
         end do
 
 
-    end subroutine weno
-    !>#########################################################################################
+    end subroutine wenok
 
 
     pure subroutine calc_c(k, xedges, c)
     !>-----------------------------------------------------------------------------------------
-    !> This subroutine computes the array of constants 'c(j,r,i)' required to use weno35 with
-    !> arbitrary (i.e., non-uniform) grids.
-    !> Source: ICASE 97-65 by Shu, 1997.
+    !>   This subroutine computes the array of constants 'c(j,r,i)' required to use 'wenok' with
+    !> non-uniform grids.
     !>
     !> ARGUMENTS:
     !> k             order (>=1) of reconstruction within the cell
     !> xedges(i)     vector(0:nc) of cell edges
-    !                xedges(i) value of x at right boundary of cell i (x_{i+1/2})
-    !                xedges(i-1) value of x at left boundary of cell i (x_{i-1/2})
+    !                xedges(i) is the value of x at right boundary of cell i (x_{i+1/2})
+    !                xedges(i-1) is the value of x at left boundary of cell i (x_{i-1/2})
     !> c(j,r,i)      array(0:k-1,-1:k-1,1:nc) of constants for a non-uniform grid
+    !>
+    !> NOTES:
+    !> - This procedure is only called a very small of times (as many as the number of spatial
+    !>   dimensions) at the *start* of the simulation. So, there is no point in doing complex
+    !>   optimizations.
     !>-----------------------------------------------------------------------------------------
     integer, intent (in) :: k
     real(rk), intent(in) :: xedges(0:)
@@ -227,22 +240,21 @@ module hrschemes
 
                 do j = 0, k-1
 
-                    sum2 = 0
-
+                    sum2 = 0._rk
                     do m = j+1, k
 
-                        prod2 = 1
+                        prod2 = 1._rk
                         do l = 0, k
                             if (l == m) cycle
                             prod2 = prod2*(xl(i-r+m) - xl(i-r+l))
                         end do
 
-                        sum1 = 0
+                        sum1 = 0._rk
                         do l = 0, k
 
                             if (l == m) cycle
 
-                                prod1 = 1
+                                prod1 = 1._rk
                                 do q = 0, k
                                     if (q == m .or. q == l) cycle
                                     prod1 = prod1*(xr(i) - xl(i-r+q))
@@ -265,20 +277,24 @@ module hrschemes
         end do
 
     end subroutine calc_c
-    !>#########################################################################################
 
 
     pure real(rk) function lax_friedrichs(f, vm, vp, t, alpha)
     !>-----------------------------------------------------------------------------------------
-    !> Monotone Lax-Friedrichs flux.
-    !> Equation 2.72, page 21.
+    !>   Monotone Lax-Friedrichs flux. It is more dissipative than the Godunov method, but 
+    !> computationally less demanding.
+    !>   Source: Equation 2.72, page 21.
     !>
     !> ARGUMENTS:
-    !> f      flux function f(u)
-    !> vm     left  side of reconstructed of v (v_{i^+1/2}^-)
-    !> vp     right side of reconstructed of v (v_{i^+1/2}^+)
+    !> f      flux function f(v, t)
+    !> vm     left (minus) reconstruction v_{i^+1/2}^-
+    !> vp     right (plus) reconstruction v_{i^+1/2}^+ = v_{(i+1)^+1/2}^-
     !> t      time
-    !> alpha  max(abs(f'(v)))
+    !> alpha  max(abs(f'(v))) in the domain on the problem
+    !>
+    !> NOTES:
+    !> - Although potentially useful, this procedure cannot be defined as *elemental*,
+    !>   because it has a dummy procedure as input argument.
     !>-----------------------------------------------------------------------------------------
     procedure(flux) :: f
     real(rk), intent (in) :: vm, vp, t, alpha
@@ -286,6 +302,36 @@ module hrschemes
         lax_friedrichs = (f(vm, t) + f(vp, t) - alpha*(vp - vm))/2
 
     end function lax_friedrichs
-    !>#########################################################################################
+    
 
-end module hrschemes
+    pure real(rk) function godunov(f, vm, vp, t)
+    !>-----------------------------------------------------------------------------------------
+    !>   Monotone Godunov flux. It is less dissipative than the Lax-Friedrichs method, but 
+    !> computationally more demanding because of the if constructs.
+    !>   Source: Equation 2.70, page 21.
+    !>
+    !> ARGUMENTS:
+    !> f      flux function f(v, t)
+    !> vm     left (minus) reconstruction v_{i^+1/2}^-
+    !> vp     right (plus) reconstruction v_{i^+1/2}^+ = v_{(i+1)^+1/2}^-
+    !> t      time
+    !>
+    !> NOTES:
+    !> - See note about *elemental* in 'lax_friedrichs'.
+    !>-----------------------------------------------------------------------------------------
+    procedure(flux) :: f
+    real(rk), intent (in) :: vm, vp, t
+    real(rk) :: fm, fp
+
+        fm = f(vm, t)
+        fp = f(vp, t)
+        
+        if (vm <= vp) then
+            godunov = min(fm, fp)
+        else
+            godunov = max(fm, fp)
+        end if
+
+    end function godunov
+
+end module weno

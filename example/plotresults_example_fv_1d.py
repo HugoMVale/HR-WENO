@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-Spyder Editor
+Script to plot the results from example_fv_1d.f90
 
-This is a temporary script file.
 """
 
 # %% Dependencies
@@ -14,7 +13,7 @@ from matplotlib.ticker import LinearLocator
 from matplotlib.animation import PillowWriter
 import pandas as pd
 
-# %% Import results
+# %% Import numerical results
 
 filenames = {
     "u": "../output/u.txt",
@@ -30,40 +29,45 @@ x = data['xgrid']['x(i)'].values
 t = data['u']['t'].values
 u = data['u'].iloc[:, 1:].values
 
+tpoints = u.shape[0]
+xpoints = u.shape[1]
+
 # %% Make surface plot
+
+title = "Solution of Burger's equation with 5th order WENO"
 
 # Plot the surface
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 T, X = np.meshgrid(t, x)
 surf = ax.plot_surface(X, T, u.T, cmap=cm.coolwarm,
                        linewidth=0, antialiased=False)
-# ax.view_init(35, 215)
-
-# Customize the z axis.
 ax.set_xlabel('x')
 ax.set_ylabel('t')
 ax.set_zlabel('u(x,t)')
-ax.zaxis.set_major_locator(LinearLocator(5))
-
-# Add a color bar which maps values to colors.
+ax.set_title(title)
+# ax.zaxis.set_major_locator(LinearLocator(3))
 fig.colorbar(surf, shrink=0.5, aspect=10, location='left')
 
-# %% Make moving 2d plot
+# %% Make animated line plot
 
 fig, ax = plt.subplots(1, 1)
-line, = ax.plot([], [])
+line, = ax.plot([], [], '-o', fillstyle='none')
 text = ax.text(2.5, 0.75, "", bbox=dict(facecolor='white', alpha=0.8))
 ax.set_xlabel('x')
 ax.set_ylabel('u(x,t)')
-ax.set_title("Solution of Burger's equation with 5th order WENO")
+ax.set_title(title)
 ax.set_xlim(round(np.min(x)), round(np.max(x)))
-ytol = 1.05
-ax.set_ylim(ytol*round(np.min(u[0, :])), ytol*round(np.max(u[0, :])))
+ytol = 0.1
+ax.set_ylim(np.min(u[0, :])-ytol, np.max(u[0, :])+ytol)
 ax.grid(True)
 
-writer = PillowWriter(fps=15)
+fps = 20
+writer = PillowWriter(fps=fps)
 with writer.saving(fig, "../output/example1d.gif", 100):
     for i, ti in enumerate(t):
         line.set_data(x, u[i, :])
         text.set_text(f"time = {ti:.2f}")
         writer.grab_frame()
+        if i == (tpoints-1):
+            for ii in range(2*fps):
+                writer.grab_frame()
