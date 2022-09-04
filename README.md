@@ -1,7 +1,7 @@
 # HR-WENO
 
 <p align="center">
-  <img src="output/example1d.gif">
+  <img src="output/example1d.gif" width="600" alt="Solution of Burger's equation with 5th order WENO">
 </p>
 
 ## Description
