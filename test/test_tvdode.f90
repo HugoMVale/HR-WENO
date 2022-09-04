@@ -12,7 +12,8 @@ module test_tvdode
 
     integer, parameter :: rk = real64
     logical, parameter :: verbose = .false.
-    real(rk) :: a(10)
+    integer, parameter :: nu = 10
+    real(rk) :: a(nu)
 
     contains
 
@@ -31,7 +32,7 @@ module test_tvdode
     subroutine test_rktvd(error)
         type(error_type), allocatable, intent(out) :: error
         integer :: order, itask, istate
-        real(rk) :: t, tout, dt, u(10), uref(10), rtol(3)
+        real(rk) :: t, tout, dt, u(nu), uref(nu), rtol(3)
         integer :: i
 
         istate = 1
@@ -40,7 +41,7 @@ module test_tvdode
 
         !> Analytical solution at t=tout
         !> We use a simple series of 1st order ode's
-        tout = 1_rk
+        tout = 1._rk
         do i = 1, size(u)
           a(i) = 1._rk + real(i-1,rk)
           uref(i) = exp(a(i))*tout
@@ -75,7 +76,7 @@ module test_tvdode
     subroutine test_mstvd(error)
       type(error_type), allocatable, intent(out) :: error
       integer :: istate
-      real(rk) :: t, tout, dt, u(10), uref(10), uold(10,4), udotold(10,4)
+      real(rk) :: t, tout, dt, u(nu), uref(nu), uold(nu,4), udotold(nu,4)
       integer :: i
 
       istate = 1
@@ -96,7 +97,7 @@ module test_tvdode
       call mstvd(fu, u, t, tout, dt, uold, udotold, istate)
 
       !> Check error
-      call check(error, u, uref, rel=.true., thr=1.0e-3_rk)
+      call check(error, u, uref, rel=.true., thr=1e-3_rk)
 
       !> Show results if test fails (for debugging)
       if (allocated(error) .or. verbose) then
