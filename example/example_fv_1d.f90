@@ -18,8 +18,8 @@ program example_fv_1d
 !>                                  |<---    dx(i)     --->|
 !>
 !>  In this particular example, we use the 3rd order rktvd oder solver (we could equally well
-!> employ the mstvd solver). The reconstruction is done with the 5th order WENO scheme; just
-!> change parameter 'k' in procedure 'rhs' to try other orders.      
+!> employ the mstvd solver). The reconstruction is done with the 5th order WENO scheme; to try 
+!> other orders, we can change the parameter 'k' in procedure 'rhs' .      
 !>----------------------------------------------------------------------------------------------
     use tvdode, only : rktvd
     use weno, only : wenok, godunov, lax_friedrichs 
@@ -34,8 +34,8 @@ program example_fv_1d
 
     !> Define the spatial grid
     !> In this example, we use a linear grid, but any smooth grid can be used
-    xmin = -5_rk
-    xmax = 5_rk
+    xmin = -5._rk
+    xmax = 5._rk
     do ii = 0, nc
       xedges(ii) = xmin + (xmax - xmin)*ii/nc
     end do
@@ -51,7 +51,7 @@ program example_fv_1d
     call output(1)
 
     !> Call ODE time solver
-    time_start = 0_rk
+    time_start = 0._rk
     time_end = 4._rk
     dt = 1e-2_rk
     time = time_start
@@ -79,7 +79,7 @@ program example_fv_1d
     !>
     !>   There are two main steps. First, we use the WENO scheme to obtain the reconstructed 
     !> values of 'u' at the left and right cell boundaries. Note that, in general, because of
-    !> discontinuities, u_{i+1/2}^- =/= u_{(i+1)+1/2}^-. Second, we use a suitable flux method 
+    !> discontinuities, u_{i+1/2}^+ =/= u_{(i+1)+1/2}^-. Second, we use a suitable flux method 
     !> (e.g., Godunov, Lax-Friedrichs) to compute the flux from the reconstructed 'u' values.
     !>------------------------------------------------------------------------------------------
     real(rk), intent(in) :: t, v(:)
