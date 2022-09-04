@@ -6,6 +6,7 @@ Script to plot the results from example_fv_1d.f90
 
 # %% Dependencies
 
+import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
@@ -15,14 +16,16 @@ import pandas as pd
 
 # %% Import numerical results
 
+subfolder = "../output"
 filenames = {
-    "u": "../output/u.txt",
-    "xgrid": "../output/xgrid.txt"
+    "u": "u.txt",
+    "xgrid": "xgrid.txt"
 }
 
 data = {}
 for var, filename in filenames.items():
-    data[var] = pd.read_csv(filename, delim_whitespace=True)
+    data[var] = pd.read_csv(os.path.join(subfolder, filename),
+                            delim_whitespace=True)
 
 # Extract arrays
 x = data['xgrid']['x(i)'].values
@@ -63,7 +66,7 @@ ax.grid(True)
 
 fps = 20
 writer = PillowWriter(fps=fps)
-with writer.saving(fig, "../output/example1d.gif", 100):
+with writer.saving(fig, "../output/example1d.gif", 150):
     for i, ti in enumerate(t):
         line.set_data(x, u[i, :])
         text.set_text(f"time = {ti:.2f}")
