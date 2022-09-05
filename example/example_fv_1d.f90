@@ -102,8 +102,8 @@ program example_fv_1d
         !> Fluxes at interior cell boundaries
         !> One can use the Lax-Friedrichs or the Godunov method
         do i = 1, nc-1
-            !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), t, alpha)
-            fedges(i) = godunov(flux, vr(i), vl(i+1), t)
+            !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), xedges(i), t, alpha)
+            fedges(i) = godunov(flux, vr(i), vl(i+1), xedges(i), t)
         end do
 
         !> Apply problem-specific flux constraints at domain boundaries
@@ -116,15 +116,16 @@ program example_fv_1d
     end subroutine rhs
 
 
-    pure real(rk) function flux(v, t)
+    pure real(rk) function flux(v, z, t)
     !>------------------------------------------------------------------------------------------
     !> Flux function. Here we define the flux corresponding to Burger's equation.
     !>
     !> ARGUMENTS:
-    !> v     function v(x,t)
-    !> t     variable t
+    !> v     function v(z,t)
+    !> z     spatial variable
+    !> t     time variable
     !>------------------------------------------------------------------------------------------
-    real(rk), intent (in) :: v, t
+    real(rk), intent (in) :: v, z, t
     
         flux = (v**2)/2
     
