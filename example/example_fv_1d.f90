@@ -22,7 +22,8 @@ program example_fv_1d
 !> other orders, we can change the parameter 'k' in procedure 'rhs' .      
 !>----------------------------------------------------------------------------------------------
     use tvdode, only : rktvd
-    use weno, only : wenok, godunov, lax_friedrichs 
+    use weno, only : wenok
+    use hrutils, only : godunov, lax_friedrichs 
     use iso_fortran_env, only : real64, error_unit
     implicit none
 
