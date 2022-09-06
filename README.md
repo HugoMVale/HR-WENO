@@ -1,6 +1,6 @@
 # HR-WENO
 
-[![CI](https://github.com/HugoMVale/HR-WENO/actions/workflows/CI/badge.svg)](https://github.com/HugoMVale/HR-WENO/actions)
+[![CI](https://github.com/HugoMVale/HR-WENO/workflows/CI/badge.svg)](https://github.com/HugoMVale/HR-WENO/actions)
 
 <p align="center">
   <img src="output/example1d.gif" width="600" alt="Solution of Burger's equation with 5th order WENO">
