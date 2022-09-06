@@ -1,4 +1,4 @@
-# HR-WENO
+# HR-WENO (High-Resolution Weighted Essentially Non-Oscillatory)
 
 [![CI](https://github.com/HugoMVale/HR-WENO/workflows/CI/badge.svg)](https://github.com/HugoMVale/HR-WENO/actions)
 
