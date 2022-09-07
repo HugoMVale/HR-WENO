@@ -50,20 +50,17 @@ jobs:
       with:
         fpm-version: 'v0.6.0'
 
-    - name: Build hrweno
+    - name: Build with coverage info
       run: |
         gfortran --version
-        fpm build
-        
-    - name: Run tests
-      run: |
-        gfortran --version
-        fpm test
-        
+        fom clean --all
+        fpm test --profile debug --flag --coverage
+        # ./run_gcov.sh
+               
     - name: Run examples
       run: |
         gfortran --version
-        fpm run --example
+        fpm run --profile release --example
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
