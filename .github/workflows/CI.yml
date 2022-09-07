@@ -53,7 +53,7 @@ jobs:
     - name: Build with coverage info
       run: |
         gfortran --version
-        fom clean --all
+        fpm clean --all
         fpm test --profile debug --flag --coverage
         # ./run_gcov.sh
                
