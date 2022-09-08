@@ -21,10 +21,10 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v1
+      uses: actions/checkout@v3
       
     - name: Install Python
-      uses: actions/setup-python@v1
+      uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
    
@@ -35,7 +35,7 @@ jobs:
       if: contains( matrix.os, 'ubuntu')
       run: |
         python -m pip install --upgrade pip
-        pip install ford FoBiS.py pygooglechart
+        pip install ford
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
         
     - name: Install GFortran Linux
@@ -53,9 +53,9 @@ jobs:
     - name: Build with coverage info
       run: |
         gfortran --version
-        fpm clean --all
+        rm -rf ./build/gfortran*
         fpm test --profile debug --flag --coverage
-        # ./run_gcov.sh
+        gcov ./build/gfortran*/hrweno/src*.gcda -r ./src/ -b -w
                
     - name: Run examples
       run: |
