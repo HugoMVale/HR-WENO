@@ -4,7 +4,7 @@ summary: hrweno is a modern-Fortran implementation of selected WENO and TVD inte
 src_dir: src
 include: src
 exclude_dir: test
-output_dir: docs
+output_dir: _site
 page_dir: doc
 source: true
 proc_internals: true
