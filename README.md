@@ -1,6 +1,7 @@
 # HR-WENO (High-Resolution Weighted Essentially Non-Oscillatory)
 
 [![CI](https://github.com/HugoMVale/HR-WENO/workflows/CI/badge.svg)](https://github.com/HugoMVale/HR-WENO/actions)
+[![codecov](https://codecov.io/gh/HugoMVale/HR-WENO/branch/main/graph/badge.svg?token=1XL5LQSO9P)](https://codecov.io/gh/HugoMVale/HR-WENO)
 
 <p align="center">
   <img src="output/example1d.gif" width="600" alt="Solution of Burger's equation with 5th order WENO">
