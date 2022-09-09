@@ -1,5 +1,4 @@
-# Sample workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+name: Build docs with FORD and deploy to GitHub Pages
 
 on:
   # Runs on pushes targeting the default branch
@@ -29,21 +28,23 @@ jobs:
         uses: actions/checkout@v3
       - name: Install Python
         uses: actions/setup-python@v4
-        with:
-          python-version: 3.9
+        #with:
+        #  python-version: 3.9
       - name: Setup Graphviz
         uses: ts-graphviz/setup-graphviz@v1
-      - name: Install Python dependencies
+      - name: Install FORD
         run: |
           python -m pip install --upgrade pip
           pip install ford      
-      - name: Setup Pages
-        uses: actions/configure-pages@v2
       - name: Build docs with FORD
         run: |
           ford ./api-doc-ford.md
+          ls -l
+      - name: Setup Pages
+        uses: actions/configure-pages@v2
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v1
+        
 
   # Deployment job
   deploy:
