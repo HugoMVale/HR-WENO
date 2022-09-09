@@ -1,7 +1,8 @@
 module hrutils
     !>---------------------------------------------------------------------------------------------
-    !>   This module contains a collection of high-resolution weighted essentially non-oscillatory
-    !> (WENO) schemes for *arbitrary* (uniform or non-uniform) finite volume/difference methods.
+    !>   This module contains basic flux schemes for *scalar* problems. They are mostly intented
+    !> to help test the other modules. Note that the WENO schemes are *not* restricted to scalar
+    !> problems! 
     !>   Source: ICASE 97-65 by Shu, 1997.
     !>---------------------------------------------------------------------------------------------
         use, intrinsic :: iso_fortran_env, only : real64
@@ -19,6 +20,12 @@ module hrutils
                 real(rk), intent(in) :: u, x, t
             end function
         end interface
+
+        ! type :: grid1
+        !     real(rk), allocatable :: edges(:), c(:), d(:)
+        !     real(rk), dimension(:), pointer :: l, r
+        !     integer :: nc
+        ! end type
     
         contains
       

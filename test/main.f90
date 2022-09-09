@@ -18,6 +18,7 @@ program tester
       & select_suite, run_selected, get_argument
     use test_tvdode, only : collect_tests_tvdode
     use test_weno, only : collect_tests_weno
+    use test_hrutils, only : collect_tests_hrutils
 
     implicit none
     
@@ -30,7 +31,8 @@ program tester
   
     testsuites = [ &
       new_testsuite("tvdode", collect_tests_tvdode), &
-      new_testsuite("weno", collect_tests_weno) &
+      new_testsuite("weno", collect_tests_weno), &
+      new_testsuite("hrutils", collect_tests_hrutils) &
       ]
   
     call get_argument(1, suite_name)

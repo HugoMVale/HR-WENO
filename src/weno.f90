@@ -31,6 +31,8 @@ module weno
     !>-----------------------------------------------------------------------------------------
     !>   This subroutine implements the (2k-1)th order WENO method for *arbitrary* (uniform or
     !> non-uniform) finite volume/difference schemes described in ICASE 97-65 (Shu, 1997).
+    !>   The method is applicable to scalar as well as multicomponent problems. In the later
+    !> the reconstruction is applied in a component by component fashion.
     !>   Note that the procedure does not "see" the grid, so the reponsability of making sure 
     !> that the grid is uniform (if the procedure is called without 'c') lies with the user.
     !>   The scheme below depics a generic finite *volume* discretization and the notation
