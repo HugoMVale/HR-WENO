@@ -1,10 +1,10 @@
 module hrutils
-    !>---------------------------------------------------------------------------------------------
-    !>   This module contains basic flux schemes for *scalar* problems. They are mostly intented
-    !> to help test the other modules. Note that the WENO schemes are *not* restricted to scalar
-    !> problems! 
-    !>   Source: ICASE 97-65 by Shu, 1997.
-    !>---------------------------------------------------------------------------------------------
+    !------------------------------------------------------------------------------------------
+    !!   This module contains basic flux schemes for *scalar* problems. They are mostly 
+    !! intented to help test the other modules. The WENO schemes themselves are applicable to 
+    !! scalar and multiple component problems. 
+    !!   Source: ICASE 97-65 by Shu, 1997.
+    !------------------------------------------------------------------------------------------
         use, intrinsic :: iso_fortran_env, only : real64
         implicit none
         private
@@ -21,34 +21,36 @@ module hrutils
             end function
         end interface
 
-        ! type :: grid1
-        !     real(rk), allocatable :: edges(:), c(:), d(:)
-        !     real(rk), dimension(:), pointer :: l, r
-        !     integer :: nc
-        ! end type
+        type :: grid1
+            real(rk), allocatable :: edges(:), c(:), d(:)
+            real(rk), dimension(:), pointer :: l, r
+            integer :: nc
+        end type
     
         contains
       
         pure real(rk) function lax_friedrichs(f, vm, vp, x, t, alpha)
-        !>-----------------------------------------------------------------------------------------
-        !>   Monotone Lax-Friedrichs flux. It is more dissipative than the Godunov method, but 
-        !> computationally less demanding.
-        !>   Source: Equation 2.72, page 21.
-        !>
-        !> ARGUMENTS:
-        !> f      flux function f(v, x, t)
-        !> vm     left (minus) reconstruction v_{i^+1/2}^-
-        !> vp     right (plus) reconstruction v_{i^+1/2}^+ = v_{(i+1)^+1/2}^-
-        !> x      x at flux interface, x_{i^+1/2}
-        !> t      time
-        !> alpha  max(abs(f'(v))) in the domain on the problem
-        !>
-        !> NOTES:
-        !> - Although potentially useful, this procedure cannot be defined as *elemental*,
-        !>   because it has a dummy procedure as input argument.
-        !>-----------------------------------------------------------------------------------------
+        !--------------------------------------------------------------------------------------
+        !!   Monotone Lax-Friedrichs flux. It is more dissipative than the Godunov method, but 
+        !! computationally less demanding.
+        !!   Source: Equation 2.72, page 21.
+        !!
+        !! @note
+        !!   Although it might be useful, this procedure cannot be defined as *elemental*,
+        !! because it has a dummy procedure as argument.
+        !--------------------------------------------------------------------------------------
         procedure(flux) :: f
-        real(rk), intent (in) :: vm, vp, x, t, alpha
+            !! flux function f(v, x, t)
+        real(rk), intent (in) :: vm
+            !! left (minus) reconstruction \( v_{i+1/2}^- \)
+        real(rk), intent (in) :: vp
+            !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)+1/2}^- \)
+        real(rk), intent (in) :: x
+            !! x at flux interface, \( x_{i+1/2} \)
+        real(rk), intent (in) :: t
+            !! time
+        real(rk), intent (in) :: alpha
+            !! max(abs(f'(v))) in the domain on the problem
     
             lax_friedrichs = (f(vm, x, t) + f(vp, x, t) - alpha*(vp - vm))/2
     
@@ -56,23 +58,26 @@ module hrutils
         
     
         pure real(rk) function godunov(f, vm, vp, x, t)
-        !>-----------------------------------------------------------------------------------------
-        !>   Monotone Godunov flux. It is less dissipative than the Lax-Friedrichs method, but 
-        !> computationally more demanding because of the if constructs.
-        !>   Source: Equation 2.70, page 21.
-        !>
-        !> ARGUMENTS:
-        !> f      flux function f(v, t)
-        !> vm     left (minus) reconstruction v_{i^+1/2}^-
-        !> vp     right (plus) reconstruction v_{i^+1/2}^+ = v_{(i+1)^+1/2}^-
-        !> x      x at flux interface, x_{i^+1/2}
-        !> t      time
-        !>
-        !> NOTES:
-        !> - See note about *elemental* in 'lax_friedrichs'.
-        !>-----------------------------------------------------------------------------------------
+        !--------------------------------------------------------------------------------------
+        !!   Monotone Godunov flux. It is less dissipative than the Lax-Friedrichs method, but 
+        !! computationally more demanding because of the if constructs.
+        !!   Source: Equation 2.70, page 21.
+        !!
+        !! @note
+        !! See note about *elemental* in 'lax_friedrichs'.
+        !--------------------------------------------------------------------------------------
+        ! Arguments
         procedure(flux) :: f
-        real(rk), intent (in) :: vm, vp, x, t
+            !! flux function f(v, x, t)
+        real(rk), intent (in) :: vm
+            !! left (minus) reconstruction \( v_{i+1/2}^- \)
+        real(rk), intent (in) :: vp
+            !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)+1/2}^- \)
+        real(rk), intent (in) :: x
+            !! x at flux interface, \( x_{i+1/2} \)
+        real(rk), intent (in) :: t
+            !! time
+        ! Internal variables
         real(rk) :: fm, fp
     
             fm = f(vm, x, t)
@@ -86,5 +91,36 @@ module hrutils
     
         end function godunov
     
+        ! pure type(grid1) function makegrid1(xmin, xmax, nc)
+        ! !--------------------------------------------------------------------------------------
+        ! !!   Monotone Godunov flux. It is less dissipative than the Lax-Friedrichs method, but 
+        ! !! computationally more demanding because of the if constructs.
+        ! !!   Source: Equation 2.70, page 21.
+        ! !!
+        ! !! @note
+        ! !! See note about *elemental* in 'lax_friedrichs'.
+        ! !--------------------------------------------------------------------------------------
+        ! ! Arguments
+        ! real(rk), intent (in) :: xmin
+        !     !! lower boundary of grid domain
+        ! real(rk), intent (in) :: xmax
+        !     !! upper boundary of grid domain
+        ! integer, intent (in) :: nc
+        !     !! numbe of grid cells
+        
+        ! ! Internal variables
+        ! real(rk) :: fm, fp
+    
+        !     fm = f(vm, x, t)
+        !     fp = f(vp, x, t)
+            
+        !     if (vm <= vp) then
+        !         godunov = min(fm, fp)
+        !     else
+        !         godunov = max(fm, fp)
+        !     end if
+    
+        ! end function makegrid1
+
     end module hrutils
     
