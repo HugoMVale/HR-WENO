@@ -16,15 +16,17 @@ import pandas as pd
 
 # %% Import numerical results
 
-subfolder = "../output"
+relpath_output = '../output/'
 filenames = {
-    "u": "u.txt",
-    "xgrid": "xgrid.txt"
+    "u": 'u.txt',
+    "xgrid": 'xgrid.txt'
 }
 
 data = {}
+here = os.path.dirname(os.path.abspath(__file__))
+abspath_output = os.path.join(here, relpath_output)
 for var, filename in filenames.items():
-    data[var] = pd.read_csv(os.path.join(subfolder, filename),
+    data[var] = pd.read_csv(os.path.join(abspath_output, filename),
                             delim_whitespace=True)
 
 # Extract arrays
@@ -66,7 +68,7 @@ ax.grid(True)
 
 fps = 20
 writer = PillowWriter(fps=fps)
-with writer.saving(fig, "../output/example1d.gif", 150):
+with writer.saving(fig, os.path.join(abspath_output, "example1d.gif"), 150):
     for i, ti in enumerate(t):
         line.set_data(x, u[i, :])
         text.set_text(f"time = {ti:.2f}")
