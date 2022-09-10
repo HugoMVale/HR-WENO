@@ -1,14 +1,12 @@
 ---
 project: hrweno
 summary: hrweno is a modern-Fortran implementation of selected WENO and TVD integration schemes.
-src_dir: src
-include: src
-exclude_dir: test
+src_dir: ./src
+         ./example
 output_dir: _site
-page_dir: doc
+page_dir: ./doc
 source: true
 proc_internals: true
-md_extensions: markdown.extensions.toc
 graph: true
 coloured_edges: true
 print_creation_date: true
@@ -21,6 +19,7 @@ dbg: true
 predocmark: >
 docmark_alt: #
 predocmark_alt: <
+md_extensions: markdown.extensions.toc
 ---
 
 About
@@ -30,4 +29,4 @@ This package is a modern-Fortran implementation of selected high-resolution [wei
 
 In particular, the package includes WENO schemes up to 5th order, explicit Runge-Kutta TVD methods up to 3rd order, and an explicit 3rd order multi-step TVD method.  
 
-All numerical methods are described in detail by [Shu (1997)](/Shu-WENO-notes.pdf).
+All numerical methods are described in detail by [Shu (1997)](HR-WENO/doc/Shu-WENO-notes.pdf).
