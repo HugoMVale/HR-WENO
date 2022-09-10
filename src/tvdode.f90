@@ -63,7 +63,7 @@ module tvdode
     
 
        ! Check input conditions
-        if (isdone(t, tout, dt)) return
+        if (is_done(t, tout, dt)) return
 
         if (istate ==1) then          
             if (order < 1 .or. order > 3) then
@@ -89,7 +89,7 @@ module tvdode
                     call fu(t, u, udot)
                     u = u + dt*udot
                     t = t + dt
-                    if (isdone(t, tout, dt) .or. itask == 2) exit
+                    if (is_done(t, tout, dt) .or. itask == 2) exit
                 end do
 
         ! --------------------------------- 2nd-order RK --------------------------------------
@@ -101,7 +101,7 @@ module tvdode
                     call fu(t, ui, udot)
                     u = (u + ui + dt*udot)/2
                     t = t + dt
-                    if (isdone(t, tout, dt) .or. itask == 2) exit
+                    if (is_done(t, tout, dt) .or. itask == 2) exit
                 end do
 
         ! --------------------------------- 3rd-order RK --------------------------------------
@@ -115,7 +115,7 @@ module tvdode
                     call fu(t, ui, udot)
                     u = (u + 2*ui + 2*dt*udot)/3
                     t = t + dt
-                    if (isdone(t, tout, dt) .or. itask == 2) exit
+                    if (is_done(t, tout, dt) .or. itask == 2) exit
                 end do
 
         end select
@@ -163,7 +163,7 @@ module tvdode
     integer :: itask_rktvd, istate_rktvd, i
 
         ! Check input conditions
-        if (isdone(t, tout, dt)) return
+        if (is_done(t, tout, dt)) return
 
         if (istate == 1) then
             if (size(uold,2) /= 4 .or. size(udotold,2) /= 4) then
@@ -197,7 +197,7 @@ module tvdode
         ! Equation (4.26), page 48.
         do
 
-            if (isdone(t, tout, dt)) exit
+            if (is_done(t, tout, dt)) exit
 
             call fu(t, u, udot)
             ui = (25*u + 50*dt*udot + 7*uold(:,4) + 10*dt*udotold(:,4))/32
@@ -217,7 +217,7 @@ module tvdode
     end subroutine mstvd
 
 
-    pure logical function isdone(t, tout, dt)
+    pure logical function is_done(t, tout, dt)
     !------------------------------------------------------------------------------------------
     !> Aux function to check if the integration is finished.
     !------------------------------------------------------------------------------------------
@@ -230,6 +230,6 @@ module tvdode
 
         isdone = (t - tout)*sign(1._rk, dt) > 0._rk
 
-    end function isdone
+    end function is_done
   
 end module tvdode
