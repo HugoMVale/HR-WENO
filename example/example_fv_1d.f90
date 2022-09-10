@@ -23,30 +23,25 @@ program example_fv_1d
 !----------------------------------------------------------------------------------------------
     use tvdode, only : rktvd
     use weno, only : wenok
-    use hrutils, only : godunov, lax_friedrichs 
+    use hrutils, only : godunov, lax_friedrichs, tgrid1, grid1
     use iso_fortran_env, only : real64, error_unit
     implicit none
 
     integer, parameter :: rk = real64
     integer, parameter :: nc = 100
-    real(rk) :: xedges(0:nc), x(nc), dx(nc), u(nc)
+    real(rk) :: u(nc)
     real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
     integer :: num_time_points, order, istate, itask, ii
+    type(tgrid1) :: gx
 
     ! Define the spatial grid
     ! In this example, we use a linear grid, but any smooth grid can be used
     xmin = -5._rk
     xmax = 5._rk
-    do ii = 0, nc
-      xedges(ii) = xmin + (xmax - xmin)*ii/nc
-    end do
-
-    ! Compute cell width and center (general formulas for any grid)
-    dx = xedges(1:nc) - xedges(0:nc-1)
-    x = xedges(0:nc-1) + dx/2
-
+    gx = grid1(xmin, xmax, nc)
+    
     ! Initial condition u(x,t=0)
-    u = ic(x)
+    u = ic(gx%c)
 
     ! Open file where results will be stored
     call output(1)
@@ -106,9 +101,9 @@ program example_fv_1d
 
         ! Fluxes at interior cell boundaries
         ! One can use the Lax-Friedrichs or the Godunov method
-        do i = 1, nc-1
-            !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), xedges(i), t, alpha)
-            fedges(i) = godunov(flux, vr(i), vl(i+1), xedges(i), t)
+        do concurrent (i=1:nc-1)
+            !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), gx%r(i), t, alpha)
+            fedges(i) = godunov(flux, vr(i), vl(i+1), gx%r(i), t)
         end do
 
         ! Apply problem-specific flux constraints at domain boundaries
@@ -116,7 +111,7 @@ program example_fv_1d
         fedges(nc) = fedges(nc-1)
 
         ! Evaluate du/dt
-        vdot = - (fedges(1:) - fedges(:nc-1))/dx
+        vdot = - (fedges(1:) - fedges(:nc-1))/gx%d
 
     end subroutine rhs
 
@@ -173,7 +168,7 @@ program example_fv_1d
 
             write (1,'(a5, 2(1x, a15))') "i", "x(i)", "dx(i)"
             do i = 1, nc 
-                write (1,'(i5, 2(1x, es15.5))') i, x(i), dx(i)
+                write (1,'(i5, 2(1x, es15.5))') i, gx%c(i), gx%d(i)
             end do
 
             ! Write header u
