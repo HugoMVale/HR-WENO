@@ -9,7 +9,7 @@ module hrutils
         implicit none
         private
     
-        public :: lax_friedrichs, godunov
+        public :: lax_friedrichs, godunov, grid1, tgrid1
     
         integer, parameter :: rk = real64
      
@@ -21,9 +21,8 @@ module hrutils
             end function
         end interface
 
-        type :: grid1
-            real(rk), allocatable :: edges(:), c(:), d(:)
-            real(rk), dimension(:), pointer :: l, r
+        type :: tgrid1
+            real(rk), allocatable :: edges(:), c(:), d(:), l(:), r(:)
             integer :: nc
         end type
     
@@ -64,7 +63,7 @@ module hrutils
         !!   Source: Equation 2.70, page 21.
         !!
         !! @note
-        !! See note about *elemental* in 'lax_friedrichs'.
+        !!   See note about *elemental* in 'lax_friedrichs'.
         !--------------------------------------------------------------------------------------
         ! Arguments
         procedure(flux) :: f
@@ -91,36 +90,38 @@ module hrutils
     
         end function godunov
     
-        ! pure type(grid1) function makegrid1(xmin, xmax, nc)
-        ! !--------------------------------------------------------------------------------------
-        ! !!   Monotone Godunov flux. It is less dissipative than the Lax-Friedrichs method, but 
-        ! !! computationally more demanding because of the if constructs.
-        ! !!   Source: Equation 2.70, page 21.
-        ! !!
-        ! !! @note
-        ! !! See note about *elemental* in 'lax_friedrichs'.
-        ! !--------------------------------------------------------------------------------------
-        ! ! Arguments
-        ! real(rk), intent (in) :: xmin
-        !     !! lower boundary of grid domain
-        ! real(rk), intent (in) :: xmax
-        !     !! upper boundary of grid domain
-        ! integer, intent (in) :: nc
-        !     !! numbe of grid cells
+
+        pure type(tgrid1) function grid1(xmin, xmax, nc)
+        !--------------------------------------------------------------------------------------
+        !!   Function to generate a 1D linear grid.
+        !--------------------------------------------------------------------------------------
+        ! Arguments
+        real(rk), intent (in) :: xmin
+            !! lower boundary of grid domain
+        real(rk), intent (in) :: xmax
+            !! upper boundary of grid domain
+        integer, intent (in) :: nc
+            !! number of grid cells
         
-        ! ! Internal variables
-        ! real(rk) :: fm, fp
-    
-        !     fm = f(vm, x, t)
-        !     fp = f(vp, x, t)
-            
-        !     if (vm <= vp) then
-        !         godunov = min(fm, fp)
-        !     else
-        !         godunov = max(fm, fp)
-        !     end if
-    
-        ! end function makegrid1
+        ! Internal variables
+        real(rk) :: xedges(0:nc), rx
+        integer :: i
+
+            ! Compute linear mesh
+            rx = (xmax - xmin)/nc 
+            do concurrent (i=0:nc)
+                xedges(i) = xmin + rx*i
+            end do
+
+            ! Map values to grid object
+            grid1%nc = nc
+            grid1%edges = xedges
+            grid1%l = xedges(0:nc-1)
+            grid1%r = xedges(1:nc)
+            grid1%c = (grid1%l + grid1%r)/2
+            grid1%d = grid1%r - grid1%l
+
+        end function grid1
 
     end module hrutils
     
