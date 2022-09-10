@@ -13,14 +13,16 @@ This package is a modern-Fortran implementation of selected high-resolution [wei
 
 In particular, the package includes WENO schemes up to 5th order, explicit Runge-Kutta TVD methods up to 3rd order, and an explicit 3rd order multi-step TVD method.  
 
-All numerical methods are described in detail by [Shu (1997)](/Shu-WENO-notes.pdf).
+All numerical methods are described in detail by [Shu (1997)](doc/Shu-WENO-notes.pdf).
 
 ## How to get started
 
 The easiest way to build/test the code and run the examples is by means of [`fpm`](https://fpm.fortran-lang.org/en/index.html). To run the example, just do:
+
 ```
 fpm run --example
 ```
+
 and the numerical results will be stored in the [`output`](/output) subfolder. You can then use the provided Python script to read the data and plot the results.
 
 ## Example
