@@ -1,9 +1,9 @@
 module weno
-!>---------------------------------------------------------------------------------------------
-!>   This module contains a collection of high-resolution weighted essentially non-oscillatory
-!> (WENO) schemes for *arbitrary* (uniform or non-uniform) finite volume/difference methods.
-!>   Source: ICASE 97-65 by Shu, 1997.
-!>---------------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------------------------
+!!   This module contains a collection of high-resolution weighted essentially non-oscillatory
+!! (WENO) schemes for *arbitrary* (uniform or non-uniform) finite volume/difference methods.
+!!   Source: ICASE 97-65 by Shu, 1997.
+!----------------------------------------------------------------------------------------------
     use, intrinsic :: iso_fortran_env, only : real64
     implicit none
     private
@@ -28,54 +28,56 @@ module weno
     contains
 
     pure subroutine wenok(k, vext, vl, vr, eps, c)
-    !>-----------------------------------------------------------------------------------------
-    !>   This subroutine implements the (2k-1)th order WENO method for *arbitrary* (uniform or
-    !> non-uniform) finite volume/difference schemes described in ICASE 97-65 (Shu, 1997).
-    !>   The method is applicable to scalar as well as multicomponent problems. In the later
-    !> the reconstruction is applied in a component by component fashion.
-    !>   Note that the procedure does not "see" the grid, so the reponsability of making sure 
-    !> that the grid is uniform (if the procedure is called without 'c') lies with the user.
-    !>   The scheme below depics a generic finite *volume* discretization and the notation
-    !> used (see ARGUMENTS).
-    !>
-    !>    --0--|--1--| ...  |--(i-1)--|-------(i)-------|--(i+1)--| .... |--nc--|--(nc+1)---
-    !>                                 ^               ^
-    !>                                 vl(i)           vr(i)
-    !>                                 v_{i-1/2}^+     v_{i+1/2}^-
-    !>
-    !>   The procedure can equally be used for finite difference methods. Tn that case, 'v'
-    !> is not the average cell value, but rather the flux! See section 2.3.2, page 22.   
-    !>
-    !> ARGUMENTS:
-    !> k             order of reconstruction within the cell (k = 1, 2 or 3)
-    !> vext          vector(1-(k-1):nc+(k-1)) of *average* cell values (if finite volume),
-    !>               *extended* with (k-1) ghost cells on each side
-    !> vl            vector(1:nc) of reconstructed v at left boundary of cell i (v_{i-1/2}^+)
-    !> vr            vector(1:nc) of reconstructed v at right boundary of cell i (v_{i+1/2}^-)
-    !> eps           numerical smoothing factor
-    !> c(j,r,i)      optional array(0:k-1,-1:k-1,1:nc) of constants for a *non-uniform* grid
-    !>               (see calc_c)
-    !>
-    !> NOTES:
-    !> - For a scalar 1D problem, this procedure is called once per time step. In contrast,
-    !>   for a scalar 2D problem, it is called (nc1+nc2) times per step. So, efficiency is
-    !>   very important. The current implementation is rather general in terms of order and
-    !>   grid type, but at the cost of a number of 'select case' constructs. I wonder if it
-    !>   would be wise to make a specific version for k=2 (3rd order) and uniform grids to get
-    !>   maximum performance for multi-dimensional problems.
-    !>-----------------------------------------------------------------------------------------
+    !------------------------------------------------------------------------------------------
+    !!   This subroutine implements the (2k-1)th order WENO method for *arbitrary* (uniform or
+    !! non-uniform) finite volume/difference schemes described in ICASE 97-65 (Shu, 1997).
+    !!   The method is applicable to scalar as well as multicomponent problems. In the later
+    !! case, the reconstruction is applied in a component by component fashion.
+    !!   The scheme below depics a generic finite *volume* discretization and the notation
+    !! used (see Arguments).
+    !!```
+    !!    --0--|--1--| ...  |--(i-1)--|-------(i)-------|--(i+1)--| .... |--nc--|--(nc+1)---
+    !!                                 ^               ^
+    !!                                 vl(i)           vr(i)
+    !!                                 v_{i-1/2}^+     v_{i+1/2}^-
+    !!```
+    !!   The procedure can equally be used for finite difference methods. In that case, 'v'
+    !! is not the average cell value, but rather the flux! See section 2.3.2, page 22.   
+    !!
+    !! @warning
+    !!   Note that the procedure does not "see" the grid, so the reponsability of making sure 
+    !! that the grid is uniform (if the procedure is called without 'c') lies with the user.
+    !! 
+    !! @note
+    !!   For a scalar 1D problem, this procedure is called once per time step. In contrast,
+    !! for a scalar 2D problem, it is called (nc1+nc2) times per step. So, efficiency is
+    !! very important. The current implementation is rather general in terms of order and
+    !! grid type, but at the cost of a number of 'select case' constructs. I wonder if it
+    !! would be wise to make a specific version for k=2 (3rd order) and uniform grids to get
+    !! maximum performance for multi-dimensional problems.
+    !------------------------------------------------------------------------------------------
     integer, intent (in) :: k
-    real(rk), intent(in) :: eps, vext(2-k:)
-    real(rk), intent(out) :: vl(:), vr(:)
+        !! order of reconstruction within the cell (k = 1, 2 or 3) 
+    real(rk), intent(in) :: vext(2-k:)
+        !! vector(1-(k-1):nc+(k-1)) of *average* cell values (if finite volume), *extended* 
+        !! with (k-1) ghost cells on each side
+    real(rk), intent(out) :: vl(:)
+        !! vector(1:nc) of reconstructed v at left boundary of cell i, \(v_{i-1/2}^+\)
+    real(rk), intent(out) :: vr(:)
+        !! vector(1:nc) of reconstructed v at right boundary of cell i, \(v_{i+1/2}^-\)
+    real(rk), intent(in) :: eps
+        !! numerical smoothing factor
     real(rk), intent(in), target, optional :: c(0:,-1:,:)
+        !! optional array(0:k-1,-1:k-1,1:nc) of constants for a *non-uniform* grid
+        !! (see calc_c)
 
     real(rk), dimension(0:k-1) :: vlr, vrr, w, wtilde, alfa, alfatilde, beta
     real(rk), allocatable :: d(:), ci(:,:)
     integer :: i, r, nc
     logical :: usrgrid
-    character(:), allocatable :: msg
+    character(:), allocatable :: errmsg
 
-        !> Select constant parameters according to order of the method
+        ! Select constant parameters according to order of the method
         select case (k)
             case(1)
                 d = d1
@@ -87,26 +89,25 @@ module weno
                 d = d3
                 ci = c3
             case default
-                msg = "Invalid input 'k' in 'wenok'. Valid range: 1 <= k <= 3."
-                error stop msg
+                errmsg = "Invalid input 'k' in 'wenok'. Valid range: 1 <= k <= 3."
+                error stop errmsg
         end select
 
-        !> Check if user supplied grid
+        ! Check if user supplied grid
         if (present(c)) then
             usrgrid = .true.
         else
             usrgrid = .false.
         end if
 
-        !> Algorithm
-        !> Obtain the 'k' reconstructed values vi+1/2(r) & vi-1/2(r)
-        !> Todo: change to 'do concurrent'
+        ! Algorithm
+        ! Obtain the 'k' reconstructed values vi+1/2(r) & vi-1/2(r)
         nc = size(vl)
-        do i = 1, nc
+        do concurrent(i=1:nc)
 
-            !> Equations 2.10, 2.51
+            ! Equations 2.10, 2.51
             if (usrgrid) ci = c(:,:,i)
-            do r = 0, k-1
+            do concurrent(r=0:k-1)
                 vrr(r) = sum(ci(:,r)*vext(i-r:i-r+k-1))
                 vlr(r) = sum(ci(:,r-1)*vext(i-r:i-r+k-1))
             end do
@@ -116,15 +117,13 @@ module weno
                 case(1)
                     beta(0) = 0._rk
 
-                !> Equation 2.62    
+                ! Equation 2.62    
                 case(2)
-
                     beta(0) = (vext(i+1) - vext(i))**2
                     beta(1) = (vext(i) - vext(i-1))**2
 
-                !> Equation 2.63
+                ! Equation 2.63
                 case(3)
-
                     beta(0) = 13._rk/12*(vext(i) - 2*vext(i+1) + vext(i+2))**2  &
                             + 1._rk/4*(3*vext(i) - 4*vext(i+1) + vext(i+2))**2
 
@@ -136,13 +135,13 @@ module weno
 
             end select
 
-            !> Equations 2.58-2.59 and procedure 2.2-4
+            ! Equations 2.58-2.59 and procedure 2.2-4
             alfa = d/(eps + beta)**2
             alfatilde = d(k-1:0:-1)/(eps + beta)**2
             w = alfa/sum(alfa)
             wtilde = alfatilde/sum(alfatilde)
 
-            !> Procedure 2.2-5
+            ! Procedure 2.2-5
             vr(i) = sum(w*vrr)
             vl(i) = sum(wtilde*vlr)
 
@@ -153,25 +152,23 @@ module weno
 
 
     pure subroutine calc_c(k, xedges, c)
-    !>-----------------------------------------------------------------------------------------
-    !>   This subroutine computes the array of constants 'c(j,r,i)' required to use 'wenok' with
-    !> non-uniform grids.
-    !>
-    !> ARGUMENTS:
-    !> k             order (>=1) of reconstruction within the cell
-    !> xedges(i)     vector(0:nc) of cell edges
-    !                xedges(i) is the value of x at right boundary of cell i (x_{i+1/2})
-    !                xedges(i-1) is the value of x at left boundary of cell i (x_{i-1/2})
-    !> c(j,r,i)      array(0:k-1,-1:k-1,1:nc) of constants for a non-uniform grid
-    !>
-    !> NOTES:
-    !> - This procedure is only called a very small of times (as many as the number of spatial
-    !>   dimensions) at the *start* of the simulation. So, there is no point in doing complex
-    !>   optimizations.
-    !>-----------------------------------------------------------------------------------------
+    !------------------------------------------------------------------------------------------
+    !!   This subroutine computes the array of constants 'c(j,r,i)' required to use 'wenok' 
+    !! with non-uniform grids.
+    !!
+    !! @note
+    !!   This procedure is only called a very small of times (as many as the number of spatial
+    !! dimensions) at the *start* of the simulation. So, there is no point in doing complex
+    !! optimizations.
+    !------------------------------------------------------------------------------------------
     integer, intent (in) :: k
+        !! order (>=1) of reconstruction within the cell
     real(rk), intent(in) :: xedges(0:)
+        !! vector(0:nc) of cell edges;
+        !! xedges(i) is the value of x at right boundary of cell i (x_{i+1/2});
+        !! xedges(i-1) is the value of x at left boundary of cell i (x_{i-1/2}).
     real(rk), intent(out) :: c(0:,-1:,:)
+        !!  array(0:k-1,-1:k-1,1:nc) of constants for a non-uniform grid
 
     real(rk) :: prod1, prod2, sum1, sum2, dx
     real(rk), allocatable, target :: xext(:)
@@ -179,7 +176,7 @@ module weno
     integer :: i, j, l, nc, ng, m, q, r
     character(:), allocatable :: msg
 
-        !> Check input conditions
+        ! Check input conditions
         if (k < 1) then
             msg = "Invalid input 'k' in 'calc_c'. Valid range: k >= 1."
             error stop msg
@@ -206,68 +203,60 @@ module weno
             error stop msg
         end if
 
-        !> Allocate extended grid with (k+1) ghost cells on each side
+        ! Allocate extended grid with (k+1) ghost cells on each side
         ng = k+1
         allocate(xext(0-ng:nc+ng))
         xext(0:nc) = xedges
 
-        !> Extend to the left linearly
+        ! Extend to the left linearly
         dx = xext(1) - xext(0)
         do i = -1, lbound(xext,1), -1
             xext(i) = xext(i+1) - dx
         end do
 
-        !> Extend to the right linearly
+        ! Extend to the right linearly
         dx = xext(nc) - xext(nc-1)
         do i = nc+1, ubound(xext,1)
             xext(i) = xext(i-1) + dx
         end do
 
-        !> Get pointers to left and right cell boundaries
+        ! Get pointers to left and right cell boundaries
         xl(1-ng:) => xext(lbound(xext,1):ubound(xext,1)-1)
         xr(1-ng:) => xext(lbound(xext,1)+1:ubound(xext,1))
 
-        !> Compute array of constants 'c' for each grid position
-        !> Equation 2.20, page 6.
-        do i = 1, nc
+        ! Compute array of constants 'c' for each grid position
+        ! Equation 2.20, page 6.
+        do concurrent(i=1:nc, r=-1:k-1, j=0:k-1)
+            
+            sum2 = 0._rk
+            do m = j+1, k
 
-            do r = -1, k-1
+                prod2 = 1._rk
+                do l = 0, k
+                    if (l == m) cycle
+                    prod2 = prod2*(xl(i-r+m) - xl(i-r+l))
+                end do
 
-                do j = 0, k-1
+                sum1 = 0._rk
+                do l = 0, k
 
-                    sum2 = 0._rk
-                    do m = j+1, k
+                    if (l == m) cycle
 
-                        prod2 = 1._rk
-                        do l = 0, k
-                            if (l == m) cycle
-                            prod2 = prod2*(xl(i-r+m) - xl(i-r+l))
+                        prod1 = 1._rk
+                        do q = 0, k
+                            if (q == m .or. q == l) cycle
+                            prod1 = prod1*(xr(i) - xl(i-r+q))
                         end do
 
-                        sum1 = 0._rk
-                        do l = 0, k
-
-                            if (l == m) cycle
-
-                                prod1 = 1._rk
-                                do q = 0, k
-                                    if (q == m .or. q == l) cycle
-                                    prod1 = prod1*(xr(i) - xl(i-r+q))
-                                end do
-
-                            sum1 = sum1 + prod1
-
-                        end do
-
-                        sum2 = sum2 + sum1/prod2
-
-                    end do
-
-                    c(j,r,i) = sum2*(xr(i-r+j) - xl(i-r+j))
+                    sum1 = sum1 + prod1
 
                 end do
 
+                sum2 = sum2 + sum1/prod2
+
             end do
+
+            c(j,r,i) = sum2*(xr(i-r+j) - xl(i-r+j))
 
         end do
 
