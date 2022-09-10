@@ -2,4 +2,4 @@
 *.vscode
 *.venv
 *gcov.sh
-docs
+_site
