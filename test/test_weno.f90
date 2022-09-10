@@ -1,7 +1,7 @@
 module test_weno
-!>---------------------------------------------------------------------------------------------
-!> Test for module 'weno' using test-drive.
-!>---------------------------------------------------------------------------------------------
+!----------------------------------------------------------------------------------------------
+!! Test for module 'weno' using test-drive.
+!----------------------------------------------------------------------------------------------
     use weno, only : wenok, calc_c, c1, c2, c3
     use iso_fortran_env, only : real64, error_unit
     use testdrive, only : new_unittest, unittest_type, error_type, check
@@ -17,7 +17,7 @@ module test_weno
 
     !> Collect all exported unit tests
     subroutine collect_tests_weno(testsuite)
-        !> Collection of tests
+        ! Collection of tests
         type(unittest_type), allocatable, intent(out) :: testsuite(:)
 
         testsuite = [ &
@@ -35,30 +35,30 @@ module test_weno
         real(rk) :: eps, atol
         integer :: i, k, nc = 30
 
-        !> Run check for each order
+        ! Run check for each order
         eps = 1e-6_rk
         atol = 1e-9_rk
         do k = 1, 3
 
-          !> Allocate arrays
+          ! Allocate arrays
           if(allocated(vext)) deallocate(vext)
           if(allocated(vl)) deallocate(vl)
           if(allocated(vr)) deallocate(vr)
           allocate(vext(1-(k-1):nc+(k-1)), vl(nc), vr(nc))
 
-          !> Set cell average value including ghost cells
-          !> Just a reactangular pulse __|¯¯|__
+          ! Set cell average value including ghost cells
+          ! Just a reactangular pulse __|¯¯|__
           vext = 0
           vext(nc/3:2*nc/3) = 1
 
-          !> Call procedure
+          ! Call procedure
           call wenok(k, vext, vl, vr, eps)
 
-          !> Check error
+          ! Check error
           call check(error, vext(1:nc), vl, thr=atol)
           call check(error, vext(1:nc), vr, thr=atol)
 
-          !> Detailed comparison for debugging
+          ! Detailed comparison for debugging
           if (allocated(error) .or. verbose) then
             write (error_unit, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
             do i = 1, nc
@@ -77,7 +77,7 @@ module test_weno
       real(rk) :: rtol, xmin, xmax
       integer :: i, k, nc
 
-      !> Allocate and define an abritrary uniform grid
+      ! Allocate and define an abritrary uniform grid
       xmin = 0._rk
       xmax = 3._rk
       nc = 30
@@ -86,18 +86,18 @@ module test_weno
         xedges(i) = xmin + (xmax - xmin)*i/nc
       end do
 
-      !> Run check for each order
+      ! Run check for each order
       rtol = 1e-9_rk
       do k = 1, 3
 
-        !> Allocate c array
+        ! Allocate c array
         if(allocated(c)) deallocate(c)
         allocate(c(0:k-1,-1:k-1,1:nc))
 
-        !> Compute c
+        ! Compute c
         call calc_c(k, xedges, c)
 
-        !> Get reference solution
+        ! Get reference solution
         if(allocated(cref)) deallocate(cref)
         select case(k)
           case(1)
@@ -108,7 +108,7 @@ module test_weno
             cref = c3
         end select
 
-        !> Check error
+        ! Check error
         do i = 1, nc
           call check(error, reshape(c(:,:,i),[size(cref)]), &
                     reshape(cref,[size(cref)]), rel=.true., thr=rtol)
@@ -126,7 +126,7 @@ module test_weno
       real(rk) :: eps, atol, xmin, xmax
       integer :: i, k, nc
 
-      !> Allocate and define an abritrary non-uniform grid
+      ! Allocate and define an abritrary non-uniform grid
       xmin = 0._rk
       xmax = 1._rk
       nc = 30
@@ -136,35 +136,35 @@ module test_weno
       end do
       xedges = xedges**3
 
-      !> Run check for each order
+      ! Run check for each order
       eps = 1e-6_rk
       atol = 1e-9_rk
       do k = 1, 3
 
-        !> Allocate 'c' array
+        ! Allocate 'c' array
         if(allocated(c)) deallocate(c)
         allocate(c(0:k-1,-1:k-1,1:nc))
 
-        !> Allocate 'v' arrays
+        ! Allocate 'v' arrays
         if(allocated(vext)) deallocate(vext)
         if(allocated(vl)) deallocate(vl)
         if(allocated(vr)) deallocate(vr)
         allocate(vext(1-(k-1):nc+(k-1)), vl(nc), vr(nc))
 
-        !> Set cell average value including ghost cells
-        !> Just a reactangular pulse __|¯¯|__
+        ! Set cell average value including ghost cells
+        ! Just a reactangular pulse __|¯¯|__
         vext = 0
         vext(nc/3:2*nc/3) = 1
 
-        !> Call procedures
+        ! Call procedures
         call calc_c(k, xedges, c)
         call wenok(k, vext, vl, vr, eps, c)
 
-        !> Check error
+        ! Check error
         call check(error, vext(1:nc), vl, thr=atol)
         call check(error, vext(1:nc), vr, thr=atol)
 
-        !> Detailed comparison for debugging
+        ! Detailed comparison for debugging
         if (allocated(error) .or. verbose) then
           write (error_unit, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
           do i = 1, nc
