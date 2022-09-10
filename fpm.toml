@@ -17,3 +17,5 @@ library = false
 
 [dev-dependencies]
 test-drive = { git = "https://github.com/zoziha/test-drive", branch = "add-support-array" }
+
+# fpm test --profile release --flag "-Ofast -ftree-parallelize-loops=2"
