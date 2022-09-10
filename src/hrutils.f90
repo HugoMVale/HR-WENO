@@ -22,8 +22,19 @@ module hrutils
         end interface
 
         type :: tgrid1
-            real(rk), allocatable :: edges(:), c(:), d(:), l(:), r(:)
+            !! 1D grid
+            real(rk), allocatable :: edges(:)
+                !! vector(0:nc) of cell edges
+            real(rk), allocatable :: c(:)
+                !! vector(nc) of cell centers, \( x_i \)
+            real(rk), allocatable :: d(:)
+                !! vector(nc) of cell widths,  \( x_{i+1/2} - x_{i-1/2} \)
+            real(rk), allocatable :: l(:)
+                !! vector(nc) of left cell boundaries, \( x_{i-1/2} \)
+            real(rk), allocatable :: r(:)
+                !! vector(nc) of right cell boundaries, , \( x_{i+1/2} \)
             integer :: nc
+                !! number of cells
         end type
     
         contains
