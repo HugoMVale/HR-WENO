@@ -152,7 +152,7 @@ program example1_burgers_1d_fv
     !------------------------------------------------------------------------------------------
     integer, intent (in) :: message
         !! parameter to select output action 
-    integer :: i
+    integer :: i, funit_grid=0, funit_u=0
     
         select case (message)
 
@@ -163,36 +163,36 @@ program example1_burgers_1d_fv
             print *, "Start: ", fdate()
 
             ! Write grid
-            open (unit=1, file="./output/xgrid.txt", status="replace", action="write", &
-                  position="rewind")
+            open (newunit=funit_grid, file="./output/xgrid.txt", status="replace", &
+                  action="write", position="rewind")
 
-            write (1,'(a5, 2(1x, a15))') "i", "x(i)", "dx(i)"
+            write (funit_grid,'(a5, 2(1x, a15))') "i", "x(i)", "dx(i)"
             do i = 1, nc 
-                write (1,'(i5, 2(1x, es15.5))') i, gx%c(i), gx%d(i)
+                write (funit_grid,'(i5, 2(1x, es15.5))') i, gx%c(i), gx%d(i)
             end do
 
             ! Write header u
-            open (unit=2, file="./output/u.txt", status="replace", action="write", &
-                  position="rewind")
+            open (newunit=funit_u, file="./output/u.txt", status="replace", &
+                  action="write", position="rewind")
 
-            write (2,'(a16)', advance="no") "t"
+            write (funit_u,'(a16)', advance="no") "t"
             do i = 1, nc
-                write (2,'(1x, a16)', advance="no") "u("//itoa(i)//")"
+                write (funit_u,'(1x, a16)', advance="no") "u("//itoa(i)//")"
             end do
-            write (2,*) ""
+            write (funit_u,*) ""
 
-        ! Write values
+        ! Write values u(x,t)
         case (2)
-            write (2,'(es16.5e3)', advance="no") time
+            write (funit_u,'(es16.5e3)', advance="no") time
             do i = 1, nc
-                write (2,'(1x, es16.5e3)', advance="no") u(i)
+                write (funit_u,'(1x, es16.5e3)', advance="no") u(i)
             end do
-            write (2,*) ""
+            write (funit_u,*) ""
 
         ! Close files
         case (3)
-            close (1)
-            close (2)
+            close (funit_grid)
+            close (funit_u)
             print *, "End  : ", fdate()
             print *
 
