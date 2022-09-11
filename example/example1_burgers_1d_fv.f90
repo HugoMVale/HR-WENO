@@ -22,7 +22,7 @@ program example1_burgers_1d_fv
    use tvdode, only: rktvd
    use weno, only: wenok
    use hrutils, only: godunov, lax_friedrichs, tgrid1, grid1
-   use iso_fortran_env, only: real64, stderr => error_unit
+   use iso_fortran_env, only: real64, stderr => error_unit, stdout => output_unit
    use stdlib_strings, only: to_string
    implicit none
 
@@ -141,6 +141,7 @@ contains
       integer, intent(in) :: message
         !! parameter to select output action
       integer :: i, funit_x = 0, funit_u = 0
+      real(rk) :: cpu_start = 0._rk, cpu_end = 0._rk
       character(*), parameter :: folder = "./output/example1/"
 
       select case (message)
@@ -148,8 +149,9 @@ contains
          ! Open files and write headers and grid
       case (1)
 
-         print *, "Running example1..."
-         print *, "Start: ", fdate()
+         write (stdout, '(1x, a)'), "Running example1..."
+         write (stdout, '(1x, a, 1x, a)'), "Start:", fdate()
+         call cpu_time(cpu_start)
 
          ! Write grid
          open (newunit=funit_x, file=folder//"x.txt", status="replace", &
@@ -182,8 +184,9 @@ contains
       case (3)
          close (funit_x)
          close (funit_u)
-         print *, "End  : ", fdate()
-         print *
+         write (stdout, '(1x, a, 1x, a)'), "End  :", fdate()
+         call cpu_time(cpu_end)
+         write (stdout, '(1x, a, 1x, f6.1)'), "Elaspsed time (ms) :", 1e3*(cpu_end - cpu_start)
 
       end select
 
