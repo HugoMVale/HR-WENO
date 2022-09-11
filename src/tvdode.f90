@@ -34,7 +34,7 @@ module tvdode
     !!   There are also 4th and 5th order methods, but they have lower CFL coeffiecients and
     !! are more difficult to implement. See Equation 4.15, page 44.
     !! 
-    !! #### Possible improvements    
+    !! @todo    
     !! - Adjust dt in final step to avoid overshoting tout by some fraction of dt.
     !! - Maybe include an optional work array that could be transfered to fu.
     !------------------------------------------------------------------------------------------
@@ -135,7 +135,7 @@ module tvdode
     !!   There is a 2nd order multi-step method, but the corresponding CFL value is half that
     !! of the 2nd order RK method. Thus, thre is no reason to implement it.
     !!
-    !! #### Possible improvements
+    !! @todo
     !! - Maybe include an optional work array that could be transfered to 'fu'.
     !------------------------------------------------------------------------------------------
     procedure(integrand) :: fu
