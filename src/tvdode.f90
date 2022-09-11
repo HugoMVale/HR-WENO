@@ -196,10 +196,8 @@ contains
          t = t + dt
 
          ! Shift u and udot values one step into the past
-         do i = order, 1, -1
-            udotold(:, i + 1) = udotold(:, i)
-            uold(:, i + 1) = uold(:, i)
-         end do
+         udotold = eoshift(udotold, shift=-1, dim=2)
+         uold = eoshift(uold, shift=-1, dim=2)
          udotold(:, 1) = udot
          uold(:, 1) = u
          u = ui
