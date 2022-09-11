@@ -3,7 +3,7 @@ module test_weno
 !! Test for module 'weno' using test-drive.
 !----------------------------------------------------------------------------------------------
     use weno, only : wenok, calc_c, c1, c2, c3
-    use iso_fortran_env, only : real64, error_unit
+    use iso_fortran_env, only : real64, stderr=>error_unit
     use testdrive, only : new_unittest, unittest_type, error_type, check
     implicit none
     private
@@ -60,9 +60,9 @@ module test_weno
 
           ! Detailed comparison for debugging
           if (allocated(error) .or. verbose) then
-            write (error_unit, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
+            write (stderr, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
             do i = 1, nc
-              write (error_unit, '(2(i4),3(es26.16e3))'), k, i, vext(i), vl(i), vr(i)
+              write (stderr, '(2(i4),3(es26.16e3))'), k, i, vext(i), vl(i), vr(i)
             end do
           end if
 
@@ -166,9 +166,9 @@ module test_weno
 
         ! Detailed comparison for debugging
         if (allocated(error) .or. verbose) then
-          write (error_unit, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
+          write (stderr, '(2(a4),3(a26))'), "k", "i", "v(i)", "vl(i)", "vr(i)"
           do i = 1, nc
-            write (error_unit, '(2(i4),3(es26.16e3))'), k, i, vext(i), vl(i), vr(i)
+            write (stderr, '(2(i4),3(es26.16e3))'), k, i, vext(i), vl(i), vr(i)
           end do
         end if
 

@@ -24,7 +24,7 @@ program example1_burgers_1d_fv
     use tvdode, only : rktvd
     use weno, only : wenok
     use hrutils, only : godunov, lax_friedrichs, tgrid1, grid1
-    use iso_fortran_env, only : real64, error_unit
+    use iso_fortran_env, only : real64, stderr=>error_unit
     use stdlib_strings, only: to_string
     implicit none
 

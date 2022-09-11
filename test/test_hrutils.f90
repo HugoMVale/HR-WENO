@@ -3,7 +3,7 @@ module test_hrutils
 !! Test for module 'hrutils' using test-drive.
 !----------------------------------------------------------------------------------------------
         use hrutils, only : godunov, lax_friedrichs, grid1, tgrid1
-        use iso_fortran_env, only : real64, error_unit
+        use iso_fortran_env, only : real64, stderr=>error_unit
         use testdrive, only : new_unittest, unittest_type, error_type, check
         implicit none
         private
@@ -40,7 +40,7 @@ module test_hrutils
             rtol = 1e-8_rk
 
             ! Check h(a,a) = h(a)
-            write(error_unit, *) "Check h(a,a) = h(a)"  
+            write(stderr, *) "Check h(a,a) = h(a)"  
             vp = vm
             href = f(vp, x, t)
             h = godunov(f, vm, vp, x, t)
@@ -51,7 +51,7 @@ module test_hrutils
             if (allocated(error)) return
 
             ! Check Check ->
-            write(error_unit, *) "Check ->"
+            write(stderr, *) "Check ->"
             vp = -2*vm
             href = f(vm, x, t) 
             h = godunov(f, vm, vp, x, t)
@@ -62,7 +62,7 @@ module test_hrutils
             if (allocated(error)) return
 
             ! Check Check <-
-            write(error_unit, *) "Check <-"
+            write(stderr, *) "Check <-"
             vm = - vm
             vp = - vp
             href = f(vm, x, t)  
