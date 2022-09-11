@@ -19,7 +19,7 @@ import pandas as pd
 relpath_output = '../output/'
 filenames = {
     "u": 'u.txt',
-    "xgrid": 'xgrid.txt'
+    "xgrid": 'x.txt'
 }
 
 data = {}

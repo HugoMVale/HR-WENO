@@ -153,7 +153,7 @@ program example1_burgers_1d_fv
     use stdlib_strings, only: to_string
     integer, intent (in) :: message
         !! parameter to select output action 
-    integer :: i, funit_grid=0, funit_u=0
+    integer :: i, funit_x=0, funit_u=0
     
         select case (message)
 
@@ -164,12 +164,12 @@ program example1_burgers_1d_fv
             print *, "Start: ", fdate()
 
             ! Write grid
-            open (newunit=funit_grid, file="./output/xgrid.txt", status="replace", &
+            open (newunit=funit_x, file="./output/x.txt", status="replace", &
                   action="write", position="rewind")
 
-            write (funit_grid,'(a5, 2(1x, a15))') "i", "x(i)", "dx(i)"
+            write (funit_x,'(a5, 2(1x, a15))') "i", "x(i)", "dx(i)"
             do i = 1, nc 
-                write (funit_grid,'(i5, 2(1x, es15.5))') i, gx%c(i), gx%d(i)
+                write (funit_x,'(i5, 2(1x, es15.5))') i, gx%c(i), gx%d(i)
             end do
 
             ! Write header u
@@ -192,7 +192,7 @@ program example1_burgers_1d_fv
 
         ! Close files
         case (3)
-            close (funit_grid)
+            close (funit_x)
             close (funit_u)
             print *, "End  : ", fdate()
             print *
