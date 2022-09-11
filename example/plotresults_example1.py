@@ -16,7 +16,7 @@ import pandas as pd
 
 # %% Import numerical results
 
-relpath_output = '../output/'
+relpath_output = '../output/example1'
 filenames = {
     "u": 'u.txt',
     "xgrid": 'x.txt'

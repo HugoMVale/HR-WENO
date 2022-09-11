@@ -137,21 +137,22 @@ contains
    end function ic
 
    subroutine output(message)
-    !! Auxiliary routine to save results to file.
+   !! Auxiliary routine to save results to file.
       integer, intent(in) :: message
         !! parameter to select output action
       integer :: i, funit_x = 0, funit_u = 0
+      character(*), parameter :: folder = "./output/example1/"
 
       select case (message)
 
          ! Open files and write headers and grid
       case (1)
 
-         print *, "Running example1d..."
+         print *, "Running example1..."
          print *, "Start: ", fdate()
 
          ! Write grid
-         open (newunit=funit_x, file="./output/x.txt", status="replace", &
+         open (newunit=funit_x, file=folder//"x.txt", status="replace", &
                action="write", position="rewind")
 
          write (funit_x, '(a5, 2(1x, a15))') "i", "x(i)", "dx(i)"
@@ -160,7 +161,7 @@ contains
          end do
 
          ! Write header u
-         open (newunit=funit_u, file="./output/u.txt", status="replace", &
+         open (newunit=funit_u, file=folder//"u.txt", status="replace", &
                action="write", position="rewind")
 
          write (funit_u, '(a16)', advance="no") "t"
