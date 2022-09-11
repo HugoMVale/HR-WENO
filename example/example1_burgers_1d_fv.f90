@@ -150,6 +150,7 @@ program example1_burgers_1d_fv
     !------------------------------------------------------------------------------------------
     !! Auxiliary routine to save results to file.
     !------------------------------------------------------------------------------------------
+    use stdlib_strings, only: to_string
     integer, intent (in) :: message
         !! parameter to select output action 
     integer :: i, funit_grid=0, funit_u=0
@@ -177,7 +178,7 @@ program example1_burgers_1d_fv
 
             write (funit_u,'(a16)', advance="no") "t"
             do i = 1, nc
-                write (funit_u,'(1x, a16)', advance="no") "u("//itoa(i)//")"
+                write (funit_u,'(1x, a16)', advance="no") "u("//to_string(i)//")"
             end do
             write (funit_u,*) ""
 
@@ -199,18 +200,5 @@ program example1_burgers_1d_fv
         end select
 
     end subroutine output
-
-
-    function itoa(i) result(res)
-    !------------------------------------------------------------------------------------------
-    !! Convert integer to string.
-    !------------------------------------------------------------------------------------------
-    integer, intent(in) :: i
-        !! Integer
-    character(:), allocatable :: res
-    character(range(i)+2) :: tmp
-      write(tmp,'(i0)') i
-      res = trim(tmp)
-    end function
 
 end program example1_burgers_1d_fv
