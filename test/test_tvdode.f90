@@ -1,78 +1,76 @@
 module test_tvdode
-!----------------------------------------------------------------------------------------------
 !! Test for module 'tvdode' using test-drive.
-!----------------------------------------------------------------------------------------------
-    use tvdode, only : rktvd, mstvd
-    use iso_fortran_env, only : real64, stderr=>error_unit
-    use testdrive, only : new_unittest, unittest_type, error_type, check
-    implicit none
-    private
+   use tvdode, only: rktvd, mstvd
+   use iso_fortran_env, only: real64, stderr => error_unit
+   use testdrive, only: new_unittest, unittest_type, error_type, check
+   implicit none
+   private
 
-    public :: collect_tests_tvdode
+   public :: collect_tests_tvdode
 
-    integer, parameter :: rk = real64
-    logical, parameter :: verbose = .false.
-    integer, parameter :: nu = 10
-    integer :: ii
-    real(rk), parameter :: a(nu)=[(-1._rk + real(ii-1,rk)*4/(nu-1), ii = 1, nu)]
+   integer, parameter :: rk = real64
+   logical, parameter :: verbose = .false.
+   integer, parameter :: nu = 10
+   integer :: ii
+   real(rk), parameter :: a(nu) = [(-1._rk + real(ii - 1, rk)*4/(nu - 1), ii=1, nu)]
 
-    contains
+contains
 
-    !> Collect all exported unit tests
-    subroutine collect_tests_tvdode(testsuite)
-        ! Collection of tests
-        type(unittest_type), allocatable, intent(out) :: testsuite(:)
+   !> Collect all exported unit tests
+   subroutine collect_tests_tvdode(testsuite)
+      ! Collection of tests
+      type(unittest_type), allocatable, intent(out) :: testsuite(:)
 
-        testsuite = [ &
-        new_unittest("rktvd", test_rktvd), &
-        new_unittest("mstvd", test_mstvd) &
-        ]
+      testsuite = [ &
+                  new_unittest("rktvd", test_rktvd), &
+                  new_unittest("mstvd", test_mstvd) &
+                  ]
 
-    end subroutine
+   end subroutine
 
-    subroutine test_rktvd(error)
-        type(error_type), allocatable, intent(out) :: error
-        integer :: order, itask, istate
-        real(rk) :: t0, t, tout, dt, u(nu), u0(nu), uref(nu), rtol(3)
-        integer :: i
-      
-        ! Initial conditions and ode settings
-        t0 = -1.3_rk
-        tout = 1.5_rk
-        u0 = 0.1_rk
-        dt = ((tout - t0)/3000)
-        
-        ! Run check for each order
-        rtol = [2e-2_rk, 1e-3_rk, 1e-3_rk]  
-        do concurrent(order=1:3)      
+   subroutine test_rktvd(error)
+      type(error_type), allocatable, intent(out) :: error
+      integer :: order, itask, istate
+      real(rk) :: t0, t, tout, dt, u(nu), u0(nu), uref(nu), rtol(3)
+      integer :: i
 
-          ! Numerical solution at t=tout
-          u = u0
-          t = t0
-          istate = 1
-          itask = 1
-          call rktvd(fu, u, t, tout, dt, order, itask, istate)
+      ! Initial conditions and ode settings
+      t0 = -1.3_rk
+      tout = 1.5_rk
+      u0 = 0.1_rk
+      dt = ((tout - t0)/3000)
 
-          ! Check error
-          uref = usol(t0, u0, t)
-          call check(error, u, uref, rel=.true., thr=rtol(order))
+      ! Run check for each order
+      rtol = [2e-2_rk, 1e-3_rk, 1e-3_rk]
+      do concurrent(order=1:3)
 
-          ! Show results if test fails (for debugging)
-          if (allocated(error) .or. verbose) then
-            write(stderr, '(2(a6), 2(a26))') "order", "i", "u(i)", "uref(i)"
+         ! Numerical solution at t=tout
+         u = u0
+         t = t0
+         istate = 1
+         itask = 1
+         call rktvd(fu, u, t, tout, dt, order, itask, istate)
+
+         ! Check error
+         uref = usol(t0, u0, t)
+         call check(error, u, uref, rel=.true., thr=rtol(order))
+
+         ! Show results if test fails (for debugging)
+         if (allocated(error) .or. verbose) then
+            write (stderr, '(2(a6), 2(a26))') "order", "i", "u(i)", "uref(i)"
             do i = 1, size(u)
-              write(stderr, '(2(i6), 2(es26.16e3))'), order, i, u(i), uref(i)
+               write (stderr, '(2(i6), 2(es26.16e3))'), order, i, u(i), uref(i)
             end do
-          end if
+         end if
 
       end do
 
-    end subroutine test_rktvd
+   end subroutine test_rktvd
 
-    subroutine test_mstvd(error)
+   subroutine test_mstvd(error)
       type(error_type), allocatable, intent(out) :: error
       integer :: istate
-      real(rk) :: t0, t, tout, dt, u(nu), u0(nu), uref(nu), uold(nu,4), udotold(nu,4)
+      real(rk) :: t0, t, tout, dt, u(nu), u0(nu), uref(nu), uold(nu, 4), udotold(nu, 4)
       integer :: i
 
       ! Initial conditions and ode settings
@@ -93,27 +91,26 @@ module test_tvdode
 
       ! Show results if test fails (for debugging)
       if (allocated(error) .or. verbose) then
-        write(stderr, '(a4, 2(a26))') "i", "u(i)", "uref(i)"
-        do i = 1, size(u)
-          write(stderr, '(i4, 2(es26.16e3))') i, u(i), uref(i)
-        end do
+         write (stderr, '(a4, 2(a26))') "i", "u(i)", "uref(i)"
+         do i = 1, size(u)
+            write (stderr, '(i4, 2(es26.16e3))') i, u(i), uref(i)
+         end do
       end if
 
-    end subroutine test_mstvd
+   end subroutine test_mstvd
 
-    !> Simple linear u'(u) to test ode solvers
-    pure subroutine fu(t, u, udot)
+   !> Simple linear u'(u) to test ode solvers
+   pure subroutine fu(t, u, udot)
       real(rk), intent(in) :: t, u(:)
       real(rk), intent(out) :: udot(:)
       udot = a*u
-    end subroutine
+   end subroutine
 
-    !> Analytical solution of u'(u)=au to test ode solvers
-    pure function usol(t0, u0, t)
+   !> Analytical solution of u'(u)=au to test ode solvers
+   pure function usol(t0, u0, t)
       real(rk), intent(in) :: t0, t, u0(:)
       real(rk) :: usol(size(u0))
       usol = u0*exp(a*(t - t0))
-    end function
-
+   end function
 
 end module test_tvdode
