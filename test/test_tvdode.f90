@@ -3,7 +3,7 @@ module test_tvdode
 !! Test for module 'tvdode' using test-drive.
 !----------------------------------------------------------------------------------------------
     use tvdode, only : rktvd, mstvd
-    use iso_fortran_env, only : real64, error_unit
+    use iso_fortran_env, only : real64, stderr=>error_unit
     use testdrive, only : new_unittest, unittest_type, error_type, check
     implicit none
     private
@@ -13,7 +13,8 @@ module test_tvdode
     integer, parameter :: rk = real64
     logical, parameter :: verbose = .false.
     integer, parameter :: nu = 10
-    real(rk) :: a(nu)
+    integer :: ii
+    real(rk), parameter :: a(nu)=[(-1._rk + real(ii-1,rk)*4/(nu-1), ii = 1, nu)]
 
     contains
 
@@ -32,40 +33,35 @@ module test_tvdode
     subroutine test_rktvd(error)
         type(error_type), allocatable, intent(out) :: error
         integer :: order, itask, istate
-        real(rk) :: t, tout, dt, u(nu), uref(nu), rtol(3)
+        real(rk) :: t0, t, tout, dt, u(nu), u0(nu), uref(nu), rtol(3)
         integer :: i
-
-        istate = 1
-        itask = 1
-        rtol = [2e-2_rk, 1e-3_rk, 1e-3_rk]
-
-        ! Analytical solution at t=tout
-        ! We use a simple series of 1st order ode's
-        tout = 1._rk
-        do i = 1, size(u)
-          a(i) = 1._rk + real(i-1,rk)
-          uref(i) = exp(a(i))*tout
-        end do
-
+      
+        ! Initial conditions and ode settings
+        t0 = -1.3_rk
+        tout = 1.5_rk
+        u0 = 0.1_rk
+        dt = ((tout - t0)/3000)
+        
         ! Run check for each order
-        do order = 1, 3
-
-          ! Initial conditions and ode settings
-          u = 1._rk
-          t = 0._rk
-          dt = (tout/3000)*order
+        rtol = [2e-2_rk, 1e-3_rk, 1e-3_rk]  
+        do concurrent(order=1:3)      
 
           ! Numerical solution at t=tout
+          u = u0
+          t = t0
+          istate = 1
+          itask = 1
           call rktvd(fu, u, t, tout, dt, order, itask, istate)
 
           ! Check error
+          uref = usol(t0, u0, t)
           call check(error, u, uref, rel=.true., thr=rtol(order))
 
           ! Show results if test fails (for debugging)
           if (allocated(error) .or. verbose) then
-            write(error_unit, '(2(a6), 2(a26))') "order", "i", "u(i)", "uref(i)"
+            write(stderr, '(2(a6), 2(a26))') "order", "i", "u(i)", "uref(i)"
             do i = 1, size(u)
-              write(error_unit, '(2(i6), 2(es26.16e3))'), order, i, u(i), uref(i)
+              write(stderr, '(2(i6), 2(es26.16e3))'), order, i, u(i), uref(i)
             end do
           end if
 
@@ -76,34 +72,30 @@ module test_tvdode
     subroutine test_mstvd(error)
       type(error_type), allocatable, intent(out) :: error
       integer :: istate
-      real(rk) :: t, tout, dt, u(nu), uref(nu), uold(nu,4), udotold(nu,4)
+      real(rk) :: t0, t, tout, dt, u(nu), u0(nu), uref(nu), uold(nu,4), udotold(nu,4)
       integer :: i
 
-      istate = 1
-
-      ! Analytical solution at t=tout
-      tout = 1_rk
-      do i = 1, size(u)
-        a(i) = 1._rk + real(i-1,rk)
-        uref(i) = exp(a(i))*tout
-      end do
-
       ! Initial conditions and ode settings
-      u = 1._rk
-      t = 0._rk
-      dt = tout/1000
+      t0 = -1.3_rk
+      tout = 1.5_rk
+      u0 = 0.1_rk
+      dt = 1e-3_rk
 
       ! Numerical solution at t=tout
+      u = u0
+      t = t0
+      istate = 1
       call mstvd(fu, u, t, tout, dt, uold, udotold, istate)
 
       ! Check error
+      uref = usol(t0, u0, t)
       call check(error, u, uref, rel=.true., thr=1e-3_rk)
 
       ! Show results if test fails (for debugging)
       if (allocated(error) .or. verbose) then
-        write(error_unit, '(a4, 2(a26))') "i", "u(i)", "uref(i)"
+        write(stderr, '(a4, 2(a26))') "i", "u(i)", "uref(i)"
         do i = 1, size(u)
-          write(error_unit, '(i4, 2(es26.16e3))') i, u(i), uref(i)
+          write(stderr, '(i4, 2(es26.16e3))') i, u(i), uref(i)
         end do
       end if
 
@@ -115,6 +107,13 @@ module test_tvdode
       real(rk), intent(out) :: udot(:)
       udot = a*u
     end subroutine
+
+    !> Analytical solution of u'(u)=au to test ode solvers
+    pure function usol(t0, u0, t)
+      real(rk), intent(in) :: t0, t, u0(:)
+      real(rk) :: usol(size(u0))
+      usol = u0*exp(a*(t - t0))
+    end function
 
 
 end module test_tvdode
