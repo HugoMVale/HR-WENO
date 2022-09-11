@@ -25,6 +25,7 @@ program example1_burgers_1d_fv
     use weno, only : wenok
     use hrutils, only : godunov, lax_friedrichs, tgrid1, grid1
     use iso_fortran_env, only : real64, error_unit
+    use stdlib_strings, only: to_string
     implicit none
 
     integer, parameter :: rk = real64
@@ -121,7 +122,7 @@ program example1_burgers_1d_fv
     !! Flux function. Here we define the flux corresponding to Burger's equation.
     !------------------------------------------------------------------------------------------
     real(rk), intent (in) :: v
-        !! function v(z,t)
+        !! function v(x,t)
     real(rk), intent (in) :: x
         !! spatial variable
     real(rk), intent (in) :: t
@@ -150,7 +151,6 @@ program example1_burgers_1d_fv
     !------------------------------------------------------------------------------------------
     !! Auxiliary routine to save results to file.
     !------------------------------------------------------------------------------------------
-    use stdlib_strings, only: to_string
     integer, intent (in) :: message
         !! parameter to select output action 
     integer :: i, funit_x=0, funit_u=0
