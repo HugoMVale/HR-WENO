@@ -95,19 +95,19 @@ contains
       ! print *, "r", gx%r
 
       ! Checks
-      call check(error, gx%nc, nc)
+      call check(error, gx%ncells, nc)
       if (allocated(error)) return
       call check(error, gx%edges(0), xmin)
       if (allocated(error)) return
       call check(error, gx%edges(nc), xmax)
       if (allocated(error)) return
-      call check(error, gx%l, gx%edges(0:nc - 1))
+      call check(error, gx%left, gx%edges(0:nc - 1))
       if (allocated(error)) return
-      call check(error, gx%r, gx%edges(1:nc))
+      call check(error, gx%right, gx%edges(1:nc))
       if (allocated(error)) return
-      call check(error, gx%d, gx%r - gx%l)
+      call check(error, gx%width, gx%right - gx%left)
       if (allocated(error)) return
-      call check(error, gx%c, (gx%l + gx%r)/2)
+      call check(error, gx%center, (gx%left + gx%right)/2)
 
    end subroutine test_grid1
 
