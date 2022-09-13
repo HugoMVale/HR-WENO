@@ -40,7 +40,7 @@ program example1_burgers_1d_fv
    gx = grid1(xmin, xmax, nc)
 
    ! Initial condition u(x,t=0)
-   u = ic(gx%c)
+   u = ic(gx%center)
 
    ! Open file where results will be stored
    call output(1)
@@ -100,7 +100,7 @@ contains
       ! One can use the Lax-Friedrichs or the Godunov method
       do concurrent(i=1:nc - 1)
          !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), gx%r(i), t, alpha)
-         fedges(i) = godunov(flux, vr(i), vl(i + 1), gx%r(i), t)
+         fedges(i) = godunov(flux, vr(i), vl(i + 1), gx%right(i), t)
       end do
 
       ! Apply problem-specific flux constraints at domain boundaries
@@ -108,7 +108,7 @@ contains
       fedges(nc) = fedges(nc - 1)
 
       ! Evaluate du/dt
-      vdot = -(fedges(1:) - fedges(:nc - 1))/gx%d
+      vdot = -(fedges(1:) - fedges(:nc - 1))/gx%width
 
    end subroutine rhs
 
@@ -149,8 +149,8 @@ contains
          ! Open files and write headers and grid
       case (1)
 
-         write (stdout, '(1x, a)'), "Running example1..."
-         write (stdout, '(1x, a, 1x, a)'), "Start:", fdate()
+         write (stdout, '(1x, a)') "Running example1..."
+         write (stdout, '(1x, a, 1x, a)') "Start:", fdate()
          call cpu_time(cpu_start)
 
          ! Write grid
@@ -159,7 +159,7 @@ contains
 
          write (funit_x, '(a5, 2(1x, a15))') "i", "x(i)", "dx(i)"
          do i = 1, nc
-            write (funit_x, '(i5, 2(1x, es15.5))') i, gx%c(i), gx%d(i)
+            write (funit_x, '(i5, 2(1x, es15.5))') i, gx%center(i), gx%width(i)
          end do
 
          ! Write header u
@@ -184,9 +184,9 @@ contains
       case (3)
          close (funit_x)
          close (funit_u)
-         write (stdout, '(1x, a, 1x, a)'), "End  :", fdate()
+         write (stdout, '(1x, a, 1x, a)') "End  :", fdate()
          call cpu_time(cpu_end)
-         write (stdout, '(1x, a, 1x, f6.1)'), "Elaspsed time (ms) :", 1e3*(cpu_end - cpu_start)
+         write (stdout, '(1x, a, 1x, f6.1)') "Elaspsed time (ms) :", 1e3*(cpu_end - cpu_start)
 
       end select
 

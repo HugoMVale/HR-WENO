@@ -23,15 +23,15 @@ module hrutils
     !! 1D grid
       real(rk), allocatable :: edges(:)
         !! vector(0:nc) of cell edges
-      real(rk), allocatable :: c(:)
+      real(rk), allocatable :: center(:)
         !! vector(nc) of cell centers, \( x_i \)
-      real(rk), allocatable :: d(:)
+      real(rk), allocatable :: width(:)
         !! vector(nc) of cell widths,  \( x_{i+1/2} - x_{i-1/2} \)
-      real(rk), allocatable :: l(:)
+      real(rk), allocatable :: left(:)
         !! vector(nc) of left cell boundaries, \( x_{i-1/2} \)
-      real(rk), allocatable :: r(:)
+      real(rk), allocatable :: right(:)
         !! vector(nc) of right cell boundaries, , \( x_{i+1/2} \)
-      integer :: nc
+      integer :: ncells
         !! number of cells
    end type
 
@@ -112,12 +112,12 @@ contains
       end do
 
       ! Map values to grid object
-      grid1%nc = nc
+      grid1%ncells = nc
       grid1%edges = xedges
-      grid1%l = xedges(0:nc - 1)
-      grid1%r = xedges(1:nc)
-      grid1%c = (grid1%l + grid1%r)/2
-      grid1%d = grid1%r - grid1%l
+      grid1%left = xedges(0:nc - 1)
+      grid1%right = xedges(1:nc)
+      grid1%center = (grid1%left + grid1%right)/2
+      grid1%width = grid1%right - grid1%left
 
    end function grid1
 
