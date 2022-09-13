@@ -4,7 +4,7 @@
 [![codecov](https://codecov.io/gh/HugoMVale/HR-WENO/branch/main/graph/badge.svg?token=1XL5LQSO9P)](https://codecov.io/gh/HugoMVale/HR-WENO)
 
 <p align="center">
-  <img src="output/example1d.gif" width="600" alt="Solution of Burger's equation with 5th order WENO">
+  <img src="output/example1/example1d.gif" width="600" alt="Solution of Burger's equation with 5th order WENO">
 </p>
 
 ## Description
