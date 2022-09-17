@@ -17,6 +17,7 @@ library = false
 
 [dev-dependencies]
 test-drive = { git = "https://github.com/zoziha/test-drive", branch = "add-support-array" }
-stdlib = { git = "https://github.com/fortran-lang/stdlib", branch = "stdlib-fpm" }
+# stdlib = { git = "https://github.com/fortran-lang/stdlib", branch = "stdlib-fpm" }
+stdlib = { git = "https://github.com/HugoMVale/stdlib", branch = "stdlib-fpm" }
 
 # fpm test --profile release --flag "-Ofast -ftree-parallelize-loops=2"
