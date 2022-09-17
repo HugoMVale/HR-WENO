@@ -37,7 +37,7 @@ contains
       procedure(integrand) :: fu
         !! subroutine with the derivative u'(t)
       real(rk), intent(inout) :: u(:)
-        !! vector(N) with the variables to integrate u(t)
+        !! vector with the variables to integrate u(t)
       real(rk), intent(inout) :: t
         !! time; on return it will be the current value of t (close to tout)
       real(rk), intent(in) :: tout
