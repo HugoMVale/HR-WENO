@@ -49,7 +49,7 @@ contains
          vext(nc/3:2*nc/3) = 1
 
          ! Call procedure
-         call wenok(k, vext, vl, vr, eps)
+         call wenok(k, eps, vext, vl, vr)
 
          ! Check error
          call check(error, vext(1:nc), vl, thr=atol)
@@ -153,7 +153,7 @@ contains
 
          ! Call procedures
          call calc_c(k, xedges, c)
-         call wenok(k, vext, vl, vr, eps, c)
+         call wenok(k, eps, vext, vl, vr, c)
 
          ! Check error
          call check(error, vext(1:nc), vl, thr=atol)

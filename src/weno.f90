@@ -24,7 +24,7 @@ module weno
 
 contains
 
-   pure subroutine wenok(k, vext, vl, vr, eps, c)
+   pure subroutine wenok(k, eps, vext, vl, vr, c)
     !!   This subroutine implements the (2k-1)th order WENO method for *arbitrary* (uniform or
     !! non-uniform) finite volume/difference schemes described in ICASE 97-65 (Shu, 1997).
     !!   The method is applicable to scalar as well as multicomponent problems. In the later
@@ -53,6 +53,8 @@ contains
     !! maximum performance for multi-dimensional problems.
       integer, intent(in) :: k
         !! order of reconstruction within the cell (k = 1, 2 or 3)
+      real(rk), intent(in) :: eps
+        !! numerical smoothing factor
       real(rk), intent(in) :: vext(2 - k:)
         !! vector(1-(k-1):nc+(k-1)) of *average* cell values (if finite volume), *extended*
         !! with (k-1) ghost cells on each side
@@ -60,8 +62,6 @@ contains
         !! vector(1:nc) of reconstructed v at left boundary of cell i, \(v_{i-1/2}^+\)
       real(rk), intent(out) :: vr(:)
         !! vector(1:nc) of reconstructed v at right boundary of cell i, \(v_{i+1/2}^-\)
-      real(rk), intent(in) :: eps
-        !! numerical smoothing factor
       real(rk), intent(in), target, optional :: c(0:, -1:, :)
         !! optional array(0:k-1,-1:k-1,1:nc) of constants for a *non-uniform* grid
         !! (see calc_c)

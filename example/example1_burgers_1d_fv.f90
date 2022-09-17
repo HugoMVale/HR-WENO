@@ -93,7 +93,7 @@ contains
       vext(nc + 1:) = v(nc)
 
       ! Get reconstructed values at cell boundaries
-      call wenok(k, vext, vl, vr, eps)
+      call wenok(k, eps, vext, vl, vr)
 
       ! Fluxes at interior cell boundaries
       ! One can use the Lax-Friedrichs or the Godunov method
