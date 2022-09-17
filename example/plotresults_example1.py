@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Script to plot the results from example_fv_1d.f90
+Script to plot the results from example1_burgers_1d_fv.f90
 
 """
 
