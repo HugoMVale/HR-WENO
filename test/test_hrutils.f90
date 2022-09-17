@@ -28,7 +28,7 @@ contains
    subroutine test_fluxes(error)
       type(error_type), allocatable, intent(out) :: error
       integer :: order, itask, istate
-      real(rk) :: h, href, vm, vp, x, t, rtol
+      real(rk) :: h, href, vm, vp, x(1), t, rtol
       integer :: i
 
       ! General settings
@@ -44,7 +44,7 @@ contains
       h = godunov(f, vm, vp, x, t)
       call check(error, h, href, rel=.true., thr=rtol)
       if (allocated(error)) return
-      h = lax_friedrichs(f, vm, vp, x, t, x*t)
+      h = lax_friedrichs(f, vm, vp, x, t, x(1)*t)
       call check(error, h, href, rel=.true., thr=rtol)
       if (allocated(error)) return
 
@@ -55,7 +55,7 @@ contains
       h = godunov(f, vm, vp, x, t)
       call check(error, h, href, rel=.true., thr=rtol)
       if (allocated(error)) return
-      h = lax_friedrichs(f, vm, vp, x, t, x*t)
+      h = lax_friedrichs(f, vm, vp, x, t, x(1)*t)
       call check(error, h, href, rel=.true., thr=rtol)
       if (allocated(error)) return
 
@@ -67,7 +67,7 @@ contains
       h = godunov(f, vm, vp, x, t)
       call check(error, h, href, rel=.true., thr=rtol)
       if (allocated(error)) return
-      h = lax_friedrichs(f, vm, vp, x, t, x*t)
+      h = lax_friedrichs(f, vm, vp, x, t, x(1)*t)
       call check(error, h, href, rel=.true., thr=rtol)
       if (allocated(error)) return
 
@@ -114,8 +114,8 @@ contains
    !> Simple flux function to test numerical fluxes
    pure function f(u, x, t)
       real(rk) :: f
-      real(rk), intent(in) :: u, x, t
-      f = u*x*t
+      real(rk), intent(in) :: u, x(:), t
+      f = u*x(1)*t
    end function
 
 end module test_hrutils

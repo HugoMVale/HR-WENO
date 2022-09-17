@@ -15,7 +15,7 @@ module hrutils
       pure function flux(u, x, t)
          import :: rk
          real(rk) :: flux
-         real(rk), intent(in) :: u, x, t
+         real(rk), intent(in) :: u, x(:), t
       end function
    end interface
 
@@ -51,7 +51,7 @@ contains
         !! left (minus) reconstruction \( v_{i+1/2}^- \)
       real(rk), intent(in) :: vp
         !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)+1/2}^- \)
-      real(rk), intent(in) :: x
+      real(rk), intent(in) :: x(:)
         !! x at flux interface, \( x_{i+1/2} \)
       real(rk), intent(in) :: t
         !! time
@@ -75,7 +75,7 @@ contains
         !! left (minus) reconstruction \( v_{i+1/2}^- \)
       real(rk), intent(in) :: vp
         !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)+1/2}^- \)
-      real(rk), intent(in) :: x
+      real(rk), intent(in) :: x(:)
         !! x at flux interface, \( x_{i+1/2} \)
       real(rk), intent(in) :: t
         !! time
