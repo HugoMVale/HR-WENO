@@ -49,12 +49,11 @@ program example1_burgers_1d_fv
    time_start = 0._rk
    time_end = 12._rk
    dt = 1e-2_rk
-   time = time_start
-   num_time_points = 100
    order = 3
    istate = 1
    itask = 1
-
+   time = time_start
+   num_time_points = 100
    do ii = 0, num_time_points
       time_out = time_end*ii/num_time_points
       call rktvd(rhs, u, time, time_out, dt, order, itask, istate)
@@ -100,7 +99,7 @@ contains
       ! One can use the Lax-Friedrichs or the Godunov method
       do concurrent(i=1:nc - 1)
          !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), gx%r(i), t, alpha)
-         fedges(i) = godunov(flux, vr(i), vl(i + 1), gx%right(i), t)
+         fedges(i) = godunov(flux, vr(i), vl(i + 1), [gx%right(i)], t)
       end do
 
       ! Apply problem-specific flux constraints at domain boundaries
@@ -116,7 +115,7 @@ contains
     !! Flux function. Here we define the flux corresponding to Burger's equation.
       real(rk), intent(in) :: v
         !! function v(x,t)
-      real(rk), intent(in) :: x
+      real(rk), intent(in) :: x(:)
         !! spatial variable
       real(rk), intent(in) :: t
         !! time variable
