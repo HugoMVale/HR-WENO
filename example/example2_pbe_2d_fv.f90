@@ -22,7 +22,7 @@ program example_pbe_2d_fv
    integer, parameter :: rk = real64
    integer, parameter :: nc(2) = [200, 200]
    real(rk) :: u(product(nc))
-   real(rk), dimension(size(u), 4) :: uold, udotold
+   real(rk), dimension(product(nc), 4) :: uold, udotold
    type(tgrid1) :: gx(2)
    real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
    integer :: num_time_points, istate, ii, jj
