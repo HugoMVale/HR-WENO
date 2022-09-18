@@ -44,7 +44,8 @@ jobs:
     - name: Run examples
       run: |
         gfortran --version
-        fpm run --profile release --example
+        fpm run --profile release --example "example1*"
+        fpm run --profile release --example "example2*"
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
