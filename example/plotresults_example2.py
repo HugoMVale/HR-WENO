@@ -10,7 +10,6 @@ import os
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import cm
-from matplotlib.ticker import LinearLocator
 from matplotlib.animation import PillowWriter
 import pandas as pd
 
@@ -44,7 +43,7 @@ upoints = u.shape[1]
 fig, ax = plt.subplots(subplot_kw={"projection": "3d"})
 X1, X2 = np.meshgrid(x1, x2, indexing='ij')
 
-text = ax.text(0.8*np.max(x1), np.max(x2), 1.5*np.max(u), "",
+text = ax.text(0.8*np.max(x1), np.max(x2), 1.1*np.max(u), "",
                bbox=dict(facecolor='white', alpha=0.8))
 
 ax.set_xlabel('x1')
@@ -54,17 +53,19 @@ ax.set_title("Solution of 2D PBE with 5th order WENO")
 
 ax.set_xlim(round(np.min(x1)), round(np.max(x1)))
 ax.set_ylim(round(np.min(x2)), round(np.max(x2)))
-ytol = 0.1
-ax.set_zlim(0, np.max(u)+ytol)
+ax.set_zlim(0, np.max(u))
 ax.grid(True)
 
 fps = 20
 writer = PillowWriter(fps=fps)
+surf = None
 with writer.saving(fig, os.path.join(abspath_output, "example2d.gif"), 150):
     for i, ti in enumerate(t):
-        ax.plot_surface(X1, X2, np.reshape(u[i, :], X1.shape, order='F'),
-                        cmap=cm.coolwarm,
-                        linewidth=0, antialiased=False)
+        if surf is not None:
+            surf.remove()
+        surf = ax.plot_surface(X1, X2, np.reshape(u[i, :], X1.shape, order='F'),
+                               cmap=cm.coolwarm,
+                               linewidth=0, antialiased=False)
         text.set_text(f"time = {ti:.2f}")
         writer.grab_frame()
         if i == (tpoints-1):
