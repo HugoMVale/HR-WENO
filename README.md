@@ -81,3 +81,8 @@ This example ([`example1_burgers_1d_fv.f90`](/example/example1_burgers_1d_fv.f90
 
 ### Population balance equation (2D)
 This example ([`example2_pbe_2d_fv.f90`](/example/example2_pbe_2d_fv.f90)) illustrates the application of procedures `wenok` and `mstvd` for solving a [population balance equation](https://en.wikipedia.org/wiki/Population_balance_equation) with 2 internal coordinates using a finite volume (FV) formulation. The results are depicted in the figure below and demonstrate the excellent resolution of the pulse.
+
+<p align="center">
+  <img src="output/example2/example2d.gif" width="600" alt="Solution of 2D PBE with 5th order WENO">
+</p>
+
