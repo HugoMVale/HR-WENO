@@ -1,4 +1,4 @@
-module hrutils
+module fluxes
 !!   This module contains basic flux schemes for *scalar* problems. They are mostly
 !! intented to help test the other modules. The WENO schemes themselves are applicable to
 !! scalar and multiple component problems.
@@ -7,7 +7,7 @@ module hrutils
    implicit none
    private
 
-   public :: lax_friedrichs, godunov, grid1, tgrid1
+   public :: lax_friedrichs, godunov
 
    integer, parameter :: rk = real64
 
@@ -18,22 +18,6 @@ module hrutils
          real(rk), intent(in) :: u, x(:), t
       end function
    end interface
-
-   type :: tgrid1
-    !! 1D grid
-      real(rk), allocatable :: edges(:)
-        !! vector(0:nc) of cell edges
-      real(rk), allocatable :: center(:)
-        !! vector(nc) of cell centers, \( x_i \)
-      real(rk), allocatable :: width(:)
-        !! vector(nc) of cell widths,  \( x_{i+1/2} - x_{i-1/2} \)
-      real(rk), allocatable :: left(:)
-        !! vector(nc) of left cell boundaries, \( x_{i-1/2} \)
-      real(rk), allocatable :: right(:)
-        !! vector(nc) of right cell boundaries, , \( x_{i+1/2} \)
-      integer :: ncells
-        !! number of cells
-   end type
 
 contains
 
@@ -93,32 +77,4 @@ contains
 
    end function godunov
 
-   pure type(tgrid1) function grid1(xmin, xmax, nc)
-    !!   Function to generate a 1D linear grid.
-      real(rk), intent(in) :: xmin
-        !! lower boundary of grid domain
-      real(rk), intent(in) :: xmax
-        !! upper boundary of grid domain
-      integer, intent(in) :: nc
-        !! number of grid cells
-
-      real(rk) :: xedges(0:nc), rx
-      integer :: i
-
-      ! Compute linear mesh
-      rx = (xmax - xmin)/nc
-      do concurrent(i=0:nc)
-         xedges(i) = xmin + rx*i
-      end do
-
-      ! Map values to grid object
-      grid1%ncells = nc
-      grid1%edges = xedges
-      grid1%left = xedges(0:nc - 1)
-      grid1%right = xedges(1:nc)
-      grid1%center = (grid1%left + grid1%right)/2
-      grid1%width = grid1%right - grid1%left
-
-   end function grid1
-
-end module hrutils
+end module fluxes

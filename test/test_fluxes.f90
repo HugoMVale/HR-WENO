@@ -1,12 +1,12 @@
-module test_hrutils
-!! Test for module 'hrutils' using test-drive.
-   use hrutils, only: godunov, lax_friedrichs
+module test_fluxes
+!! Test for module 'fluxes' using test-drive.
+   use fluxes, only: godunov, lax_friedrichs
    use iso_fortran_env, only: real64, stderr => error_unit
    use testdrive, only: new_unittest, unittest_type, error_type, check
    implicit none
    private
 
-   public :: collect_tests_hrutils
+   public :: collect_tests_fluxes
 
    integer, parameter :: rk = real64
    logical, parameter :: verbose = .false.
@@ -14,7 +14,7 @@ module test_hrutils
 contains
 
    !> Collect all exported unit tests
-   subroutine collect_tests_hrutils(testsuite)
+   subroutine collect_tests_fluxes(testsuite)
       ! Collection of tests
       type(unittest_type), allocatable, intent(out) :: testsuite(:)
 
@@ -79,4 +79,4 @@ contains
       f = u*x(1)*t
    end function
 
-end module test_hrutils
+end module test_fluxes

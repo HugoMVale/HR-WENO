@@ -21,7 +21,7 @@ program example1_burgers_1d_fv
 !! try other orders, we can change the parameter 'k' in procedure 'rhs' .
    use tvdode, only: rktvd
    use weno, only: wenok
-   use hrutils, only: godunov, lax_friedrichs
+   use fluxes, only: godunov, lax_friedrichs
    use grid, only: grid1
    use iso_fortran_env, only: real64, stderr => error_unit, stdout => output_unit
    use stdlib_strings, only: to_string

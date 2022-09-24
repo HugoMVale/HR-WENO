@@ -14,7 +14,7 @@ program example_pbe_2d_fv
 !! in procedure 'rhs' .
    use tvdode, only: mstvd
    use weno, only: wenok
-   use hrutils, only: godunov
+   use fluxes, only: godunov
    use grid, only: grid1
    use iso_fortran_env, only: real64, stderr => error_unit, stdout => output_unit
    use stdlib_strings, only: to_string
