@@ -1,5 +1,6 @@
 ---
 project: hrweno
+license: mit
 summary: hrweno is a modern-Fortran implementation of selected WENO and TVD integration schemes.
 src_dir: ./src
          ./example
