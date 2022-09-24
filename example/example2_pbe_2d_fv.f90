@@ -14,7 +14,8 @@ program example_pbe_2d_fv
 !! in procedure 'rhs' .
    use tvdode, only: mstvd
    use weno, only: wenok
-   use hrutils, only: godunov, tgrid1, grid1
+   use hrutils, only: godunov
+   use grid, only: grid1
    use iso_fortran_env, only: real64, stderr => error_unit, stdout => output_unit
    use stdlib_strings, only: to_string
    implicit none
@@ -23,14 +24,14 @@ program example_pbe_2d_fv
    integer, parameter :: nc(2) = [200, 200]
    real(rk) :: u(product(nc))
    real(rk), dimension(product(nc), 4) :: uold, udotold
-   type(tgrid1) :: gx(2)
+   type(grid1) :: gx(2)
    real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
    integer :: num_time_points, istate, ii, jj
 
    ! Define grids for x1 and x2
    ! In this example, we use linear grids, but any smooth grid can be used
-   gx(1) = grid1(0._rk, 10._rk, nc(1))
-   gx(2) = grid1(0._rk, 10._rk, nc(2))
+   call gx(1)%new(0._rk, 10._rk, nc(1))
+   call gx(2)%new(0._rk, 10._rk, nc(2))
 
    ! Initial condition u(x,t=0)
    do concurrent(ii=1:nc(1), jj=1:nc(2))
