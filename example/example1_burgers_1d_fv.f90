@@ -21,7 +21,8 @@ program example1_burgers_1d_fv
 !! try other orders, we can change the parameter 'k' in procedure 'rhs' .
    use tvdode, only: rktvd
    use weno, only: wenok
-   use hrutils, only: godunov, lax_friedrichs, tgrid1, grid1
+   use hrutils, only: godunov, lax_friedrichs
+   use grid, only: grid1
    use iso_fortran_env, only: real64, stderr => error_unit, stdout => output_unit
    use stdlib_strings, only: to_string
    implicit none
@@ -31,13 +32,13 @@ program example1_burgers_1d_fv
    real(rk) :: u(nc)
    real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
    integer :: num_time_points, order, istate, itask, ii
-   type(tgrid1) :: gx
+   type(grid1) :: gx
 
    ! Define the spatial grid
    ! In this example, we use a linear grid, but any smooth grid can be used
    xmin = -5._rk
    xmax = 5._rk
-   gx = grid1(xmin, xmax, nc)
+   call gx%new(xmin, xmax, nc)
 
    ! Initial condition u(x,t=0)
    u = ic(gx%center)
