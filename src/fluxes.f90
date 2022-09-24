@@ -34,7 +34,7 @@ contains
       real(rk), intent(in) :: vm
         !! left (minus) reconstruction \( v_{i+1/2}^- \)
       real(rk), intent(in) :: vp
-        !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)+1/2}^- \)
+        !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)-1/2}^- \)
       real(rk), intent(in) :: x(:)
         !! x at flux interface, \( x_{i+1/2} \)
       real(rk), intent(in) :: t
@@ -58,7 +58,7 @@ contains
       real(rk), intent(in) :: vm
         !! left (minus) reconstruction \( v_{i+1/2}^- \)
       real(rk), intent(in) :: vp
-        !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)+1/2}^- \)
+        !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)-1/2}^- \)
       real(rk), intent(in) :: x(:)
         !! x at flux interface, \( x_{i+1/2} \)
       real(rk), intent(in) :: t
