@@ -19,12 +19,12 @@ contains
       type(unittest_type), allocatable, intent(out) :: testsuite(:)
 
       testsuite = [ &
-                  new_unittest("fluxes", test_fluxes) &
+                  new_unittest("fluxes", test_allfluxes) &
                   ]
 
    end subroutine
 
-   subroutine test_fluxes(error)
+   subroutine test_allfluxes(error)
       type(error_type), allocatable, intent(out) :: error
       integer :: order, itask, istate
       real(rk) :: h, href, vm, vp, x(1), t, rtol
@@ -70,7 +70,7 @@ contains
       call check(error, h, href, rel=.true., thr=rtol)
       if (allocated(error)) return
 
-   end subroutine test_fluxes
+   end subroutine test_allfluxes
 
    !> Simple flux function to test numerical fluxes
    pure function f(u, x, t)
