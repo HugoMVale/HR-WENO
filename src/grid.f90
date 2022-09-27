@@ -1,6 +1,7 @@
 module grid
 !!   This module implements a 1D grid class.
    use, intrinsic :: iso_fortran_env, only: real64
+   use stdlib_optval, only: optval
    implicit none
    private
 
@@ -30,7 +31,7 @@ module grid
 
 contains
 
-   pure subroutine new(self, xmin, xmax, nc)
+   pure subroutine new(self, xmin, xmax, nc, scl)
       !! Constructor grid1
       class(grid1), intent(inout), target :: self
         !! object
@@ -40,15 +41,26 @@ contains
         !! upper boundary of grid domain
       integer, intent(in) :: nc
         !! number of grid cells
+      integer, intent(in), optional :: scl
+        !! grid scale: linear (1), logarithmic (2)
 
       real(rk) :: xedges(0:nc), rx
       integer :: i
 
-      ! Compute linear mesh
-      rx = (xmax - xmin)/nc
-      do concurrent(i=0:nc)
-         xedges(i) = xmin + rx*i
-      end do
+      ! Compute mesh
+      select case (optval(scl, 1))
+      case (1)
+         rx = (xmax - xmin)/nc
+         do concurrent(i=0:nc)
+            xedges(i) = xmin + rx*i
+         end do
+      case (2)
+         rx = (log(xmax/xmin))/nc
+         do concurrent(i=0:nc)
+            xedges(i) = log(xmin) + rx*i
+         end do
+         xedges = exp(xedges)
+      end select
 
       ! Map values to grid object
       self%ncells = nc
