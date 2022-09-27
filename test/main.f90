@@ -19,6 +19,7 @@ program tester
    use test_tvdode, only: collect_tests_tvdode
    use test_weno, only: collect_tests_weno
    use test_fluxes, only: collect_tests_fluxes
+   use test_grid, only: collect_tests_grid
 
    implicit none
 
@@ -32,7 +33,8 @@ program tester
    testsuites = [ &
                 new_testsuite("tvdode", collect_tests_tvdode), &
                 new_testsuite("weno", collect_tests_weno), &
-                new_testsuite("fluxes", collect_tests_fluxes) &
+                new_testsuite("fluxes", collect_tests_fluxes), &
+                new_testsuite("grid", collect_tests_grid) &
                 ]
 
    call get_argument(1, suite_name)
