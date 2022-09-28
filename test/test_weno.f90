@@ -53,7 +53,9 @@ contains
 
          ! Check error
          call check(error, vext(1:nc), vl, thr=atol)
-         call check(error, vext(1:nc), vr, thr=atol)
+         if (.not. (allocated(error))) then
+            call check(error, vext(1:nc), vr, thr=atol)
+         end if
 
          ! Detailed comparison for debugging
          if (allocated(error) .or. verbose) then
@@ -157,7 +159,9 @@ contains
 
          ! Check error
          call check(error, vext(1:nc), vl, thr=atol)
-         call check(error, vext(1:nc), vr, thr=atol)
+         if (.not. (allocated(error))) then
+            call check(error, vext(1:nc), vr, thr=atol)
+         end if
 
          ! Detailed comparison for debugging
          if (allocated(error) .or. verbose) then
