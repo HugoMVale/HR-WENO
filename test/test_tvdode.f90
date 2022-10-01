@@ -1,6 +1,6 @@
 module test_tvdode
 !! Test for module 'tvdode' using test-drive.
-   use tvdode, only: rktvd, mstvd
+   use tvdode, only: tvdode_class, rktvd, mstvd
    use iso_fortran_env, only: real64, stderr => error_unit
    use testdrive, only: new_unittest, unittest_type, error_type, check
    implicit none
@@ -30,7 +30,8 @@ contains
 
    subroutine test_rktvd(error)
       type(error_type), allocatable, intent(out) :: error
-      integer :: order, itask, istate
+      type(rktvd) :: ode
+      integer :: order
       real(rk) :: t0, t, tout, dt, u(nu), u0(nu), uref(nu), rtol(3)
       integer :: i
 
@@ -44,12 +45,13 @@ contains
       rtol = [2e-2_rk, 1e-3_rk, 1e-3_rk]
       do concurrent(order=1:3)
 
+         ! Init ode object
+         call ode%init(fu, nu, order)
+
          ! Numerical solution at t=tout
          u = u0
          t = t0
-         istate = 1
-         itask = 1
-         call rktvd(fu, u, t, tout, dt, order, itask, istate)
+         call ode%integrate(u, t, tout, dt)
 
          ! Check error
          uref = usol(t0, u0, t)
@@ -59,7 +61,7 @@ contains
          if (allocated(error) .or. verbose) then
             write (stderr, '(2(a6), 2(a26))') "order", "i", "u(i)", "uref(i)"
             do i = 1, size(u)
-               write (stderr, '(2(i6), 2(es26.16e3))'), order, i, u(i), uref(i)
+               write (stderr, '(2(i6), 2(es26.16e3))') order, i, u(i), uref(i)
             end do
          end if
 
@@ -69,8 +71,8 @@ contains
 
    subroutine test_mstvd(error)
       type(error_type), allocatable, intent(out) :: error
-      integer :: istate
-      real(rk) :: t0, t, tout, dt, u(nu), u0(nu), uref(nu), uold(nu, 4), udotold(nu, 4)
+      type(mstvd) :: ode
+      real(rk) :: t0, t, tout, dt, u(nu), u0(nu), uref(nu)
       integer :: i
 
       ! Initial conditions and ode settings
@@ -79,11 +81,13 @@ contains
       u0 = 0.1_rk
       dt = 1e-3_rk
 
+      ! Init ode object
+      call ode%init(fu, nu)
+
       ! Numerical solution at t=tout
       u = u0
       t = t0
-      istate = 1
-      call mstvd(fu, u, t, tout, dt, uold, udotold, istate)
+      call ode%integrate(u, t, tout, dt)
 
       ! Check error
       uref = usol(t0, u0, t)
@@ -100,7 +104,8 @@ contains
    end subroutine test_mstvd
 
    !> Simple linear u'(u) to test ode solvers
-   pure subroutine fu(t, u, udot)
+   pure subroutine fu(self, t, u, udot)
+      class(tvdode_class), intent(inout) :: self
       real(rk), intent(in) :: t, u(:)
       real(rk), intent(out) :: udot(:)
       udot = a*u

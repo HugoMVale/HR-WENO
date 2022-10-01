@@ -19,7 +19,7 @@ program example1_burgers_1d_fv
 !!  In this particular example, we use the 3rd order 'rktvd' ode solver (we could equally well
 !! employ the 'mstvd' solver). The reconstruction is done with the 5th order WENO scheme; to
 !! try other orders, we can change the parameter 'k' in procedure 'rhs' .
-   use tvdode, only: rktvd
+   use tvdode, only: tvdode_class, rktvd
    use weno, only: wenok
    use fluxes, only: godunov, lax_friedrichs
    use grid, only: grid1
@@ -31,8 +31,9 @@ program example1_burgers_1d_fv
    integer, parameter :: nc = 100
    real(rk) :: u(nc)
    real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
-   integer :: num_time_points, order, istate, itask, ii
+   integer :: num_time_points, order, ii
    type(grid1) :: gx
+   type(rktvd) :: ode
 
    ! Define the spatial grid
    ! In this example, we use a linear grid, but any smooth grid can be used
@@ -47,17 +48,17 @@ program example1_burgers_1d_fv
    call output(1)
 
    ! Call ODE time solver
+   order = 3
+   call ode%init(rhs, nc, order)
+
    time_start = 0._rk
    time_end = 12._rk
    dt = 1e-2_rk
-   order = 3
-   istate = 1
-   itask = 1
    time = time_start
    num_time_points = 100
    do ii = 0, num_time_points
       time_out = time_end*ii/num_time_points
-      call rktvd(rhs, u, time, time_out, dt, order, itask, istate)
+      call ode%integrate(u, time, time_out, dt)
       call output(2)
    end do
 
@@ -66,7 +67,7 @@ program example1_burgers_1d_fv
 
 contains
 
-   pure subroutine rhs(t, v, vdot)
+   pure subroutine rhs(self, t, v, vdot)
     !! This subroutine computes the *numerical approximation* to the right hand side of:
     !!```
     !!                du(i,t)/dt = -1/dx(i)*( f(u(x(i+1/2),t)) - f(u(x(i-1/2),t)) )
@@ -76,6 +77,8 @@ contains
     !! discontinuities, \( u_{i+1/2}^+ \neq u_{(i+1)+1/2}^- \). Second, we use a suitable flux
     !! method (e.g., Godunov, Lax-Friedrichs) to compute the flux from the reconstructed
     !! 'u' values.
+      class(tvdode_class), intent(inout) :: self
+        !! object
       real(rk), intent(in) :: t
         !! time variable
       real(rk), intent(in) :: v(:)
