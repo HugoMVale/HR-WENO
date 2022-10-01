@@ -37,20 +37,20 @@ and the numerical results will be stored in the [`output`](/output) subfolder. Y
 The ODE solvers (`rktvd` and `mstvd`) are called like most other solvers (e.g., LSODE): 
 
 ```fortran
-use tvdode, only: rktvd
+use tvdode, only: tvdode_class, rktvd
+...
+type(rktvd) :: ode
 ...
 ! Call ODE time solver
+call ode%init(rhs, neq=size(u), order=3)
 time_start = 0._rk
 time_end = 12._rk
 dt = 1e-2_rk
-order = 3
-istate = 1
-itask = 1
 time = time_start
 num_time_points = 100
 do i = 0, num_time_points
   time_out = time_end*i/num_time_points
-  call rktvd(rhs, u, time, time_out, dt, order, itask, istate)
+  call ode%integrate(u, time, time_out, dt)
   call save_intermediate_results(u, time, ...)
 end do
  ...
