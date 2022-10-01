@@ -31,7 +31,7 @@ program example1_burgers_1d_fv
    integer, parameter :: nc = 100
    real(rk) :: u(nc)
    real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
-   integer :: num_time_points, order, ii
+   integer :: num_time_points, ii
    type(grid1) :: gx
    type(rktvd) :: ode
 
@@ -39,7 +39,7 @@ program example1_burgers_1d_fv
    ! In this example, we use a linear grid, but any smooth grid can be used
    xmin = -5._rk
    xmax = 5._rk
-   call gx%new(xmin, xmax, nc)
+   call gx%new(xmin, xmax, nc, scl=1)
 
    ! Initial condition u(x,t=0)
    u = ic(gx%center)
@@ -48,12 +48,12 @@ program example1_burgers_1d_fv
    call output(1)
 
    ! Call ODE time solver
-   order = 3
-   call ode%init(rhs, nc, order)
+   call ode%init(rhs, nc, order=3)
 
    time_start = 0._rk
    time_end = 12._rk
    dt = 1e-2_rk
+
    time = time_start
    num_time_points = 100
    do ii = 0, num_time_points
@@ -68,23 +68,23 @@ program example1_burgers_1d_fv
 contains
 
    pure subroutine rhs(self, t, v, vdot)
-    !! This subroutine computes the *numerical approximation* to the right hand side of:
-    !!```
-    !!                du(i,t)/dt = -1/dx(i)*( f(u(x(i+1/2),t)) - f(u(x(i-1/2),t)) )
-    !!```
-    !!   There are two main steps. First, we use the WENO scheme to obtain the reconstructed
-    !! values of 'u' at the left and right cell boundaries. Note that, in general, because of
-    !! discontinuities, \( u_{i+1/2}^+ \neq u_{(i+1)+1/2}^- \). Second, we use a suitable flux
-    !! method (e.g., Godunov, Lax-Friedrichs) to compute the flux from the reconstructed
-    !! 'u' values.
+   !! This subroutine computes the *numerical approximation* to the right hand side of:
+   !!```
+   !!                du(i,t)/dt = -1/dx(i)*( f(u(x(i+1/2),t)) - f(u(x(i-1/2),t)) )
+   !!```
+   !!   There are two main steps. First, we use the WENO scheme to obtain the reconstructed
+   !! values of 'u' at the left and right cell boundaries. Note that, in general, because of
+   !! discontinuities, \( u_{i+1/2}^+ \neq u_{(i+1)+1/2}^- \). Second, we use a suitable flux
+   !! method (e.g., Godunov, Lax-Friedrichs) to compute the flux from the reconstructed
+   !! 'u' values.
       class(tvdode_class), intent(inout) :: self
-        !! object
+         !! object
       real(rk), intent(in) :: t
-        !! time variable
+         !! time variable
       real(rk), intent(in) :: v(:)
-        !! vector(N) with v(x,t) values
+         !! vector(N) with v(x,t) values
       real(rk), intent(out) :: vdot(:)
-        !! vector(N) with v'(x,t) values
+         !! vector(N) with v'(x,t) values
 
       integer, parameter :: k = 3
       real(rk) :: vl(nc), vr(nc), fedges(0:nc), vext(1 - (k - 1):nc + (k - 1))
@@ -116,22 +116,22 @@ contains
    end subroutine rhs
 
    pure real(rk) function flux(v, x, t)
-    !! Flux function. Here we define the flux corresponding to Burger's equation.
+   !! Flux function. Here we define the flux corresponding to Burger's equation.
       real(rk), intent(in) :: v
-        !! function v(x,t)
+         !! function v(x,t)
       real(rk), intent(in) :: x(:)
-        !! spatial variable
+         !! spatial variable
       real(rk), intent(in) :: t
-        !! time variable
+         !! time variable
 
       flux = (v**2)/2
 
    end function flux
 
    elemental real(rk) function ic(x)
-    !! Initial condition. Here we used a limited linear profile.
+   !! Initial condition. Here we used a limited linear profile.
       real(rk), intent(in) :: x
-        !! spatial variable
+         !! spatial variable
       real(rk), parameter :: xa = -4._rk, xb = 2._rk, va = 1._rk, vb = -0.5_rk
 
       ic = va + (vb - va)/(xb - xa)*(x - xa)
@@ -142,7 +142,7 @@ contains
    subroutine output(message)
    !! Auxiliary routine to save results to file.
       integer, intent(in) :: message
-        !! parameter to select output action
+         !! parameter to select output action
       integer :: i, funit_x = 0, funit_u = 0
       real(rk) :: cpu_start = 0._rk, cpu_end = 0._rk
       character(*), parameter :: folder = "./output/example1/"
