@@ -14,7 +14,7 @@ module tvdode
    integer, parameter :: rk = real64
 
    type :: tvdode_class
-   !! Abstract class for tvode-like types
+   !! Abstract class for tvdode-like types
       procedure(integrand), pointer, private :: fu => null()
          !! subroutine with the derivative u'(t)
       integer, private :: neq = 0
