@@ -13,7 +13,7 @@ module tvdode
 
    integer, parameter :: rk = real64
 
-   type :: tvdode_class
+   type, abstract :: tvdode_class
    !! Abstract class for tvdode-like types
       procedure(integrand), pointer, private :: fu => null()
          !! subroutine with the derivative u'(t)
@@ -26,7 +26,7 @@ module tvdode
          !! 1 first call for a problem,
          !! 2 subsequent call for a problem.
       character(:), allocatable:: msg
-      !! error message
+         !! error message
       real(rk), allocatable, private :: ui(:)
       real(rk), allocatable, private :: udot(:)
    end type
