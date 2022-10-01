@@ -12,7 +12,7 @@ program example_pbe_2d_fv
 !!   In this particular example, we use the 3rd order 'mstvd' ode solver. The reconstruction
 !! is done with the 5th order WENO scheme; to try other orders, we can change the parameter 'k'
 !! in procedure 'rhs' .
-   use tvdode, only: mstvd
+   use tvdode, only: tvdode_class, mstvd
    use weno, only: wenok
    use fluxes, only: godunov
    use grid, only: grid1
@@ -23,15 +23,15 @@ program example_pbe_2d_fv
    integer, parameter :: rk = real64
    integer, parameter :: nc(2) = [200, 200]
    real(rk) :: u(product(nc))
-   real(rk), dimension(product(nc), 4) :: uold, udotold
    type(grid1) :: gx(2)
+   type(mstvd) :: ode
    real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
-   integer :: num_time_points, istate, ii, jj
+   integer :: num_time_points, ii, jj
 
    ! Define grids for x1 and x2
    ! In this example, we use linear grids, but any smooth grid can be used
-   call gx(1)%new(0._rk, 10._rk, nc(1))
-   call gx(2)%new(0._rk, 10._rk, nc(2))
+   call gx(1)%new(0._rk, 10._rk, nc(1), scl=1)
+   call gx(2)%new(0._rk, 10._rk, nc(2), scl=1)
 
    ! Initial condition u(x,t=0)
    do concurrent(ii=1:nc(1), jj=1:nc(2))
@@ -42,16 +42,17 @@ program example_pbe_2d_fv
    call output(1)
 
    ! Call ODE time solver
+   call ode%init(rhs, size(u))
+
    time_start = 0._rk
    time_end = 5._rk
    dt = 5e-3_rk
 
    time = time_start
    num_time_points = 100
-   istate = 1
    do ii = 0, num_time_points
       time_out = time_end*ii/num_time_points
-      call mstvd(rhs, u, time, time_out, dt, uold, udotold, istate)
+      call ode%integrate(u, time, time_out, dt)
       call output(2)
    end do
 
@@ -60,7 +61,7 @@ program example_pbe_2d_fv
 
 contains
 
-   pure subroutine rhs(t, v, vdot)
+   pure subroutine rhs(self, t, v, vdot)
    !! This subroutine computes the *numerical approximation* to the right hand side of:
    !!```
    !!     du(i,j,t)/dt = -1/dx1(i)*( f1(u(x1(i+1/2),x2(j),t)) - f1(u(x1(i-1/2),x2(j),t)) )
@@ -70,12 +71,14 @@ contains
    !! values of 'u' at the left and right cell boundaries along each dimension. Second, we use
    !! a suitable flux method (e.g., Godunov, Lax-Friedrichs) to compute the flux from the
    !! reconstructed 'u' values.
+      class(tvdode_class), intent(inout) :: self
+         !! object
       real(rk), intent(in) :: t
-        !! time variable
+         !! time variable
       real(rk), intent(in) :: v(:)
-        !! vector(N) with v(z,t) values
+         !! vector(N) with v(z,t) values
       real(rk), intent(out) :: vdot(:)
-        !! vector(N) with v'(z,t) values
+         !! vector(N) with v'(z,t) values
 
       integer, parameter :: k = 3
       real(rk), allocatable :: vl(:), vr(:), vext(:)
@@ -136,11 +139,11 @@ contains
    pure real(rk) function flux1(v, x, t)
    !! Flux function along x1.
       real(rk), intent(in) :: v
-        !! function v(z,t)
+         !! function v(z,t)
       real(rk), intent(in) :: x(:)
-        !! vector of internal coordinates
+         !! vector of internal coordinates
       real(rk), intent(in) :: t
-        !! time
+         !! time
 
       flux1 = v !*x(1)**2
 
@@ -149,11 +152,11 @@ contains
    pure real(rk) function flux2(v, x, t)
    !! Flux function along x2.
       real(rk), intent(in) :: v
-        !! function v(z,t)
+         !! function v(z,t)
       real(rk), intent(in) :: x(:)
-        !! vector of internal coordinates
+         !! vector of internal coordinates
       real(rk), intent(in) :: t
-        !! time
+         !! time
 
       flux2 = v !*x(1)*x(2)
 
