@@ -34,8 +34,8 @@ program example1_burgers_1d_fv
    real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
    integer :: num_time_points, ii
    type(grid1) :: gx
-   type(rktvd) :: ode
    type(weno) :: myweno
+   type(rktvd) :: ode
 
    ! Define the spatial grid
    ! In this example, we use a linear grid, but any smooth grid can be used

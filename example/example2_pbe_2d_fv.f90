@@ -13,7 +13,7 @@ program example_pbe_2d_fv
 !! is done with the 5th order WENO scheme; to try other orders, we can change the parameter 'k'
 !! in procedure 'rhs' .
    use tvdode, only: tvdode_class, mstvd
-   use weno, only: wenok
+   use hrweno, only: weno
    use fluxes, only: godunov
    use grid, only: grid1
    use iso_fortran_env, only: real64, stderr => error_unit, stdout => output_unit
@@ -21,9 +21,11 @@ program example_pbe_2d_fv
    implicit none
 
    integer, parameter :: rk = real64
-   integer, parameter :: nc(2) = [200, 200]
+   integer, parameter :: nc(2) = [250, 250]
+   integer, parameter :: k = 3
    real(rk) :: u(product(nc))
    type(grid1) :: gx(2)
+   type(weno) :: myweno(2)
    type(mstvd) :: ode
    real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
    integer :: num_time_points, ii, jj
@@ -33,13 +35,17 @@ program example_pbe_2d_fv
    call gx(1)%new(0._rk, 10._rk, nc(1), scl=1)
    call gx(2)%new(0._rk, 10._rk, nc(2), scl=1)
 
+   ! Init weno objects
+   call myweno(1)%init(nc(1), k, eps=1e-6_rk)
+   call myweno(2)%init(nc(2), k, eps=1e-6_rk)
+
+   ! Open file where results will be stored
+   call output(1)
+
    ! Initial condition u(x,t=0)
    do concurrent(ii=1:nc(1), jj=1:nc(2))
       u((jj - 1)*nc(1) + ii) = ic([gx(1)%center(ii), gx(2)%center(jj)])
    end do
-
-   ! Open file where results will be stored
-   call output(1)
 
    ! Call ODE time solver
    call ode%init(rhs, size(u))
@@ -80,10 +86,8 @@ contains
       real(rk), intent(out) :: vdot(:)
          !! vector(N) with v'(z,t) values
 
-      integer, parameter :: k = 3
       real(rk), allocatable :: vl(:), vr(:), vext(:)
-      real(rk) :: varray(nc(1), nc(2)), fedges(0:nc(1), 0:nc(1), 2)
-      real(rk), parameter :: eps = 1e-6_rk
+      real(rk) :: varray(nc(1), nc(2)), fedges(0:nc(1), 0:nc(2), 2)
       integer :: i, j
 
       ! Reshape v to array
@@ -91,14 +95,9 @@ contains
 
       ! Fluxes along x1 at interior cell boundaries
       fedges = 0
-      allocate (vl(nc(1)), vr(nc(1)), vext(1 - (k - 1):nc(1) + (k - 1)))
+      allocate (vl(nc(1)), vr(nc(1)))
       do concurrent(j=1:nc(2))
-         ! Populate extended 'v' vector with ghost cells
-         vext(1:nc(1)) = varray(:, j)
-         vext(:0) = vext(1)
-         vext(nc(1) + 1:) = vext(nc(1))
-         !Get reconstructed values at cell boundaries
-         call wenok(k, eps, vext, vl, vr)
+         call myweno(1)%reconstruct(varray(:, j), vl, vr)
          do concurrent(i=1:nc(1) - 1)
             fedges(i, j, 1) = godunov(flux1, vr(i), vl(i + 1), &
                                       [gx(1)%right(i), gx(2)%center(j)], t)
@@ -106,15 +105,10 @@ contains
       end do
 
       ! Fluxes along x2 at interior cell boundaries
-      deallocate (vl, vr, vext)
-      allocate (vl(nc(2)), vr(nc(2)), vext(1 - (k - 1):nc(2) + (k - 1)))
+      deallocate (vl, vr)
+      allocate (vl(nc(2)), vr(nc(2)))
       do concurrent(i=1:nc(1))
-         ! Populate extended 'v' vector with ghost cells
-         vext(1:nc(2)) = varray(i, :)
-         vext(:0) = vext(1)
-         vext(nc(2) + 1:) = vext(nc(2))
-         !Get reconstructed values at cell boundaries
-         call wenok(k, eps, vext, vl, vr)
+         call myweno(2)%reconstruct(varray(i, :), vl, vr)
          do concurrent(j=1:nc(2) - 1)
             fedges(i, j, 2) = godunov(flux2, vr(j), vl(j + 1), &
                                       [gx(1)%center(i), gx(2)%right(j)], t)
