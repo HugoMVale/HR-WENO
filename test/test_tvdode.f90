@@ -43,7 +43,7 @@ contains
 
       ! Run check for each order
       rtol = [2e-2_rk, 1e-3_rk, 1e-3_rk]
-      do concurrent(order=1:3)
+      do order = 1, 3
 
          ! Init ode object
          call ode%init(fu, nu, order)

@@ -21,6 +21,8 @@ module tvdode
          !! number of equations
       integer, private :: order = 0
          !! order of the method
+      integer :: fevals = 0
+         !! number of function evaluations
       integer :: istate = 0
          !! flag indicating the state of the integration:
          !! 1 first call for a problem,
@@ -48,7 +50,7 @@ module tvdode
    end type
 
    abstract interface
-      pure subroutine integrand(self, t, u, udot)
+      subroutine integrand(self, t, u, udot)
       !!  Integrand for 'tvdode_class'
          import :: rk, tvdode_class
          class(tvdode_class), intent(inout) :: self
@@ -59,7 +61,7 @@ module tvdode
 
 contains
 
-   pure subroutine rktvd_init(self, fu, neq, order)
+   subroutine rktvd_init(self, fu, neq, order)
    !! Initialize 'rktvd' object.
       class(rktvd), intent(inout) :: self
          !! object
@@ -98,7 +100,7 @@ contains
 
    end subroutine rktvd_init
 
-   pure subroutine rktvd_integrate(self, u, t, tout, dt, itask)
+   subroutine rktvd_integrate(self, u, t, tout, dt, itask)
    !!   This subroutine implements the optimal 1st, 2nd and 3rd order TVD RK methods described
    !! in ICASE 97-65 (Shu, 1997).
    !!   The routine was built to work similarly to LSODE.
@@ -143,6 +145,7 @@ contains
                call self%fu(t, u, udot)
                u = u + dt*udot
                t = t + dt
+               self%fevals = self%fevals + 1
                if (is_done(t, tout, dt) .or. itask_ == 2) exit
             end do
 
@@ -155,6 +158,7 @@ contains
                call self%fu(t, ui, udot)
                u = (u + ui + dt*udot)/2
                t = t + dt
+               self%fevals = self%fevals + 2
                if (is_done(t, tout, dt) .or. itask_ == 2) exit
             end do
 
@@ -169,6 +173,7 @@ contains
                call self%fu(t, ui, udot)
                u = (u + 2*ui + 2*dt*udot)/3
                t = t + dt
+               self%fevals = self%fevals + 3
                if (is_done(t, tout, dt) .or. itask_ == 2) exit
             end do
 
@@ -179,7 +184,7 @@ contains
 
    end subroutine rktvd_integrate
 
-   pure subroutine mstvd_init(self, fu, neq)
+   subroutine mstvd_init(self, fu, neq)
    !! Initialize 'mstvd' object.
       class(mstvd), intent(inout) :: self
          !! object
@@ -213,7 +218,7 @@ contains
 
    end subroutine mstvd_init
 
-   pure subroutine mstvd_integrate(self, u, t, tout, dt)
+   subroutine mstvd_integrate(self, u, t, tout, dt)
    !!   This subroutine implements a 5-step, 3rd order TVD multi-step method described
    !! in ICASE 97-65 (Shu, 1997). In theory, this method should have an efficiency 1.5 times
    !! higher than the RK method of the same order. However, in practice they appear to be
@@ -259,6 +264,7 @@ contains
             call ode_start%integrate(u, t, t + 2*dt, dt, itask=2)
          end do
 
+         self%fevals = ode_start%fevals
          self%istate = 2
 
       end if
@@ -271,6 +277,7 @@ contains
          call self%fu(t, u, udot)
          ui = (25*u + 50*dt*udot + 7*uold(:, 4) + 10*dt*udotold(:, 4))/32
          t = t + dt
+         self%fevals = self%fevals + 1
 
          ! Shift u and udot values one step into the past
          udotold = eoshift(udotold, shift=-1, dim=2)
