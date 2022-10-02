@@ -59,17 +59,15 @@ end do
  The WENO reconstruction is even simpler to call:
  
  ```fortran
-use weno, only: wenok
+use hrweno, only: weno
 ...
-! Populate extended 'v' vector with ghost cells
-vext(1:nc) = v
-vext(:0) = v(1)
-vext(nc + 1:) = v(nc)
-
+type(weno) :: myweno
+...
+! Init weno object
+call myweno%init(ncells=100, k=3, eps=1e-6_rk)
+   
 ! Get reconstructed values at cell boundaries
-k = 3
-eps = 1e-6_rk
-call wenok(k, eps, vext, vl, vr)
+call myweno%reconstruct(v, vl, vr)
 ...
 ```
 
