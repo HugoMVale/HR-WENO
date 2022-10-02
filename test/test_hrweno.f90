@@ -1,5 +1,5 @@
 module test_hrweno
-!! Test for module 'weno' using test-drive.
+!! Test for module 'hrweno' using test-drive.
    use hrweno, only: weno, c1, c2, c3
    use iso_fortran_env, only: real64, stderr => error_unit
    use testdrive, only: new_unittest, unittest_type, error_type, check

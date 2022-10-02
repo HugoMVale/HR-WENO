@@ -1,5 +1,5 @@
 program example_pbe_2d_fv
-!!   This program illustrates the application of modules 'weno' and 'mstvd' for solving a 2D
+!!   This program illustrates the application of modules 'hrweno' and 'mstvd' for solving a 2D
 !! population balance equation (PBE):
 !!```
 !!                    d/dt u(x,t) + d/dx1 f1(u(x,t)) + d/dx2 f2(u(x,t)) = 0

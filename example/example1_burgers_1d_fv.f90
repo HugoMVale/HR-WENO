@@ -1,5 +1,5 @@
 program example1_burgers_1d_fv
-!!   This program illustrates the application of modules 'weno' and 'tvdode' for solving a 1D
+!!   This program illustrates the application of modules 'hrweno' and 'tvdode' for solving a 1D
 !! hyperbolic equation (Burger's equation):
 !!```
 !!                    d/dt u(x,t) = - d/dx f(u(x,t))
