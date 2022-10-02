@@ -17,7 +17,7 @@ program tester
    use testdrive, only: run_testsuite, new_testsuite, testsuite_type, &
      & select_suite, run_selected, get_argument
    use test_tvdode, only: collect_tests_tvdode
-   use test_weno, only: collect_tests_weno
+   use test_hrweno, only: collect_tests_hrweno
    use test_fluxes, only: collect_tests_fluxes
    use test_grid, only: collect_tests_grid
 
@@ -32,7 +32,7 @@ program tester
 
    testsuites = [ &
                 new_testsuite("tvdode", collect_tests_tvdode), &
-                new_testsuite("weno", collect_tests_weno), &
+                new_testsuite("hrweno", collect_tests_hrweno), &
                 new_testsuite("fluxes", collect_tests_fluxes), &
                 new_testsuite("grid", collect_tests_grid) &
                 ]

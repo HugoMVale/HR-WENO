@@ -18,9 +18,9 @@ program example1_burgers_1d_fv
 !!```
 !!  In this particular example, we use the 3rd order 'rktvd' ode solver (we could equally well
 !! employ the 'mstvd' solver). The reconstruction is done with the 5th order WENO scheme; to
-!! try other orders, we can change the parameter 'k' in procedure 'rhs' .
+!! try other orders, we can change the parameter 'k'.
    use tvdode, only: tvdode_class, rktvd
-   use weno, only: wenok
+   use hrweno, only: weno
    use fluxes, only: godunov, lax_friedrichs
    use grid, only: grid1
    use iso_fortran_env, only: real64, stderr => error_unit, stdout => output_unit
@@ -29,11 +29,13 @@ program example1_burgers_1d_fv
 
    integer, parameter :: rk = real64
    integer, parameter :: nc = 100
+   integer, parameter :: k = 3
    real(rk) :: u(nc)
    real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
    integer :: num_time_points, ii
    type(grid1) :: gx
    type(rktvd) :: ode
+   type(weno) :: myweno
 
    ! Define the spatial grid
    ! In this example, we use a linear grid, but any smooth grid can be used
@@ -41,11 +43,14 @@ program example1_burgers_1d_fv
    xmax = 5._rk
    call gx%new(xmin, xmax, nc, scl=1)
 
-   ! Initial condition u(x,t=0)
-   u = ic(gx%center)
+   ! Init weno object
+   call myweno%init(nc, k, eps=1e-6_rk)
 
    ! Open file where results will be stored
    call output(1)
+
+   ! Initial condition u(x,t=0)
+   u = ic(gx%center)
 
    ! Call ODE time solver
    call ode%init(rhs, nc, order=3)
@@ -86,23 +91,16 @@ contains
       real(rk), intent(out) :: vdot(:)
          !! vector(N) with v'(x,t) values
 
-      integer, parameter :: k = 3
-      real(rk) :: vl(nc), vr(nc), fedges(0:nc), vext(1 - (k - 1):nc + (k - 1))
-      real(rk), parameter :: eps = 1e-6_rk, alpha = 1._rk
+      real(rk) :: fedges(0:nc), vl(nc), vr(nc)
       integer :: i
 
-      ! Populate extended 'v' vector with ghost cells
-      vext(1:nc) = v
-      vext(:0) = v(1)
-      vext(nc + 1:) = v(nc)
-
       ! Get reconstructed values at cell boundaries
-      call wenok(k, eps, vext, vl, vr)
+      call myweno%reconstruct(v, vl, vr)
 
       ! Fluxes at interior cell boundaries
       ! One can use the Lax-Friedrichs or the Godunov method
       do concurrent(i=1:nc - 1)
-         !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), gx%r(i), t, alpha)
+         !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), gx%r(i), t, alpha = 1._rk)
          fedges(i) = godunov(flux, vr(i), vl(i + 1), [gx%right(i)], t)
       end do
 

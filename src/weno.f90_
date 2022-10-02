@@ -22,6 +22,18 @@ module weno
                                -1._rk/6, 5._rk/6, 1._rk/3, 1._rk/3, -7._rk/6, 11._rk/6], &
                               [3, 4], order=[1, 2])
 
+   type :: tweno
+      integer, private :: order
+         !! order of reconstruction within the cell (k = 1, 2 or 3)
+      real(rk), private :: eps
+         !! numerical smoothing factor
+      character(:), allocatable:: msg
+         !! error message
+      real(rk), allocatable :: c(:, :, :)
+         !! array of constants for a non-uniform grid
+
+   end type
+
 contains
 
    pure subroutine wenok(k, eps, vext, vl, vr, c)
