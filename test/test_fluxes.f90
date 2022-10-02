@@ -26,9 +26,7 @@ contains
 
    subroutine test_allfluxes(error)
       type(error_type), allocatable, intent(out) :: error
-      integer :: order, itask, istate
       real(rk) :: h, href, vm, vp, x(1), t, rtol
-      integer :: i
 
       ! General settings
       vm = 2._rk
