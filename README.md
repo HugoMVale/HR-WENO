@@ -11,7 +11,10 @@
 
 This package is a modern-Fortran implementation of selected high-resolution [weighted essentially non-oscillatory (WENO)](https://en.wikipedia.org/wiki/WENO_methods) schemes and [total variation diminishing (TVD)](https://en.wikipedia.org/wiki/Total_variation_diminishing) integration methods for solving [hyperbolic conservation equations](https://en.wikipedia.org/wiki/Hyperbolic_partial_differential_equation).
 
-In particular, the package includes WENO schemes up to 5th order, explicit Runge-Kutta TVD methods up to 3rd order, and an explicit 3rd order multi-step TVD method.  
+In particular, the package includes:
+* WENO schemes up to 5th order;
+* explicit Runge-Kutta TVD methods up to 3rd order;
+* explicit 3rd order multi-step TVD method.  
 
 All numerical methods are described in detail by [Shu (1997)](doc/Shu-WENO-notes.pdf).
 
