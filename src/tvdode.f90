@@ -17,13 +17,13 @@ module tvdode
    !! Abstract class for tvdode-like types
       procedure(integrand), pointer, private :: fu => null()
          !! subroutine with the derivative u'(t)
-      integer, private :: neq = 0
+      integer, private :: neq
          !! number of equations
-      integer, private :: order = 0
+      integer, private :: order
          !! order of the method
-      integer :: fevals = 0
+      integer :: fevals
          !! number of function evaluations
-      integer :: istate = 0
+      integer :: istate
          !! flag indicating the state of the integration:
          !! 1 first call for a problem,
          !! 2 subsequent call for a problem.
@@ -76,6 +76,8 @@ contains
       if (allocated(self%msg)) deallocate (self%msg)
       if (allocated(self%ui)) deallocate (self%ui)
       if (allocated(self%udot)) deallocate (self%udot)
+      self%istate = 0
+      self%fevals = 0
 
       self%fu => fu
 

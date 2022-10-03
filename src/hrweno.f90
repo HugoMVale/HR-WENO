@@ -25,19 +25,19 @@ module hrweno
    type :: weno
       character(:), allocatable :: msg
          !! error message
-      integer :: ierr = 0
+      integer :: ierr
          !! error status
-      integer, private :: k = 0
+      integer, private :: k
          !! order of reconstruction within the cell (k = 1, 2 or 3)
-      integer, private :: ncells = 0
+      integer, private :: ncells
          !! number of cells
-      real(rk), private :: eps = 1e-6_rk
+      real(rk), private :: eps
          !! numerical smoothing factor
       real(rk), allocatable, private :: d(:)
          !! array of constants
       real(rk), allocatable, private :: c(:, :)
          !! array of constants for uniform grid
-      logical, private :: uniform_grid = .true.
+      logical, private :: uniform_grid
          !! flag for uniform grid
       real(rk), allocatable :: cnu(:, :, :)
          !! array of constants for a non-uniform grid
@@ -50,7 +50,7 @@ module hrweno
 contains
 
    pure subroutine init(self, ncells, k, eps, xedges)
-   !! Initialize 'weno_class' object.
+   !! Initialize 'weno' object.
       class(weno), intent(inout) :: self
          !! object
       integer, intent(in) :: ncells
@@ -67,6 +67,7 @@ contains
       ! Clear object if required
       if (allocated(self%msg)) deallocate (self%msg)
       if (allocated(self%cnu)) deallocate (self%cnu)
+      self%ierr = 0
 
       ! Check inputs
       if (ncells > 0) then
@@ -93,6 +94,8 @@ contains
             self%ierr = 1
             error stop self%msg
          end if
+      else
+         self%eps = 1e-6_rk
       end if
 
       if (present(xedges)) then
@@ -105,6 +108,8 @@ contains
             self%ierr = 1
             error stop self%msg
          end if
+      else
+         self%uniform_grid = .true.
       end if
 
       ! Select constant parameters according to order of the method

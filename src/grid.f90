@@ -22,9 +22,9 @@ module grid
         !! vector(nc) of left cell boundaries, \( x_{i-1/2} \)
       real(rk), dimension(:), pointer :: right => null()
         !! vector(nc) of right cell boundaries, , \( x_{i+1/2} \)
-      integer :: ncells = 0
+      integer :: ncells
         !! number of cells
-      integer :: scl = 0
+      integer :: scl
         !! scale (1: linear, 2: bilinear, 3: log, 4: geometric)
    contains
       procedure, pass(self) :: linear => grid1_linear
@@ -224,7 +224,7 @@ contains
       class(grid1), intent(inout), target :: self
         !! object
 
-      ! Map values to grid object
+      ! Reset all variables
       if (allocated(self%name)) deallocate (self%name)
       if (allocated(self%edges)) deallocate (self%edges)
       if (allocated(self%center)) deallocate (self%center)
