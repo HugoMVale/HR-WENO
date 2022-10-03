@@ -39,7 +39,7 @@ program example1_burgers_1d_fv
 
    ! Define the spatial grid
    ! In this example, we use a linear grid, but any smooth grid can be used
-   call gx%linear(xmin=-5._rk, xmax=5._rk, nc=nc)
+   call gx%linear(xmin=-5._rk, xmax=5._rk, ncells=nc)
 
    ! Init weno object
    call myweno%init(ncells=nc, k=k, eps=1e-6_rk)

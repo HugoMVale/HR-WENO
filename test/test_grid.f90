@@ -129,31 +129,30 @@ contains
       type(error_type), allocatable, intent(out) :: error
       type(grid1) :: gx
       real(rk) :: xmin, xcross, xmax
-      integer :: nc1, nc2, nc
+      integer :: nc(2), ncsum
 
       ! General settings
       xmin = 0._rk
       xcross = 1e1_rk
       xmax = 1e3_rk
-      nc1 = 124
-      nc2 = 365
-      nc = nc1 + nc2
+      nc = [124, 365]
+      ncsum = sum(nc)
 
       ! Make grid
-      call gx%bilinear(xmin, xcross, xmax, nc1, nc2)
+      call gx%bilinear(xmin, xcross, xmax, nc)
 
       ! Checks
-      call check(error, gx%ncells, nc)
+      call check(error, gx%ncells, ncsum)
       if (allocated(error)) return
       call check(error, gx%edges(0), xmin, thr=atol)
       if (allocated(error)) return
-      call check(error, gx%edges(nc1), xcross, thr=atol)
+      call check(error, gx%edges(nc(1)), xcross, thr=atol)
       if (allocated(error)) return
-      call check(error, gx%edges(nc), xmax, thr=atol)
+      call check(error, gx%edges(ncsum), xmax, thr=atol)
       if (allocated(error)) return
-      call check(error, gx%left, gx%edges(0:nc - 1))
+      call check(error, gx%left, gx%edges(0:ncsum - 1))
       if (allocated(error)) return
-      call check(error, gx%right, gx%edges(1:nc))
+      call check(error, gx%right, gx%edges(1:ncsum))
       if (allocated(error)) return
       call check(error, gx%width, gx%right - gx%left)
       if (allocated(error)) return

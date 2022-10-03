@@ -32,8 +32,8 @@ program example_pbe_2d_fv
 
    ! Define grids for x1 and x2
    ! In this example, we use linear grids, but any smooth grid can be used
-   call gx(1)%linear(xmin=0._rk, xmax=10._rk, nc=nc(1))
-   call gx(2)%linear(xmin=0._rk, xmax=10._rk, nc=nc(2))
+   call gx(1)%linear(xmin=0._rk, xmax=10._rk, ncells=nc(1))
+   call gx(2)%linear(xmin=0._rk, xmax=10._rk, ncells=nc(2))
 
    ! Init weno objects
    call myweno(1)%init(ncells=nc(1), k=k, eps=1e-6_rk)

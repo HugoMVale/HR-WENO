@@ -37,7 +37,7 @@ module grid
 
 contains
 
-   pure subroutine grid1_linear(self, xmin, xmax, nc)
+   pure subroutine grid1_linear(self, xmin, xmax, ncells)
     !! Constructor linear grid
       class(grid1), intent(inout), target :: self
         !! object
@@ -45,26 +45,26 @@ contains
         !! lower boundary of grid domain
       real(rk), intent(in) :: xmax
         !! upper boundary of grid domain
-      integer, intent(in) :: nc
+      integer, intent(in) :: ncells
         !! number of grid cells
 
-      real(rk) :: xedges(0:nc), rx
+      real(rk) :: xedges(0:ncells), rx
       integer :: i
 
       ! Check input
       if (.not. (xmax > xmin)) then
          error stop "Invalid input 'xmin', 'xmax'. Valid range: xmax > xmin."
       end if
-      if (nc < 1) then
-         error stop "Invalid input 'nc'. Valid range: nc > 1."
+      if (ncells < 1) then
+         error stop "Invalid input 'ncells'. Valid range: ncells > 1."
       end if
 
       ! Clear grid, if we are trying to reallocate
       call self%clear
 
       ! Compute mesh
-      rx = (xmax - xmin)/nc
-      do concurrent(i=0:nc)
+      rx = (xmax - xmin)/ncells
+      do concurrent(i=0:ncells)
          xedges(i) = xmin + rx*i
       end do
 
@@ -73,7 +73,7 @@ contains
 
    end subroutine grid1_linear
 
-   pure subroutine grid1_bilinear(self, xmin, xcross, xmax, nc1, nc2)
+   pure subroutine grid1_bilinear(self, xmin, xcross, xmax, ncells)
    !! Constructor bilinear grid
       class(grid1), intent(inout), target :: self
         !! object
@@ -83,12 +83,10 @@ contains
         !! cross-over boundary of grid domain
       real(rk), intent(in) :: xmax
         !! upper boundary of grid domain
-      integer, intent(in) :: nc1
-        !! number of grid cells in range [xmin, xcross]
-      integer, intent(in) :: nc2
-        !! number of grid cells in range [xcross, xmax]
+      integer, intent(in) :: ncells(2)
+        !! number of grid cells in range [xmin, xcross] and [xcross, xmax]
 
-      real(rk) :: xedges(0:nc1 + nc2), rx
+      real(rk) :: xedges(0:sum(ncells)), rx
       integer :: i
 
       if (.not. (xcross > xmin)) then
@@ -97,23 +95,20 @@ contains
       if (.not. (xmax > xcross)) then
          error stop "Invalid input 'xcross', 'xmax'. Valid range: xmax > xcross."
       end if
-      if (nc1 < 1) then
-         error stop "Invalid input 'nc1'. Valid range: nc1 > 1."
-      end if
-      if (nc2 < 1) then
-         error stop "Invalid input 'nc2'. Valid range: nc2 > 1."
+      if (any(ncells < 1)) then
+         error stop "Invalid input 'ncells'. Valid range: ncells(i) >= 1."
       end if
 
       ! Compute mesh [xmin, xcross]
-      rx = (xcross - xmin)/nc1
-      do concurrent(i=0:nc1)
+      rx = (xcross - xmin)/ncells(1)
+      do concurrent(i=0:ncells(1))
          xedges(i) = xmin + rx*i
       end do
 
       ! Compute mesh [xcross, xmax]
-      rx = (xmax - xcross)/nc2
-      do concurrent(i=1:nc2)
-         xedges(nc1 + i) = xcross + rx*i
+      rx = (xmax - xcross)/ncells(2)
+      do concurrent(i=1:ncells(2))
+         xedges(ncells(1) + i) = xcross + rx*i
       end do
 
       self%scl = 2
@@ -121,7 +116,7 @@ contains
 
    end subroutine grid1_bilinear
 
-   pure subroutine grid1_log(self, xmin, xmax, nc)
+   pure subroutine grid1_log(self, xmin, xmax, ncells)
    !! Constructor log grid
       class(grid1), intent(inout) :: self
         !! object
@@ -129,10 +124,10 @@ contains
         !! lower boundary of grid domain
       real(rk), intent(in) :: xmax
         !! upper boundary of grid domain
-      integer, intent(in) :: nc
+      integer, intent(in) :: ncells
         !! number of grid cells
 
-      real(rk) :: xedges(0:nc), rx
+      real(rk) :: xedges(0:ncells), rx
       integer :: i
 
       ! Check input
@@ -142,16 +137,16 @@ contains
       if (.not. (xmax > xmin)) then
          error stop "Invalid input 'xmin', 'xmax'. Valid range: xmax > xmin."
       end if
-      if (nc < 1) then
-         error stop "Invalid input 'nc'. Valid range: nc > 1."
+      if (ncells < 1) then
+         error stop "Invalid input 'ncells'. Valid range: ncells > 1."
       end if
 
       ! Clear grid, if we are trying to reallocate
       call self%clear
 
       ! Compute mesh
-      rx = (log(xmax/xmin))/nc
-      do concurrent(i=0:nc)
+      rx = (log(xmax/xmin))/ncells
+      do concurrent(i=0:ncells)
          xedges(i) = log(xmin) + rx*i
       end do
       xedges = exp(xedges)
@@ -161,7 +156,7 @@ contains
 
    end subroutine grid1_log
 
-   pure subroutine grid1_geometric(self, xmin, xmax, ratio, nc)
+   pure subroutine grid1_geometric(self, xmin, xmax, ratio, ncells)
    !! Constructor geometric grid
       class(grid1), intent(inout) :: self
         !! object
@@ -171,10 +166,10 @@ contains
         !! upper boundary of grid domain
       real(rk), intent(in) :: ratio
         !! constant ratio of geometric grid
-      integer, intent(in) :: nc
+      integer, intent(in) :: ncells
         !! number of grid cells
 
-      real(rk) :: xedges(0:nc), sum_ratio, a1
+      real(rk) :: xedges(0:ncells), sum_ratio, a1
       integer :: i
 
       ! Check input
@@ -184,8 +179,8 @@ contains
       if (ratio <= 0._rk) then
          error stop "Invalid input 'ratio'. Valid range: ratio > 0"
       end if
-      if (nc < 1) then
-         error stop "Invalid input 'nc'. Valid range: nc > 1"
+      if (ncells < 1) then
+         error stop "Invalid input 'ncells'. Valid range: ncells > 1"
       end if
 
       ! Clear grid, if we are trying to reallocate
@@ -193,12 +188,12 @@ contains
 
       ! Compute mesh
       sum_ratio = 0._rk
-      do i = 1, nc
+      do i = 1, ncells
          sum_ratio = sum_ratio + ratio**(i - 1)
       end do
       a1 = (xmax - xmin)/sum_ratio
       xedges(0) = xmin
-      do i = 1, nc
+      do i = 1, ncells
          xedges(i) = xedges(i - 1) + a1*ratio**(i - 1)
       end do
 
