@@ -10,6 +10,7 @@ module test_grid
 
    integer, parameter :: rk = real64
    logical, parameter :: verbose = .false.
+   real(rk), parameter :: atol = 1e-10_rk
 
 contains
 
@@ -19,53 +20,146 @@ contains
       type(unittest_type), allocatable, intent(out) :: testsuite(:)
 
       testsuite = [ &
-                  new_unittest("grid1", test_grid1) &
+                  new_unittest("linear", test_linear), &
+                  new_unittest("log", test_log), &
+                  new_unittest("geometric", test_geometric), &
+                  new_unittest("bilinear", test_bilinear) &
                   ]
 
    end subroutine
 
-   subroutine test_grid1(error)
+   subroutine test_linear(error)
       type(error_type), allocatable, intent(out) :: error
-      integer :: nc, scl
-      real(rk) :: xmin, xmax, atol
       type(grid1) :: gx
+      real(rk) :: xmin, xmax
+      integer :: nc
+
+      ! General settings
+      xmin = 0._rk
+      xmax = 1e3_rk
+      nc = 1000000
+
+      ! Make grid
+      call gx%linear(xmin, xmax, nc)
+
+      ! Checks
+      call check(error, gx%ncells, nc)
+      if (allocated(error)) return
+      call check(error, gx%edges(0), xmin, thr=atol)
+      if (allocated(error)) return
+      call check(error, gx%edges(nc), xmax, thr=atol)
+      if (allocated(error)) return
+      call check(error, gx%left, gx%edges(0:nc - 1))
+      if (allocated(error)) return
+      call check(error, gx%right, gx%edges(1:nc))
+      if (allocated(error)) return
+      call check(error, gx%width, gx%right - gx%left)
+      if (allocated(error)) return
+      call check(error, gx%center, (gx%left + gx%right)/2)
+      if (allocated(error)) return
+
+   end subroutine test_linear
+
+   subroutine test_log(error)
+      type(error_type), allocatable, intent(out) :: error
+      type(grid1) :: gx
+      real(rk) :: xmin, xmax
+      integer :: nc
 
       ! General settings
       xmin = 1e-1_rk
       xmax = 1e3_rk
       nc = 1000000
-      atol = 1e-10_rk
 
-      do scl = 1, 2
+      ! Make grid
+      call gx%log(xmin, xmax, nc)
 
-         ! Make grid
-         call gx%new(xmin, xmax, nc, scl=scl)
+      ! Checks
+      call check(error, gx%ncells, nc)
+      if (allocated(error)) return
+      call check(error, gx%edges(0), xmin, thr=atol)
+      if (allocated(error)) return
+      call check(error, gx%edges(nc), xmax, thr=atol)
+      if (allocated(error)) return
+      call check(error, gx%left, gx%edges(0:nc - 1))
+      if (allocated(error)) return
+      call check(error, gx%right, gx%edges(1:nc))
+      if (allocated(error)) return
+      call check(error, gx%width, gx%right - gx%left)
+      if (allocated(error)) return
+      call check(error, gx%center, (gx%left + gx%right)/2)
+      if (allocated(error)) return
 
-         !print *, scl
-         !print *, "nc", gx%ncells
-         !print *, "edges", gx%edges
-         ! print *, "d", gx%d
-         ! print *, "c", gx%c
-         ! print *, "l", gx%l
-         ! print *, "r", gx%r
+   end subroutine test_log
 
-         ! Checks
-         call check(error, gx%ncells, nc)
-         if (allocated(error)) return
-         call check(error, gx%edges(0), xmin, thr=atol)
-         if (allocated(error)) return
-         call check(error, gx%edges(nc), xmax, thr=atol)
-         if (allocated(error)) return
-         call check(error, gx%left, gx%edges(0:nc - 1))
-         if (allocated(error)) return
-         call check(error, gx%right, gx%edges(1:nc))
-         if (allocated(error)) return
-         call check(error, gx%width, gx%right - gx%left)
-         if (allocated(error)) return
-         call check(error, gx%center, (gx%left + gx%right)/2)
+   subroutine test_geometric(error)
+      type(error_type), allocatable, intent(out) :: error
+      type(grid1) :: gx
+      real(rk) :: xmin, xmax, ratio
+      integer :: nc
 
-      end do
+      ! General settings
+      xmin = 1e-1_rk
+      xmax = 1e3_rk
+      ratio = 1.1_rk
+      nc = 1000
 
-   end subroutine test_grid1
+      ! Make grid
+      call gx%geometric(xmin, xmax, ratio, nc)
+
+      ! Checks
+      call check(error, gx%ncells, nc)
+      if (allocated(error)) return
+      call check(error, gx%edges(0), xmin, thr=atol)
+      if (allocated(error)) return
+      call check(error, gx%edges(nc), xmax, thr=atol)
+      if (allocated(error)) return
+      call check(error, gx%left, gx%edges(0:nc - 1))
+      if (allocated(error)) return
+      call check(error, gx%right, gx%edges(1:nc))
+      if (allocated(error)) return
+      call check(error, gx%width, gx%right - gx%left)
+      if (allocated(error)) return
+      call check(error, gx%center, (gx%left + gx%right)/2)
+      if (allocated(error)) return
+
+   end subroutine test_geometric
+
+   subroutine test_bilinear(error)
+      type(error_type), allocatable, intent(out) :: error
+      type(grid1) :: gx
+      real(rk) :: xmin, xcross, xmax
+      integer :: nc1, nc2, nc
+
+      ! General settings
+      xmin = 0._rk
+      xcross = 1e1_rk
+      xmax = 1e3_rk
+      nc1 = 124
+      nc2 = 365
+      nc = nc1 + nc2
+
+      ! Make grid
+      call gx%bilinear(xmin, xcross, xmax, nc1, nc2)
+
+      ! Checks
+      call check(error, gx%ncells, nc)
+      if (allocated(error)) return
+      call check(error, gx%edges(0), xmin, thr=atol)
+      if (allocated(error)) return
+      call check(error, gx%edges(nc1), xcross, thr=atol)
+      if (allocated(error)) return
+      call check(error, gx%edges(nc), xmax, thr=atol)
+      if (allocated(error)) return
+      call check(error, gx%left, gx%edges(0:nc - 1))
+      if (allocated(error)) return
+      call check(error, gx%right, gx%edges(1:nc))
+      if (allocated(error)) return
+      call check(error, gx%width, gx%right - gx%left)
+      if (allocated(error)) return
+      call check(error, gx%center, (gx%left + gx%right)/2)
+      if (allocated(error)) return
+
+   end subroutine test_bilinear
 
 end module test_grid

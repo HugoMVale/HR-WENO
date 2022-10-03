@@ -31,7 +31,7 @@ program example1_burgers_1d_fv
    integer, parameter :: nc = 100
    integer, parameter :: k = 3
    real(rk) :: u(nc)
-   real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
+   real(rk) :: dt, time, time_out, time_start, time_end
    integer :: num_time_points, ii
    type(grid1) :: gx
    type(weno) :: myweno
@@ -39,12 +39,10 @@ program example1_burgers_1d_fv
 
    ! Define the spatial grid
    ! In this example, we use a linear grid, but any smooth grid can be used
-   xmin = -5._rk
-   xmax = 5._rk
-   call gx%new(xmin, xmax, nc, scl=1)
+   call gx%linear(xmin=-5._rk, xmax=5._rk, nc=nc)
 
    ! Init weno object
-   call myweno%init(nc, k, eps=1e-6_rk)
+   call myweno%init(ncells=nc, k=k, eps=1e-6_rk)
 
    ! Open file where results will be stored
    call output(1)

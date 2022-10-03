@@ -27,17 +27,17 @@ program example_pbe_2d_fv
    type(grid1) :: gx(2)
    type(weno) :: myweno(2)
    type(mstvd) :: ode
-   real(rk) :: dt, time, time_out, time_start, time_end, xmin, xmax
+   real(rk) :: dt, time, time_out, time_start, time_end
    integer :: num_time_points, ii, jj
 
    ! Define grids for x1 and x2
    ! In this example, we use linear grids, but any smooth grid can be used
-   call gx(1)%new(0._rk, 10._rk, nc(1), scl=1)
-   call gx(2)%new(0._rk, 10._rk, nc(2), scl=1)
+   call gx(1)%linear(xmin=0._rk, xmax=10._rk, nc=nc(1))
+   call gx(2)%linear(xmin=0._rk, xmax=10._rk, nc=nc(2))
 
    ! Init weno objects
-   call myweno(1)%init(nc(1), k, eps=1e-6_rk)
-   call myweno(2)%init(nc(2), k, eps=1e-6_rk)
+   call myweno(1)%init(ncells=nc(1), k=k, eps=1e-6_rk)
+   call myweno(2)%init(ncells=nc(2), k=k, eps=1e-6_rk)
 
    ! Open file where results will be stored
    call output(1)
