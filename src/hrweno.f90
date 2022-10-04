@@ -23,6 +23,7 @@ module hrweno
                               [3, 4], order=[1, 2])
 
    type :: weno
+   !! WENO class
       character(:), allocatable :: msg
          !! error message
       integer :: ierr
@@ -43,8 +44,8 @@ module hrweno
          !! array of constants for a non-uniform grid
    contains
       procedure, pass(self):: init
-      procedure, pass(self), private :: calc_cnu
       procedure, pass(self) :: reconstruct
+      procedure, pass(self), private :: calc_cnu
    end type
 
 contains
