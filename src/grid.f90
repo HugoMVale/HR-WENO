@@ -13,15 +13,15 @@ module grid
       character(:), allocatable :: name
         !! variable name
       real(rk), allocatable :: edges(:)
-        !! vector(0:nc) of cell edges
+        !! vector(0:ncells) of cell edges
       real(rk), allocatable :: center(:)
-        !! vector(nc) of cell centers, \( x_i \)
+        !! vector(ncells) of cell centers, \( x_i \)
       real(rk), allocatable :: width(:)
-        !! vector(nc) of cell widths,  \( x_{i+1/2} - x_{i-1/2} \)
+        !! vector(ncells) of cell widths,  \( x_{i+1/2} - x_{i-1/2} \)
       real(rk), dimension(:), pointer :: left => null()
-        !! vector(nc) of left cell boundaries, \( x_{i-1/2} \)
+        !! vector(ncells) of left cell boundaries, \( x_{i-1/2} \)
       real(rk), dimension(:), pointer :: right => null()
-        !! vector(nc) of right cell boundaries, , \( x_{i+1/2} \)
+        !! vector(ncells) of right cell boundaries, \( x_{i+1/2} \)
       integer :: ncells
         !! number of cells
       integer :: scl
@@ -38,8 +38,15 @@ module grid
 contains
 
    pure subroutine grid1_linear(self, xmin, xmax, ncells)
-    !! Constructor linear grid
-      class(grid1), intent(inout), target :: self
+    !! Constructor *linear* grid. <br>
+    !! Constant width: \( width(i) = width(i+1) \)
+    !!
+    !!```
+    !!     |  ...  |------(i)------|------(i+1)------|  ...  |
+    !!    xmin      <-  width(i) -> <- width(i+1)  ->       xmax
+    !!```
+    !!
+      class(grid1), intent(inout) :: self
         !! object
       real(rk), intent(in) :: xmin
         !! lower boundary of grid domain
@@ -74,8 +81,15 @@ contains
    end subroutine grid1_linear
 
    pure subroutine grid1_bilinear(self, xmin, xcross, xmax, ncells)
-   !! Constructor bilinear grid
-      class(grid1), intent(inout), target :: self
+    !! Constructor *bilinear* grid.
+    !! Equivalent to 2 linear grids in series.
+    !!
+    !!```
+    !!     |  ...  |--|--|--| ... | ... |---|---|---|  ...  |
+    !!    xmin                  xcross                     xmax
+    !!```
+    !!
+      class(grid1), intent(inout) :: self
         !! object
       real(rk), intent(in) :: xmin
         !! lower boundary of grid domain
@@ -117,11 +131,13 @@ contains
    end subroutine grid1_bilinear
 
    pure subroutine grid1_log(self, xmin, xmax, ncells)
-   !! Constructor log grid
+   !! Constructor *log* grid. <br>
+   !! Equivalent to a linear grid in terms of \( y=\log(x) \).
+   !!
       class(grid1), intent(inout) :: self
         !! object
       real(rk), intent(in) :: xmin
-        !! lower boundary of grid domain
+        !! lower boundary of grid domain, >0
       real(rk), intent(in) :: xmax
         !! upper boundary of grid domain
       integer, intent(in) :: ncells
@@ -157,7 +173,14 @@ contains
    end subroutine grid1_log
 
    pure subroutine grid1_geometric(self, xmin, xmax, ratio, ncells)
-   !! Constructor geometric grid
+    !! Constructor *geometric* grid. <br>
+    !! Increasing/decreasing width: \( width(i+1) = R \; width(i) \)
+    !!
+    !!```
+    !!     |  ...  |------(i)------|------(i+1)------|  ...  |
+    !!    xmin      <-  width(i) -> <- width(i+1)  ->       xmax
+    !!```
+    !!
       class(grid1), intent(inout) :: self
         !! object
       real(rk), intent(in) :: xmin
@@ -165,7 +188,7 @@ contains
       real(rk), intent(in) :: xmax
         !! upper boundary of grid domain
       real(rk), intent(in) :: ratio
-        !! constant ratio of geometric grid
+        !! constant ratio \(R\) of geometric grid, >0
       integer, intent(in) :: ncells
         !! number of grid cells
 
