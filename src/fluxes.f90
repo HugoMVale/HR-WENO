@@ -30,17 +30,17 @@ contains
     !!   Although it might be useful, this procedure cannot be defined as *elemental*,
     !! because it has a dummy procedure as argument.
       procedure(flux) :: f
-        !! flux function f(v, x, t)
+        !! flux function, \( f(v, x, t) \)
       real(rk), intent(in) :: vm
-        !! left (minus) reconstruction \( v_{i+1/2}^- \)
+        !! left (minus) reconstruction, \( v_{i+1/2}^- \)
       real(rk), intent(in) :: vp
-        !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)-1/2}^- \)
+        !! right (plus) reconstruction, \( v_{i+1/2}^+ = v_{(i+1)-1/2}^- \)
       real(rk), intent(in) :: x(:)
         !! x at flux interface, \( x_{i+1/2} \)
       real(rk), intent(in) :: t
-        !! time
+        !! time, \( t \)
       real(rk), intent(in) :: alpha
-        !! max(abs(f'(v))) in the domain on the problem
+        !! \( max(abs(f'(v))) \) in the domain on the problem
 
       lax_friedrichs = (f(vm, x, t) + f(vp, x, t) - alpha*(vp - vm))/2
 
@@ -54,15 +54,15 @@ contains
     !! @note
     !!   See note about *elemental* in 'lax_friedrichs'.
       procedure(flux) :: f
-        !! flux function f(v, x, t)
+        !! flux function, \( f(v, x, t) \)
       real(rk), intent(in) :: vm
-        !! left (minus) reconstruction \( v_{i+1/2}^- \)
+        !! left (minus) reconstruction, \( v_{i+1/2}^- \)
       real(rk), intent(in) :: vp
-        !! right (plus) reconstruction \( v_{i+1/2}^+ = v_{(i+1)-1/2}^- \)
+        !! right (plus) reconstruction, \( v_{i+1/2}^+ = v_{(i+1)-1/2}^- \)
       real(rk), intent(in) :: x(:)
         !! x at flux interface, \( x_{i+1/2} \)
       real(rk), intent(in) :: t
-        !! time
+        !! time, \( t \)
 
       real(rk) :: fm, fp
 
