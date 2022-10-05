@@ -23,7 +23,7 @@ module hrweno
                               [3, 4], order=[1, 2])
 
    type :: weno
-   !! WENO class
+   !! WENO class.
       character(:), allocatable :: msg
          !! error message
       integer :: ierr
@@ -46,12 +46,15 @@ module hrweno
       procedure, pass(self):: init
       procedure, pass(self) :: reconstruct
       procedure, pass(self), private :: calc_cnu
-   end type
+   end type weno
 
 contains
 
    pure subroutine init(self, ncells, k, eps, xedges)
    !! Initialize 'weno' object.
+   !!
+   !! @note
+   !! If the grid is not uniform, the user must supply the edges of the grid.
       class(weno), intent(inout) :: self
          !! object
       integer, intent(in) :: ncells
@@ -62,8 +65,8 @@ contains
          !! numerical smoothing factor
       real(rk), intent(in), optional :: xedges(0:)
          !! vector(0:ncells) of cell edges;
-         !! xedges(i) is the value of x at right boundary of cell i (x_{i+1/2});
-         !! xedges(i-1) is the value of x at left boundary of cell i (x_{i-1/2}).
+         !! xedges(i) is the value of x at right boundary of cell i, \( x_{i+1/2} \);
+         !! xedges(i-1) is the value of x at left boundary of cell i, \( x_{i-1/2} \).
 
       ! Clear object if required
       if (allocated(self%msg)) deallocate (self%msg)
@@ -136,33 +139,29 @@ contains
    !!   The scheme below depics a generic finite *volume* discretization and the notation
    !! used (see Arguments).
    !!```
-   !!    --0--|--1--| ...  |--(i-1)--|-------(i)-------|--(i+1)--| .... |--nc--|--(nc+1)---
-   !!                                 ^               ^
-   !!                                 vl(i)           vr(i)
-   !!                                 v_{i-1/2}^+     v_{i+1/2}^-
+   !! --0--|--1--| ...  |--(i-1)--|-------(i)-------|--(i+1)--| .... |--nc--|--(ncells+1)---
+   !!                              ^               ^
+   !!                              vl(i)           vr(i)
+   !!                              v_{i-1/2}^+     v_{i+1/2}^-
    !!```
    !!   The procedure can equally be used for finite difference methods. In that case, 'v'
    !! is not the average cell value, but rather the flux! See section 2.3.2, page 22.
    !!
-   !! @warning
-   !!   Note that the procedure does not "see" the grid, so the reponsability of making sure
-   !! that the grid is uniform (if the procedure is called without 'c') lies with the user.
-   !!
    !! @note
    !!   For a scalar 1D problem, this procedure is called once per time step. In contrast,
-   !! for a scalar 2D problem, it is called (nc1+nc2) times per step. So, efficiency is
-   !! very important. The current implementation is rather general in terms of order and
+   !! for a scalar 2D problem, it is called (ncells1+ncells2) times per step. So, efficiency
+   !! is very important. The current implementation is rather general in terms of order and
    !! grid type, but at the cost of a number of 'select case' constructs. I wonder if it
    !! would be wise to make a specific version for k=2 (3rd order) and uniform grids to get
    !! maximum performance for multi-dimensional problems.
       class(weno), intent(in) :: self
          !! object
       real(rk), intent(in) :: v(:)
-         !! vector of *average* cell values (if finite volume)
+         !! vector(ncells) of *average* cell values (if finite volume)
       real(rk), intent(out) :: vl(:)
-         !! vector(1:nc) of reconstructed v at left boundary of cell i, \(v_{i-1/2}^+\)
+         !! vector(ncells) of reconstructed v at left boundary of cell i, \(v_{i-1/2}^+\)
       real(rk), intent(out) :: vr(:)
-         !! vector(1:nc) of reconstructed v at right boundary of cell i, \(v_{i+1/2}^-\)
+         !! vector(ncells) of reconstructed v at right boundary of cell i, \(v_{i+1/2}^-\)
 
       real(rk), dimension(0:self%k - 1) :: vlr, vrr, w, wtilde, alfa, alfatilde, beta
       real(rk), dimension(0:self%k - 1, -1:self%k - 1) :: ci

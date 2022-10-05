@@ -14,9 +14,9 @@ module tvdode
    integer, parameter :: rk = real64
 
    type, abstract :: tvdode_class
-   !! Abstract class for tvdode-like types
+   !! Abstract class for TVD ODE solvers.
       procedure(integrand), pointer, private :: fu => null()
-         !! subroutine with the derivative u'(t)
+         !! subroutine with the derivative \( u'(t) \)
       integer, private :: neq
          !! number of equations
       integer, private :: order
@@ -31,23 +31,23 @@ module tvdode
          !! error message
       real(rk), allocatable, private :: ui(:)
       real(rk), allocatable, private :: udot(:)
-   end type
+   end type tvdode_class
 
    type, extends(tvdode_class) :: rktvd
-   !!  'rktvd' class
+   !! Runge-Kutta TVD ODE solver class.
    contains
       procedure, pass(self) :: init => rktvd_init
       procedure, pass(self) :: integrate => rktvd_integrate
-   end type
+   end type rktvd
 
    type, extends(tvdode_class) :: mstvd
-   !!  'mstvd' class
+   !! Multi-step TVD ODE solver class.
       real(rk), allocatable, private :: uold(:, :)
       real(rk), allocatable, private :: udotold(:, :)
    contains
       procedure, pass(self) :: init => mstvd_init
       procedure, pass(self) :: integrate => mstvd_integrate
-   end type
+   end type mstvd
 
    abstract interface
       subroutine integrand(self, t, u, udot)
@@ -66,7 +66,7 @@ contains
       class(rktvd), intent(inout) :: self
          !! object
       procedure(integrand) :: fu
-         !! subroutine with the derivative u'(t)
+         !! subroutine with the derivative \( u'(t) \)
       integer, intent(in) :: neq
          !! number of equations
       integer, intent(in) :: order
@@ -108,18 +108,18 @@ contains
    !!   The routine was built to work similarly to LSODE.
    !!
    !! @note
-   !!   There are also 4th and 5th order methods, but they have lower CFL coeffiecients and
+   !!   There are also 4th and 5th order methods, but they have lower CFL coefficients and
    !! are more difficult to implement. See Equation 4.15, page 44.
    !!
    !! @todo
    !! - Adjust dt in final step to avoid overshoting tout by some fraction of dt.
-   !! - Maybe include an optional work array that could be transfered to fu.
+   !! - Maybe include an optional work array that could be passed to the integrand (fu).
       class(rktvd), intent(inout) :: self
          !! object
       real(rk), intent(inout) :: u(:)
-         !! vector(neq) with the variables to integrate u(t)
+         !! vector(neq) with the variables to integrate \( u(t) \)
       real(rk), intent(inout) :: t
-         !! time; on return it will be the current value of t (close to tout)
+         !! time; on return it will be the current value of \(t\) (close to tout)
       real(rk), intent(in) :: tout
          !! time where next output is desired
       real(rk), intent(in) :: dt
@@ -140,7 +140,7 @@ contains
       associate (ui => self%ui, udot => self%udot)
          select case (self%order)
 
-            ! ------------------------------- 1st-order RK (Euler) -------------------------------
+            ! ------------------------------- 1st-order RK (Euler) ----------------------------
             ! Equation (4.10), page 43.
          case (1)
             do
@@ -151,7 +151,7 @@ contains
                if (is_done(t, tout, dt) .or. itask_ == 2) exit
             end do
 
-            ! --------------------------------- 2nd-order RK -------------------------------------
+            ! --------------------------------- 2nd-order RK ----------------------------------
             ! Equation (4.10), page 43.
          case (2)
             do
@@ -191,7 +191,7 @@ contains
       class(mstvd), intent(inout) :: self
          !! object
       procedure(integrand) :: fu
-         !! subroutine with the derivative u'(t)
+         !! subroutine with the derivative \( u'(t) \)
       integer, intent(in) :: neq
          !! number of equations
 
@@ -229,16 +229,16 @@ contains
    !!
    !! @note
    !!   There is a 2nd order multi-step method, but the corresponding CFL value is half that
-   !! of the 2nd order RK method. Thus, thre is no reason to implement it.
+   !! of the 2nd order RK method. Thus, there is no reason to implement it.
    !!
    !! @todo
-   !! - Maybe include an optional work array that could be transfered to 'fu'.
+   !! - Maybe include an optional work array that could be transfered to the integrand (fu).
       class(mstvd), intent(inout) :: self
          !! object
       real(rk), intent(inout) :: u(:)
-         !! vector(neq) with the variables to integrate u(t)
+         !! vector(neq) with the variables to integrate \( u(t) \)
       real(rk), intent(inout) :: t
-         !! time; on return it will be the current value of t (close to tout)
+         !! time; on return it will be the current value of \(t\) (close to tout)
       real(rk), intent(in) :: tout
          !! time where next output is desired
       real(rk), intent(in) :: dt

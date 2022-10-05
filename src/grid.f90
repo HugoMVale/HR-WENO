@@ -1,6 +1,7 @@
 module grid
 !!   This module implements a 1D grid class.
    use, intrinsic :: iso_fortran_env, only: real64
+   use stdlib_optval, only: optval
    implicit none
    private
 
@@ -9,7 +10,7 @@ module grid
    integer, parameter :: rk = real64
 
    type :: grid1
-    !! 1D grid
+    !! 1D grid class.
       character(:), allocatable :: name
         !! variable name
       real(rk), allocatable :: edges(:)
@@ -25,7 +26,7 @@ module grid
       integer :: ncells
         !! number of cells
       integer :: scl
-        !! scale (1: linear, 2: bilinear, 3: log, 4: geometric)
+        !! scale flag (1: linear, 2: bilinear, 3: log, 4: geometric)
    contains
       procedure, pass(self) :: linear => grid1_linear
       procedure, pass(self) :: bilinear => grid1_bilinear
@@ -37,8 +38,8 @@ module grid
 
 contains
 
-   pure subroutine grid1_linear(self, xmin, xmax, ncells)
-    !! Constructor *linear* grid. <br>
+   pure subroutine grid1_linear(self, xmin, xmax, ncells, name)
+    !! Initialize *linear* grid. <br>
     !! Constant width: \( width(i) = width(i+1) \)
     !!
     !!```
@@ -54,6 +55,8 @@ contains
         !! upper boundary of grid domain
       integer, intent(in) :: ncells
         !! number of grid cells
+      character(*), intent(in), optional :: name
+        !! grid name
 
       real(rk) :: xedges(0:ncells), rx
       integer :: i
@@ -76,12 +79,12 @@ contains
       end do
 
       self%scl = 1
-      call self%compute(xedges)
+      call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_linear
 
-   pure subroutine grid1_bilinear(self, xmin, xcross, xmax, ncells)
-    !! Constructor *bilinear* grid.
+   pure subroutine grid1_bilinear(self, xmin, xcross, xmax, ncells, name)
+    !! Initialize *bilinear* grid.
     !! Equivalent to 2 linear grids in series.
     !!
     !!```
@@ -99,6 +102,8 @@ contains
         !! upper boundary of grid domain
       integer, intent(in) :: ncells(2)
         !! number of grid cells in range [xmin, xcross] and [xcross, xmax]
+      character(*), intent(in), optional :: name
+        !! grid name
 
       real(rk) :: xedges(0:sum(ncells)), rx
       integer :: i
@@ -126,22 +131,24 @@ contains
       end do
 
       self%scl = 2
-      call self%compute(xedges)
+      call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_bilinear
 
-   pure subroutine grid1_log(self, xmin, xmax, ncells)
-   !! Constructor *log* grid. <br>
+   pure subroutine grid1_log(self, xmin, xmax, ncells, name)
+   !! Initialize *logarithmic* grid. <br>
    !! Equivalent to a linear grid in terms of \( y=\log(x) \).
    !!
       class(grid1), intent(inout) :: self
         !! object
       real(rk), intent(in) :: xmin
-        !! lower boundary of grid domain, >0
+        !! lower boundary of grid domain (xmin>0)
       real(rk), intent(in) :: xmax
         !! upper boundary of grid domain
       integer, intent(in) :: ncells
         !! number of grid cells
+      character(*), intent(in), optional :: name
+        !! grid name
 
       real(rk) :: xedges(0:ncells), rx
       integer :: i
@@ -168,13 +175,13 @@ contains
       xedges = exp(xedges)
 
       self%scl = 3
-      call self%compute(xedges)
+      call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_log
 
-   pure subroutine grid1_geometric(self, xmin, xmax, ratio, ncells)
-    !! Constructor *geometric* grid. <br>
-    !! Increasing/decreasing width: \( width(i+1) = R \; width(i) \)
+   pure subroutine grid1_geometric(self, xmin, xmax, ratio, ncells, name)
+    !! Initialize *geometric* grid. <br>
+    !! Geometrically increasing/decreasing width: \( width(i+1) = R \; width(i) \)
     !!
     !!```
     !!     |  ...  |------(i)------|------(i+1)------|  ...  |
@@ -188,9 +195,11 @@ contains
       real(rk), intent(in) :: xmax
         !! upper boundary of grid domain
       real(rk), intent(in) :: ratio
-        !! constant ratio \(R\) of geometric grid, >0
+        !! constant ratio \(R\) of geometric grid (R>0)
       integer, intent(in) :: ncells
         !! number of grid cells
+      character(*), intent(in), optional :: name
+        !! grid name
 
       real(rk) :: xedges(0:ncells), sum_ratio, a1
       integer :: i
@@ -221,16 +230,18 @@ contains
       end do
 
       self%scl = 4
-      call self%compute(xedges)
+      call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_geometric
 
-   pure subroutine grid1_compute(self, xedges)
-   !! Aux procedure to compute grid features
+   pure subroutine grid1_compute(self, xedges, name)
+   !! Auxiliar procedure to compute/assign grid components.
       class(grid1), intent(inout), target :: self
         !! object
       real(rk), intent(in) :: xedges(0:)
         !! grid edges
+      character(*), intent(in), optional :: name
+        !! grid name
 
       ! Map values to grid object
       self%ncells = ubound(xedges, 1)
@@ -239,11 +250,12 @@ contains
       self%right => self%edges(1:self%ncells)
       self%center = (self%left + self%right)/2
       self%width = self%right - self%left
+      self%name = name
 
    end subroutine grid1_compute
 
    pure subroutine grid1_clear(self)
-   !! Clear grid
+   !! Clear grid object.
       class(grid1), intent(inout), target :: self
         !! object
 

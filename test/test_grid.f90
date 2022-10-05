@@ -40,7 +40,7 @@ contains
       nc = 1000000
 
       ! Make grid
-      call gx%linear(xmin, xmax, nc)
+      call gx%linear(xmin, xmax, nc, name="F [N]")
 
       ! Checks
       call check(error, gx%ncells, nc)
@@ -72,7 +72,7 @@ contains
       nc = 1000000
 
       ! Make grid
-      call gx%log(xmin, xmax, nc)
+      call gx%log(xmin, xmax, nc, name="T [K]")
 
       ! Checks
       call check(error, gx%ncells, nc)
@@ -105,7 +105,7 @@ contains
       nc = 1000
 
       ! Make grid
-      call gx%geometric(xmin, xmax, ratio, nc)
+      call gx%geometric(xmin, xmax, ratio, nc, name="P [W]")
 
       ! Checks
       call check(error, gx%ncells, nc)
@@ -139,7 +139,7 @@ contains
       ncsum = sum(nc)
 
       ! Make grid
-      call gx%bilinear(xmin, xcross, xmax, nc)
+      call gx%bilinear(xmin, xcross, xmax, nc, name="W [J]")
 
       ! Checks
       call check(error, gx%ncells, ncsum)
