@@ -70,7 +70,7 @@ program example1_burgers_1d_fv
 
 contains
 
-   pure subroutine rhs(self, t, v, vdot)
+   pure subroutine rhs(t, v, vdot)
    !! This subroutine computes the *numerical approximation* to the right hand side of:
    !!```
    !!                du(i,t)/dt = -1/dx(i)*( f(u(x(i+1/2),t)) - f(u(x(i-1/2),t)) )
@@ -80,8 +80,6 @@ contains
    !! discontinuities, \( u_{i+1/2}^+ \neq u_{(i+1)+1/2}^- \). Second, we use a suitable flux
    !! method (e.g., Godunov, Lax-Friedrichs) to compute the flux from the reconstructed
    !! 'u' values.
-      class(tvdode_class), intent(inout) :: self
-         !! object
       real(rk), intent(in) :: t
          !! time variable
       real(rk), intent(in) :: v(:)

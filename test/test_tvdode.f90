@@ -104,8 +104,7 @@ contains
    end subroutine test_mstvd
 
    !> Simple linear u'(u) to test ode solvers
-   pure subroutine fu(self, t, u, udot)
-      class(tvdode_class), intent(inout) :: self
+   pure subroutine fu(t, u, udot)
       real(rk), intent(in) :: t, u(:)
       real(rk), intent(out) :: udot(:)
       udot = a*u

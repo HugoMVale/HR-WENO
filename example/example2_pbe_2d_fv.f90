@@ -67,7 +67,7 @@ program example_pbe_2d_fv
 
 contains
 
-   pure subroutine rhs(self, t, v, vdot)
+   pure subroutine rhs(t, v, vdot)
    !! This subroutine computes the *numerical approximation* to the right hand side of:
    !!```
    !!     du(i,j,t)/dt = -1/dx1(i)*( f1(u(x1(i+1/2),x2(j),t)) - f1(u(x1(i-1/2),x2(j),t)) )
@@ -77,8 +77,6 @@ contains
    !! values of 'u' at the left and right cell boundaries along each dimension. Second, we use
    !! a suitable flux method (e.g., Godunov, Lax-Friedrichs) to compute the flux from the
    !! reconstructed 'u' values.
-      class(tvdode_class), intent(inout) :: self
-         !! object
       real(rk), intent(in) :: t
          !! time variable
       real(rk), intent(in) :: v(:)
@@ -230,4 +228,4 @@ contains
 
    end subroutine output
 
-end program
+end program example_pbe_2d_fv

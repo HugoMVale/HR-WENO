@@ -15,7 +15,7 @@ module tvdode
 
    type, abstract :: tvdode_class
    !! Abstract class for TVD ODE solvers.
-      procedure(integrand), pointer, private :: fu => null()
+      procedure(integrand), pointer, nopass, private :: fu => null()
          !! subroutine with the derivative \( u'(t) \)
       integer, private :: neq
          !! number of equations
@@ -50,10 +50,9 @@ module tvdode
    end type mstvd
 
    abstract interface
-      subroutine integrand(self, t, u, udot)
+      subroutine integrand(t, u, udot)
       !!  Integrand for 'tvdode_class'
          import :: rk, tvdode_class
-         class(tvdode_class), intent(inout) :: self
          real(rk), intent(in) :: t, u(:)
          real(rk), intent(out) :: udot(:)
       end subroutine
