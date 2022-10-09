@@ -28,11 +28,11 @@ module hrweno
          !! error message
       integer :: ierr = 0
          !! error status
-      integer, private :: k
+      integer :: k
          !! order of reconstruction within the cell (k = 1, 2 or 3)
-      integer, private :: ncells
+      integer :: ncells
          !! number of cells
-      real(rk), private :: eps
+      real(rk) :: eps = 1e-6_rk
          !! numerical smoothing factor
       real(rk), allocatable, private :: d(:)
          !! array of constants
@@ -94,8 +94,6 @@ contains
             self%ierr = 1
             error stop self%msg
          end if
-      else
-         self%eps = 1e-6_rk
       end if
 
       if (present(xedges)) then

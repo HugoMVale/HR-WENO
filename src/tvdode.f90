@@ -17,9 +17,9 @@ module tvdode
    !! Abstract class for TVD ODE solvers.
       procedure(integrand), pointer, nopass, private :: fu => null()
          !! subroutine with the derivative \( u'(t) \)
-      integer, private :: neq
+      integer :: neq
          !! number of equations
-      integer, private :: order
+      integer :: order
          !! order of the method
       integer :: fevals = 0
          !! number of function evaluations
