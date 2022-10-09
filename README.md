@@ -78,10 +78,10 @@ call myweno%reconstruct(v, vl, vr)
 
 ### Burgers' inviscid equation (1D)
 
-This example ([`example1_burgers_1d_fv.f90`](/example/example1_burgers_1d_fv.f90)) illustrates the application of procedures `wenok` and `rktvd` for solving [Burger's inviscid equation](https://en.wikipedia.org/wiki/Burgers%27_equation) using a finite volume (FV) formulation. The results are depicted in the figure at the top of the page and demonstrate the excellent resolution of the shock wave.
+This example ([`example1_burgers_1d_fv.f90`](/example/example1_burgers_1d_fv.f90)) illustrates the application of procedures `weno` and `rktvd` for solving [Burger's inviscid equation](https://en.wikipedia.org/wiki/Burgers%27_equation) using a finite volume (FV) formulation. The results are depicted in the figure at the top of the page and demonstrate the excellent resolution of the shock wave.
 
 ### Population balance equation (2D)
-This example ([`example2_pbe_2d_fv.f90`](/example/example2_pbe_2d_fv.f90)) illustrates the application of procedures `wenok` and `mstvd` for solving a [population balance equation](https://en.wikipedia.org/wiki/Population_balance_equation) with 2 internal coordinates using a finite volume (FV) formulation. The results are depicted in the figure below and demonstrate the excellent resolution of the pulse.
+This example ([`example2_pbe_2d_fv.f90`](/example/example2_pbe_2d_fv.f90)) illustrates the application of procedures `weno` and `mstvd` for solving a [population balance equation](https://en.wikipedia.org/wiki/Population_balance_equation) with 2 internal coordinates using a finite volume (FV) formulation. The results are depicted in the figure below and demonstrate the excellent resolution of the pulse.
 
 <p align="center">
   <img src="output/example2/example2d.gif" width="600" alt="Solution of 2D PBE with 5th order WENO">
