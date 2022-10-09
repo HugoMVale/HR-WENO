@@ -46,7 +46,7 @@ contains
       do order = 1, 3
 
          ! Init ode object
-         call ode%init(fu, nu, order)
+         ode = rktvd(fu, nu, order)
 
          ! Numerical solution at t=tout
          u = u0
@@ -82,7 +82,7 @@ contains
       dt = 1e-3_rk
 
       ! Init ode object
-      call ode%init(fu, nu)
+      ode = mstvd(fu, nu)
 
       ! Numerical solution at t=tout
       u = u0

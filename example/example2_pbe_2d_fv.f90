@@ -48,7 +48,7 @@ program example_pbe_2d_fv
    end do
 
    ! Call ODE time solver
-   call ode%init(rhs, size(u))
+   ode = mstvd(rhs, size(u))
 
    time_start = 0._rk
    time_end = 5._rk

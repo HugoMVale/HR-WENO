@@ -51,7 +51,7 @@ program example1_burgers_1d_fv
    u = ic(gx%center)
 
    ! Call ODE time solver
-   call ode%init(rhs, nc, order=3)
+   ode = rktvd(rhs, nc, order=3)
 
    time_start = 0._rk
    time_end = 12._rk

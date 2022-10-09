@@ -21,9 +21,9 @@ module tvdode
          !! number of equations
       integer, private :: order
          !! order of the method
-      integer :: fevals
+      integer :: fevals = 0
          !! number of function evaluations
-      integer :: istate
+      integer :: istate = 0
          !! flag indicating the state of the integration:
          !! 1 first call for a problem,
          !! 2 subsequent call for a problem.
@@ -36,7 +36,6 @@ module tvdode
    type, extends(tvdode_class) :: rktvd
    !! Runge-Kutta TVD ODE solver class.
    contains
-      procedure, pass(self) :: init => rktvd_init
       procedure, pass(self) :: integrate => rktvd_integrate
    end type rktvd
 
@@ -45,38 +44,36 @@ module tvdode
       real(rk), allocatable, private :: uold(:, :)
       real(rk), allocatable, private :: udotold(:, :)
    contains
-      procedure, pass(self) :: init => mstvd_init
       procedure, pass(self) :: integrate => mstvd_integrate
    end type mstvd
 
    abstract interface
       subroutine integrand(t, u, udot)
       !!  Integrand for 'tvdode_class'
-         import :: rk, tvdode_class
+         import :: rk
          real(rk), intent(in) :: t, u(:)
          real(rk), intent(out) :: udot(:)
       end subroutine
    end interface
 
+   interface rktvd
+      module procedure :: rktvd_init
+   end interface rktvd
+
+   interface mstvd
+      module procedure :: mstvd_init
+   end interface mstvd
+
 contains
 
-   subroutine rktvd_init(self, fu, neq, order)
+   type(rktvd) function rktvd_init(fu, neq, order) result(self)
    !! Initialize 'rktvd' object.
-      class(rktvd), intent(inout) :: self
-         !! object
       procedure(integrand) :: fu
          !! subroutine with the derivative \( u'(t) \)
       integer, intent(in) :: neq
          !! number of equations
       integer, intent(in) :: order
          !! order of the method (1, 2 or 3)
-
-      ! Clear object if required
-      if (allocated(self%msg)) deallocate (self%msg)
-      if (allocated(self%ui)) deallocate (self%ui)
-      if (allocated(self%udot)) deallocate (self%udot)
-      self%istate = 0
-      self%fevals = 0
 
       self%fu => fu
 
@@ -99,7 +96,7 @@ contains
       allocate (self%ui(self%neq), self%udot(self%neq))
       self%istate = 1
 
-   end subroutine rktvd_init
+   end function rktvd_init
 
    subroutine rktvd_integrate(self, u, t, tout, dt, itask)
    !!   This subroutine implements the optimal 1st, 2nd and 3rd order TVD RK methods described
@@ -185,21 +182,12 @@ contains
 
    end subroutine rktvd_integrate
 
-   subroutine mstvd_init(self, fu, neq)
+   type(mstvd) function mstvd_init(fu, neq) result(self)
    !! Initialize 'mstvd' object.
-      class(mstvd), intent(inout) :: self
-         !! object
       procedure(integrand) :: fu
          !! subroutine with the derivative \( u'(t) \)
       integer, intent(in) :: neq
          !! number of equations
-
-      ! Clear object if required
-      if (allocated(self%msg)) deallocate (self%msg)
-      if (allocated(self%ui)) deallocate (self%ui)
-      if (allocated(self%udot)) deallocate (self%udot)
-      if (allocated(self%uold)) deallocate (self%uold)
-      if (allocated(self%udotold)) deallocate (self%udotold)
 
       self%fu => fu
 
@@ -217,7 +205,7 @@ contains
                 self%uold(self%neq, self%order + 1), self%udotold(self%neq, self%order + 1))
       self%istate = 1
 
-   end subroutine mstvd_init
+   end function mstvd_init
 
    subroutine mstvd_integrate(self, u, t, tout, dt)
    !!   This subroutine implements a 5-step, 3rd order TVD multi-step method described
@@ -257,7 +245,7 @@ contains
       associate (ui => self%ui, udot => self%udot, uold => self%uold, udotold => self%udotold)
       if (self%istate == 1) then
 
-         call ode_start%init(self%fu, self%neq, self%order)
+         ode_start = rktvd(self%fu, self%neq, self%order)
 
          do i = (self%order + 1), 1, -1
             uold(:, i) = u
