@@ -38,7 +38,7 @@ contains
       do k = 1, 3
 
          ! Init weno object
-         call myweno%init(nc, k, eps=1e-6_rk)
+         myweno = weno(nc, k, eps=1e-6_rk)
 
          ! Set cell average value
          ! Just a reactangular pulse __|¯¯|__
@@ -87,7 +87,7 @@ contains
       do k = 1, 3
 
          ! Init weno object
-         call myweno%init(nc, k, eps=1e-6_rk, xedges=xedges)
+         myweno = weno(nc, k, eps=1e-6_rk, xedges=xedges)
 
          ! Get reference solution
          if (allocated(cref)) deallocate (cref)
@@ -132,7 +132,7 @@ contains
       do k = 1, 3
 
          ! Init weno object
-         call myweno%init(nc, k, xedges=xedges)
+         myweno = weno(nc, k, xedges=xedges)
 
          ! Set cell average value
          ! Just a reactangular pulse __|¯¯|__

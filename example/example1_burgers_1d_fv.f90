@@ -42,7 +42,7 @@ program example1_burgers_1d_fv
    call gx%linear(xmin=-5._rk, xmax=5._rk, ncells=nc)
 
    ! Init weno object
-   call myweno%init(ncells=nc, k=k, eps=1e-6_rk)
+   myweno = weno(ncells=nc, k=k, eps=1e-6_rk)
 
    ! Open file where results will be stored
    call output(1)

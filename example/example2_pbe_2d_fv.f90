@@ -36,8 +36,8 @@ program example_pbe_2d_fv
    call gx(2)%linear(xmin=0._rk, xmax=10._rk, ncells=nc(2))
 
    ! Init weno objects
-   call myweno(1)%init(ncells=nc(1), k=k, eps=1e-6_rk)
-   call myweno(2)%init(ncells=nc(2), k=k, eps=1e-6_rk)
+   myweno(1) = weno(ncells=nc(1), k=k, eps=1e-6_rk)
+   myweno(2) = weno(ncells=nc(2), k=k, eps=1e-6_rk)
 
    ! Open file where results will be stored
    call output(1)

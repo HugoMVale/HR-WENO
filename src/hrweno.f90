@@ -26,7 +26,7 @@ module hrweno
    !! WENO class.
       character(:), allocatable :: msg
          !! error message
-      integer :: ierr
+      integer :: ierr = 0
          !! error status
       integer, private :: k
          !! order of reconstruction within the cell (k = 1, 2 or 3)
@@ -43,20 +43,21 @@ module hrweno
       real(rk), allocatable :: cnu(:, :, :)
          !! array of constants for a non-uniform grid
    contains
-      procedure, pass(self):: init
-      procedure, pass(self) :: reconstruct
-      procedure, pass(self), private :: calc_cnu
+      procedure, pass(self) :: reconstruct => weno_reconstruct
+      procedure, pass(self), private :: calc_cnu => weno_calc_cnu
    end type weno
+
+   interface weno
+      module procedure :: weno_init
+   end interface weno
 
 contains
 
-   pure subroutine init(self, ncells, k, eps, xedges)
+   pure type(weno) function weno_init(ncells, k, eps, xedges) result(self)
    !! Initialize 'weno' object.
    !!
    !! @note
    !! If the grid is not uniform, the user must supply the edges of the grid.
-      class(weno), intent(inout) :: self
-         !! object
       integer, intent(in) :: ncells
          !! number of cells
       integer, intent(in) :: k
@@ -67,11 +68,6 @@ contains
          !! vector(0:ncells) of cell edges;
          !! xedges(i) is the value of x at right boundary of cell i, \( x_{i+1/2} \);
          !! xedges(i-1) is the value of x at left boundary of cell i, \( x_{i-1/2} \).
-
-      ! Clear object if required
-      if (allocated(self%msg)) deallocate (self%msg)
-      if (allocated(self%cnu)) deallocate (self%cnu)
-      self%ierr = 0
 
       ! Check inputs
       if (ncells > 0) then
@@ -129,9 +125,9 @@ contains
          self%c = c3
       end select
 
-   end subroutine init
+   end function weno_init
 
-   pure subroutine reconstruct(self, v, vl, vr)
+   pure subroutine weno_reconstruct(self, v, vl, vr)
    !!   This subroutine implements the (2k-1)th order WENO method for *arbitrary* (uniform or
    !! non-uniform) finite volume/difference schemes described in ICASE 97-65 (Shu, 1997).
    !!   The method is applicable to scalar as well as multicomponent problems. In the later
@@ -221,9 +217,9 @@ contains
          end do
       end associate
 
-   end subroutine reconstruct
+   end subroutine weno_reconstruct
 
-   pure subroutine calc_cnu(self, xedges)
+   pure subroutine weno_calc_cnu(self, xedges)
    !!   This subroutine computes the array of constants 'c(j,r,i)' required to use 'weno'
    !! with non-uniform grids.
    !!
@@ -299,6 +295,6 @@ contains
 
          end do
       end associate
-   end subroutine calc_cnu
+   end subroutine weno_calc_cnu
 
 end module hrweno
