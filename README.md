@@ -45,7 +45,7 @@ use tvdode, only: tvdode_class, rktvd
 type(rktvd) :: ode
 ...
 ! Call ODE time solver
-call ode%init(rhs, neq=size(u), order=3)
+ode = rktvd(rhs, neq=size(u), order=3)
 time_start = 0._rk
 time_end = 12._rk
 dt = 1e-2_rk
@@ -67,7 +67,7 @@ use hrweno, only: weno
 type(weno) :: myweno
 ...
 ! Init weno object
-call myweno%init(ncells=100, k=3, eps=1e-6_rk)
+myweno = weno(ncells=100, k=3, eps=1e-6_rk)
    
 ! Get reconstructed values at cell boundaries
 call myweno%reconstruct(v, vl, vr)
