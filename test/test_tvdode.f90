@@ -1,6 +1,6 @@
 module test_tvdode
 !! Test for module 'tvdode' using test-drive.
-   use tvdode, only: tvdode_class, rktvd, mstvd
+   use tvdode, only: rktvd, mstvd
    use iso_fortran_env, only: real64, stderr => error_unit
    use testdrive, only: new_unittest, unittest_type, error_type, check
    implicit none

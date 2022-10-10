@@ -9,7 +9,7 @@ module tvdode
    implicit none
    private
 
-   public :: tvdode_class, rktvd, mstvd
+   public :: rktvd, mstvd
 
    integer, parameter :: rk = real64
 

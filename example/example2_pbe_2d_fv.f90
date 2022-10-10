@@ -12,7 +12,7 @@ program example_pbe_2d_fv
 !!   In this particular example, we use the 3rd order 'mstvd' ode solver. The reconstruction
 !! is done with the 5th order WENO scheme; to try other orders, we can change the parameter 'k'
 !! in procedure 'rhs' .
-   use tvdode, only: tvdode_class, mstvd
+   use tvdode, only: mstvd
    use hrweno, only: weno
    use fluxes, only: godunov
    use grid, only: grid1
