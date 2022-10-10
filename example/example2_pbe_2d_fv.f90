@@ -84,7 +84,7 @@ contains
       real(rk), intent(out) :: vdot(:)
          !! vector(N) with v'(z,t) values
 
-      real(rk), allocatable :: vl(:), vr(:), vext(:)
+      real(rk), allocatable :: vl(:), vr(:)
       real(rk) :: varray(nc(1), nc(2)), fedges(0:nc(1), 0:nc(2), 2)
       integer :: i, j
 
