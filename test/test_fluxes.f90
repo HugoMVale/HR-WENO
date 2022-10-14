@@ -1,14 +1,14 @@
 module test_fluxes
 !! Test for module 'fluxes' using test-drive.
+   use iso_fortran_env, only: stderr => error_unit
+   use hrweno_kinds, only: rk
    use fluxes, only: godunov, lax_friedrichs
-   use iso_fortran_env, only: real64, stderr => error_unit
    use testdrive, only: new_unittest, unittest_type, error_type, check
    implicit none
    private
 
    public :: collect_tests_fluxes
 
-   integer, parameter :: rk = real64
    logical, parameter :: verbose = .false.
 
 contains

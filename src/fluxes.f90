@@ -3,13 +3,11 @@ module fluxes
 !! intented to help test the other modules. The WENO schemes themselves are applicable to
 !! scalar and multiple component problems.
 !!   Source: ICASE 97-65 by Shu, 1997.
-   use, intrinsic :: iso_fortran_env, only: real64
+   use hrweno_kinds, only: rk
    implicit none
    private
 
    public :: lax_friedrichs, godunov
-
-   integer, parameter :: rk = real64
 
    abstract interface
       pure function flux(u, x, t)

@@ -4,14 +4,12 @@ module tvdode
 !! with a TVD spacial discretization, if the time discretization is done by a non-TVD method,
 !! the result may be oscillatory.
 !!   Source: ICASE 97-65 by Shu, 1997.
-   use, intrinsic :: iso_fortran_env, only: real64
+   use hrweno_kinds, only: rk
    use stdlib_optval, only: optval
    implicit none
    private
 
    public :: rktvd, mstvd
-
-   integer, parameter :: rk = real64
 
    type, abstract :: tvdode_class
    !! Abstract class for TVD ODE solvers.
@@ -109,7 +107,6 @@ contains
    !!
    !! @todo
    !! - Adjust dt in final step to avoid overshoting tout by some fraction of dt.
-   !! - Maybe include an optional work array that could be passed to the integrand (fu).
       class(rktvd), intent(inout) :: self
          !! object
       real(rk), intent(inout) :: u(:)
@@ -217,9 +214,6 @@ contains
    !! @note
    !!   There is a 2nd order multi-step method, but the corresponding CFL value is half that
    !! of the 2nd order RK method. Thus, there is no reason to implement it.
-   !!
-   !! @todo
-   !! - Maybe include an optional work array that could be transfered to the integrand (fu).
       class(mstvd), intent(inout) :: self
          !! object
       real(rk), intent(inout) :: u(:)

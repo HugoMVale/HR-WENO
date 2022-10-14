@@ -1,14 +1,14 @@
 module test_hrweno
 !! Test for module 'hrweno' using test-drive.
+   use iso_fortran_env, only: stderr => error_unit
+   use hrweno_kinds, only: rk
    use hrweno, only: weno, c1, c2, c3
-   use iso_fortran_env, only: real64, stderr => error_unit
    use testdrive, only: new_unittest, unittest_type, error_type, check
    implicit none
    private
 
    public :: collect_tests_hrweno
 
-   integer, parameter :: rk = real64
    logical, parameter :: verbose = .false.
 
 contains

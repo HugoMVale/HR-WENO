@@ -2,17 +2,15 @@ module hrweno
 !!   This module contains a collection of high-resolution weighted essentially non-oscillatory
 !! (WENO) schemes for *arbitrary* (uniform or non-uniform) finite volume/difference methods.
 !!   Source: ICASE 97-65 by Shu, 1997.
-   use, intrinsic :: iso_fortran_env, only: real64
+   use hrweno_kinds, only: rk
    implicit none
    private
 
    public :: weno, c1, c2, c3
 
-   integer, parameter :: rk = real64
-
    !> Parameter arrays for WENO methods
    real(rk), parameter :: d1(0:0) = 1._rk, &
-                          d2(0:1) = [2._rk/3_rk, 1._rk/3_rk], &
+                          d2(0:1) = [2._rk/3, 1._rk/3], &
                           d3(0:2) = [0.3_rk, 0.6_rk, 0.1_rk]
    real(rk), parameter :: &
       c1(0:0, -1:0) = reshape([1._rk, 1._rk], [1, 2], order=[1, 2]), &

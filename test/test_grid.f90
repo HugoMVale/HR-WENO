@@ -1,14 +1,14 @@
 module test_grid
     !! Test for module 'grid' using test-drive.
+   use iso_fortran_env, only: stderr => error_unit
+   use hrweno_kinds, only: rk
    use grid, only: grid1
-   use iso_fortran_env, only: real64, stderr => error_unit
    use testdrive, only: new_unittest, unittest_type, error_type, check
    implicit none
    private
 
    public :: collect_tests_grid
 
-   integer, parameter :: rk = real64
    logical, parameter :: verbose = .false.
    real(rk), parameter :: atol = 1e-10_rk
 
@@ -37,7 +37,7 @@ contains
       ! General settings
       xmin = 0._rk
       xmax = 1e3_rk
-      nc = 1000000
+      nc = 10**6
 
       ! Make grid
       call gx%linear(xmin, xmax, nc, name="F [N]")
@@ -69,7 +69,7 @@ contains
       ! General settings
       xmin = 1e-1_rk
       xmax = 1e3_rk
-      nc = 1000000
+      nc = 10**4
 
       ! Make grid
       call gx%log(xmin, xmax, nc, name="T [K]")
@@ -102,7 +102,7 @@ contains
       xmin = 1e-1_rk
       xmax = 1e3_rk
       ratio = 1.1_rk
-      nc = 1000
+      nc = 10**3
 
       ! Make grid
       call gx%geometric(xmin, xmax, ratio, nc, name="P [W]")

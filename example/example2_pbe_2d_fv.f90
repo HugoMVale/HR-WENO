@@ -11,16 +11,16 @@ program example_pbe_2d_fv
 !! and the time variable 't' is left continuous (method of lines). See example1 for notation.
 !!   In this particular example, we use the 3rd order 'mstvd' ode solver. The reconstruction
 !! is done with the 5th order WENO scheme; to try other orders, we can change the parameter 'k'
-!! in procedure 'rhs' .
+!! in procedure 'rhs'.
+   use iso_fortran_env, only: stderr => error_unit, stdout => output_unit
+   use hrweno_kinds, only: rk
    use tvdode, only: mstvd
    use hrweno, only: weno
    use fluxes, only: godunov
    use grid, only: grid1
-   use iso_fortran_env, only: real64, stderr => error_unit, stdout => output_unit
    use stdlib_strings, only: to_string
    implicit none
 
-   integer, parameter :: rk = real64
    integer, parameter :: nc(2) = [250, 250]
    integer, parameter :: k = 3
    real(rk) :: u(product(nc))

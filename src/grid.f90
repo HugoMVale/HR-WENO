@@ -1,13 +1,11 @@
 module grid
 !!   This module implements a 1D grid class.
-   use, intrinsic :: iso_fortran_env, only: real64
+   use hrweno_kinds, only: rk
    use stdlib_optval, only: optval
    implicit none
    private
 
    public :: grid1
-
-   integer, parameter :: rk = real64
 
    type :: grid1
     !! 1D grid class.
@@ -62,7 +60,7 @@ contains
       integer :: i
 
       ! Check input
-      if (.not. (xmax > xmin)) then
+      if (xmax <= xmin) then
          error stop "Invalid input 'xmin', 'xmax'. Valid range: xmax > xmin."
       end if
       if (ncells < 1) then
@@ -108,10 +106,10 @@ contains
       real(rk) :: xedges(0:sum(ncells)), rx
       integer :: i
 
-      if (.not. (xcross > xmin)) then
+      if (xcross <= xmin) then
          error stop "Invalid input 'xmin', 'xcross'. Valid range: xcross > xmin."
       end if
-      if (.not. (xmax > xcross)) then
+      if (xmax <= xcross) then
          error stop "Invalid input 'xcross', 'xmax'. Valid range: xmax > xcross."
       end if
       if (any(ncells < 1)) then
@@ -205,7 +203,7 @@ contains
       integer :: i
 
       ! Check input
-      if (.not. (xmax > xmin)) then
+      if (xmax <= xmin) then
          error stop "Invalid input 'xmin', 'xmax'. Valid range: xmax > xmin"
       end if
       if (ratio <= 0._rk) then
