@@ -1,6 +1,6 @@
 module test_grid
     !! Test for module 'grid' using test-drive.
-   use iso_fortran_env, only: stderr => error_unit
+   use, intrinsic :: iso_fortran_env, only: stderr => error_unit
    use hrweno_kinds, only: rk
    use grid, only: grid1
    use testdrive, only: new_unittest, unittest_type, error_type, check

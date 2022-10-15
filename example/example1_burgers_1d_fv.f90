@@ -19,7 +19,7 @@ program example1_burgers_1d_fv
 !!  In this particular example, we use the 3rd order 'rktvd' ode solver (we could equally well
 !! employ the 'mstvd' solver). The reconstruction is done with the 5th order WENO scheme; to
 !! try other orders, we can change the parameter 'k'.
-   use iso_fortran_env, only: stderr => error_unit, stdout => output_unit
+   use, intrinsic :: iso_fortran_env, only: stderr => error_unit, stdout => output_unit
    use hrweno_kinds, only: rk
    use tvdode, only: rktvd
    use hrweno, only: weno

@@ -1,6 +1,6 @@
 module test_fluxes
 !! Test for module 'fluxes' using test-drive.
-   use iso_fortran_env, only: stderr => error_unit
+   use, intrinsic :: iso_fortran_env, only: stderr => error_unit
    use hrweno_kinds, only: rk
    use fluxes, only: godunov, lax_friedrichs
    use testdrive, only: new_unittest, unittest_type, error_type, check

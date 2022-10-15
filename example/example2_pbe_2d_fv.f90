@@ -12,7 +12,7 @@ program example_pbe_2d_fv
 !!   In this particular example, we use the 3rd order 'mstvd' ode solver. The reconstruction
 !! is done with the 5th order WENO scheme; to try other orders, we can change the parameter 'k'
 !! in procedure 'rhs'.
-   use iso_fortran_env, only: stderr => error_unit, stdout => output_unit
+   use, intrinsic :: iso_fortran_env, only: stderr => error_unit, stdout => output_unit
    use hrweno_kinds, only: rk
    use tvdode, only: mstvd
    use hrweno, only: weno
