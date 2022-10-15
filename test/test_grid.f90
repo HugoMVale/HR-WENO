@@ -10,7 +10,7 @@ module test_grid
    public :: collect_tests_grid
 
    logical, parameter :: verbose = .false.
-   real(rk), parameter :: atol = 1e-10_rk
+   real(rk), parameter :: rtol = 1e-5_rk
 
 contains
 
@@ -35,7 +35,7 @@ contains
       integer :: nc
 
       ! General settings
-      xmin = 0._rk
+      xmin = 1._rk
       xmax = 1e3_rk
       nc = 10**6
 
@@ -45,9 +45,9 @@ contains
       ! Checks
       call check(error, gx%ncells, nc)
       if (allocated(error)) return
-      call check(error, gx%edges(0), xmin, thr=atol)
+      call check(error, gx%edges(0), xmin, rel=.true., thr=rtol)
       if (allocated(error)) return
-      call check(error, gx%edges(nc), xmax, thr=atol)
+      call check(error, gx%edges(nc), xmax, rel=.true., thr=rtol)
       if (allocated(error)) return
       call check(error, gx%left, gx%edges(0:nc - 1))
       if (allocated(error)) return
@@ -77,9 +77,9 @@ contains
       ! Checks
       call check(error, gx%ncells, nc)
       if (allocated(error)) return
-      call check(error, gx%edges(0), xmin, thr=atol)
+      call check(error, gx%edges(0), xmin, rel=.true., thr=rtol)
       if (allocated(error)) return
-      call check(error, gx%edges(nc), xmax, thr=atol)
+      call check(error, gx%edges(nc), xmax, rel=.true., thr=rtol)
       if (allocated(error)) return
       call check(error, gx%left, gx%edges(0:nc - 1))
       if (allocated(error)) return
@@ -99,10 +99,10 @@ contains
       integer :: nc
 
       ! General settings
-      xmin = 1e-1_rk
+      xmin = 1e1_rk
       xmax = 1e3_rk
       ratio = 1.1_rk
-      nc = 10**3
+      nc = 10**2
 
       ! Make grid
       call gx%geometric(xmin, xmax, ratio, nc, name="P [W]")
@@ -110,9 +110,9 @@ contains
       ! Checks
       call check(error, gx%ncells, nc)
       if (allocated(error)) return
-      call check(error, gx%edges(0), xmin, thr=atol)
+      call check(error, gx%edges(0), xmin, rel=.true., thr=rtol)
       if (allocated(error)) return
-      call check(error, gx%edges(nc), xmax, thr=atol)
+      call check(error, gx%edges(nc), xmax, rel=.true., thr=rtol)
       if (allocated(error)) return
       call check(error, gx%left, gx%edges(0:nc - 1))
       if (allocated(error)) return
@@ -144,11 +144,11 @@ contains
       ! Checks
       call check(error, gx%ncells, ncsum)
       if (allocated(error)) return
-      call check(error, gx%edges(0), xmin, thr=atol)
+      call check(error, gx%edges(0), xmin, rel=.true., thr=rtol)
       if (allocated(error)) return
-      call check(error, gx%edges(nc(1)), xcross, thr=atol)
+      call check(error, gx%edges(nc(1)), xcross, rel=.true., thr=rtol)
       if (allocated(error)) return
-      call check(error, gx%edges(ncsum), xmax, thr=atol)
+      call check(error, gx%edges(ncsum), xmax, rel=.true., thr=rtol)
       if (allocated(error)) return
       call check(error, gx%left, gx%edges(0:ncsum - 1))
       if (allocated(error)) return
