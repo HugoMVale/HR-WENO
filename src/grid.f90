@@ -177,7 +177,7 @@ contains
 
    end subroutine grid1_log
 
-   pure subroutine grid1_geometric(self, xmin, xmax, ratio, ncells, name)
+   subroutine grid1_geometric(self, xmin, xmax, ratio, ncells, name)
     !! Initialize *geometric* grid. <br>
     !! Geometrically increasing/decreasing width: \( width(i+1) = R \; width(i) \)
     !!
@@ -217,11 +217,7 @@ contains
       call self%clear
 
       ! Compute mesh
-      sum_ratio = 0._rk
-      do i = 1, ncells
-         sum_ratio = sum_ratio + ratio**(i - 1)
-      end do
-      a1 = (xmax - xmin)/sum_ratio
+      a1 = (xmax - xmin)*(ratio - 1._rk)/(ratio**ncells - 1._rk)
       xedges(0) = xmin
       do i = 1, ncells
          xedges(i) = xedges(i - 1) + a1*ratio**(i - 1)
