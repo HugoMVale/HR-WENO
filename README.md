@@ -44,8 +44,10 @@ use tvdode, only: rktvd
 ...
 type(rktvd) :: ode
 ...
-! Call ODE time solver
+! Initialize solver object
 ode = rktvd(rhs, neq=size(u), order=3)
+
+! Integrate
 time_start = 0._rk
 time_end = 12._rk
 dt = 1e-2_rk
@@ -66,7 +68,7 @@ use hrweno, only: weno
 ...
 type(weno) :: myweno
 ...
-! Init weno object
+! Initialize weno object
 myweno = weno(ncells=100, k=3, eps=1e-6_rk)
    
 ! Get reconstructed values at cell boundaries
