@@ -46,6 +46,7 @@ type(rktvd) :: ode
 ...
 ! Initialize solver object
 ode = rktvd(rhs, neq=size(u), order=3)
+
 ! Integrate
 time_start = 0._rk
 time_end = 12._rk
