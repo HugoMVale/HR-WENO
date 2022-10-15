@@ -1,5 +1,6 @@
 *.mod
 *.vscode
+*.vs
 *.venv
 *gcov.sh
 _site
