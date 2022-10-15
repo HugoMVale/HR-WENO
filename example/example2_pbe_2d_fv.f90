@@ -182,7 +182,6 @@ contains
       case (1)
 
          write (stdout, '(1x, a)') "Running example2..."
-         write (stdout, '(1x, a, 1x, a)') "Start:", fdate()
          call cpu_time(cpu_start)
 
          ! Write grid
@@ -220,7 +219,6 @@ contains
             close (funit_x(j))
          end do
          close (funit_u)
-         write (stdout, '(1x, a, 1x, a)') "End  :", fdate()
          call cpu_time(cpu_end)
          write (stdout, '(1x, a, 1x, f7.1)') "Elaspsed time (ms) :", 1e3*(cpu_end - cpu_start)
 
