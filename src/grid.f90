@@ -199,7 +199,7 @@ contains
       character(*), intent(in), optional :: name
         !! grid name
 
-      real(rk) :: xedges(0:ncells), sum_ratio, a1
+      real(rk) :: xedges(0:ncells), a
       integer :: i
 
       ! Check input
@@ -217,10 +217,9 @@ contains
       call self%clear
 
       ! Compute mesh
-      a1 = (xmax - xmin)*(ratio - 1._rk)/(ratio**ncells - 1._rk)
-      xedges(0) = xmin
-      do i = 1, ncells
-         xedges(i) = xedges(i - 1) + a1*ratio**(i - 1)
+      a = (xmax - xmin)/(ratio**ncells - 1._rk)
+      do concurrent(i=0:ncells)
+         xedges(i) = xmin + a*(ratio**i - 1)
       end do
 
       self%scl = 4
