@@ -34,7 +34,7 @@ contains
       integer :: i, k
 
       ! Run check for each order
-      atol = 1e-9_rk
+      atol = 1e-6_rk
       do k = 1, 3
 
          ! Init weno object
@@ -83,7 +83,7 @@ contains
       end do
 
       ! Run check for each order
-      rtol = 1e-9_rk
+      rtol = 1e-5_rk
       do k = 1, 3
 
          ! Init weno object
@@ -128,7 +128,7 @@ contains
       xedges = xedges**3
 
       ! Run check for each order
-      atol = 1e-9_rk
+      atol = 1e-6_rk
       do k = 1, 3
 
          ! Init weno object
@@ -143,9 +143,9 @@ contains
          call myweno%reconstruct(v, vl, vr)
 
          ! Check error
-         call check(error, v, vl, thr=atol)
+         call check(error, vl, v, thr=atol)
          if (.not. (allocated(error))) then
-            call check(error, v, vr, thr=atol)
+            call check(error, vr, v, thr=atol)
          end if
 
          ! Detailed comparison for debugging
