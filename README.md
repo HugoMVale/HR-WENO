@@ -40,7 +40,7 @@ and the numerical results will be stored in the [`output`](/output) subfolder. Y
 The ODE solvers (`rktvd` and `mstvd`) are called like most other solvers (e.g., LSODE): 
 
 ```fortran
-use tvdode, only: tvdode_class, rktvd
+use tvdode, only: rktvd
 ...
 type(rktvd) :: ode
 ...
