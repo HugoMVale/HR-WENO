@@ -17,7 +17,7 @@ program example_pbe_2d_fv
    use tvdode, only: mstvd
    use hrweno, only: weno
    use fluxes, only: godunov
-   use grid, only: grid1
+   use grids, only: grid1
    use stdlib_strings, only: to_string
    implicit none
 

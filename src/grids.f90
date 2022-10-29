@@ -1,4 +1,4 @@
-module grid
+module grids
 !!   This module implements a 1D grid class.
    use hrweno_kinds, only: rk
    use stdlib_optval, only: optval
@@ -264,4 +264,4 @@ contains
 
    end subroutine grid1_clear
 
-end module grid
+end module grids

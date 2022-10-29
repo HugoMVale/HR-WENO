@@ -24,7 +24,7 @@ program example1_burgers_1d_fv
    use tvdode, only: rktvd
    use hrweno, only: weno
    use fluxes, only: godunov, lax_friedrichs
-   use grid, only: grid1
+   use grids, only: grid1
    use stdlib_strings, only: to_string
    implicit none
 
