@@ -22,7 +22,6 @@ program example_pbe_2d_fv
    implicit none
 
    integer, parameter :: nc(2) = [250, 250]
-   integer, parameter :: k = 3
    real(rk) :: u(product(nc))
    type(grid1) :: gx(2)
    type(weno) :: myweno(2)
@@ -36,8 +35,8 @@ program example_pbe_2d_fv
    call gx(2)%linear(xmin=0._rk, xmax=10._rk, ncells=nc(2))
 
    ! Init weno objects
-   myweno(1) = weno(ncells=nc(1), k=k, eps=1e-6_rk)
-   myweno(2) = weno(ncells=nc(2), k=k, eps=1e-6_rk)
+   myweno(1) = weno(ncells=nc(1), k=3, eps=1e-6_rk)
+   myweno(2) = weno(ncells=nc(2), k=3, eps=1e-6_rk)
 
    ! Open file where results will be stored
    call output(1)
@@ -167,16 +166,16 @@ contains
 
    end function ic
 
-   subroutine output(message)
+   subroutine output(action)
    !! Auxiliary routine to save results to file.
-      integer, intent(in) :: message
+      integer, intent(in) :: action
          !! parameter to select output action
 
       character(*), parameter :: folder = "./output/example2/"
       real(rk) :: cpu_start = 0._rk, cpu_end = 0._rk
       integer :: i, j, funit_x(size(nc)) = 0, funit_u = 0
 
-      select case (message)
+      select case (action)
 
          ! Open files and write headers and grid
       case (1)

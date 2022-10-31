@@ -29,7 +29,6 @@ program example1_burgers_1d_fv
    implicit none
 
    integer, parameter :: nc = 100
-   integer, parameter :: k = 3
    real(rk) :: u(nc)
    real(rk) :: dt, time, time_out, time_start, time_end
    integer :: num_time_points, ii
@@ -42,7 +41,7 @@ program example1_burgers_1d_fv
    call gx%linear(xmin=-5._rk, xmax=5._rk, ncells=nc)
 
    ! Init weno object
-   myweno = weno(ncells=nc, k=k, eps=1e-6_rk)
+   myweno = weno(ncells=nc, k=3, eps=1e-6_rk)
 
    ! Open file where results will be stored
    call output(1)
@@ -133,15 +132,15 @@ contains
 
    end function ic
 
-   subroutine output(message)
+   subroutine output(action)
    !! Auxiliary routine to save results to file.
-      integer, intent(in) :: message
+      integer, intent(in) :: action
          !! parameter to select output action
       integer :: i, funit_x = 0, funit_u = 0
       real(rk) :: cpu_start = 0._rk, cpu_end = 0._rk
       character(*), parameter :: folder = "./output/example1/"
 
-      select case (message)
+      select case (action)
 
          ! Open files and write headers and grid
       case (1)
