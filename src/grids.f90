@@ -11,6 +11,8 @@ module grids
     !! 1D grid class.
       character(:), allocatable :: name
         !! variable name
+      character(:), allocatable :: scl
+        !! scale type
       real(rk), allocatable :: edges(:)
         !! vector(0:ncells) of cell edges
       real(rk), allocatable :: center(:)
@@ -23,8 +25,6 @@ module grids
         !! vector(ncells) of right cell boundaries, \( x_{i+1/2} \)
       integer :: ncells
         !! number of cells
-      integer :: scl
-        !! scale flag (1: linear, 2: bilinear, 3: log, 4: geometric)
    contains
       procedure, pass(self) :: linear => grid1_linear
       procedure, pass(self) :: bilinear => grid1_bilinear
@@ -76,7 +76,7 @@ contains
          xedges(i) = xmin + rx*i
       end do
 
-      self%scl = 1
+      self%scl = "linear"
       call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_linear
@@ -128,7 +128,7 @@ contains
          xedges(ncells(1) + i) = xcross + rx*i
       end do
 
-      self%scl = 2
+      self%scl = "bilinear"
       call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_bilinear
@@ -172,7 +172,7 @@ contains
       end do
       xedges = exp(xedges)
 
-      self%scl = 3
+      self%scl = "log"
       call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_log
@@ -222,7 +222,7 @@ contains
          xedges(i) = xmin + a*(ratio**i - 1)
       end do
 
-      self%scl = 4
+      self%scl = "geometric"
       call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_geometric
@@ -260,7 +260,7 @@ contains
       if (associated(self%left)) nullify (self%left)
       if (associated(self%right)) nullify (self%right)
       self%ncells = 0
-      self%scl = 0
+      self%scl = ""
 
    end subroutine grid1_clear
 
