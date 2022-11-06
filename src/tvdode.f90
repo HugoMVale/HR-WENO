@@ -14,7 +14,7 @@ module tvdode
    type, abstract :: tvdode_class
    !! Abstract class for TVD ODE solvers.
       procedure(integrand), pointer, nopass, private :: fu => null()
-         !! subroutine with the derivative \( u'(t) \)
+         !! subroutine with the derivative \( u'(t,u) \)
       integer :: neq
          !! number of equations
       integer :: order
@@ -67,7 +67,7 @@ contains
    type(rktvd) function rktvd_init(fu, neq, order) result(self)
    !! Initialize 'rktvd' object.
       procedure(integrand) :: fu
-         !! subroutine with the derivative \( u'(t) \)
+         !! subroutine with the derivative \( u'(t,u) \)
       integer, intent(in) :: neq
          !! number of equations
       integer, intent(in) :: order
@@ -182,7 +182,7 @@ contains
    type(mstvd) function mstvd_init(fu, neq) result(self)
    !! Initialize 'mstvd' object.
       procedure(integrand) :: fu
-         !! subroutine with the derivative \( u'(t) \)
+         !! subroutine with the derivative \( u'(t,u) \)
       integer, intent(in) :: neq
          !! number of equations
 

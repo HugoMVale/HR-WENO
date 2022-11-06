@@ -38,7 +38,7 @@ contains
       real(rk), intent(in) :: t
         !! time, \( t \)
       real(rk), intent(in) :: alpha
-        !! \( max(abs(f'(v))) \) in the domain on the problem
+        !! \( \max(\abs(f'(v))) \) in the domain on the problem
 
       lax_friedrichs = (f(vm, x, t) + f(vp, x, t) - alpha*(vp - vm))/2
 

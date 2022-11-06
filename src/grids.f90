@@ -1,5 +1,7 @@
 module grids
-!!   This module implements a 1D grid class.
+!!   This module implements a convenience 1D grid class. The module is mostly indented to help
+!! write the examples. The WENO schemes themselves are completely independent from this module,
+!! so that they can be used anywhere.
    use hrweno_kinds, only: rk
    use stdlib_optval, only: optval
    implicit none
@@ -13,6 +15,8 @@ module grids
         !! variable name
       character(:), allocatable :: scl
         !! scale type
+      integer :: ncells
+        !! number of cells
       real(rk), allocatable :: edges(:)
         !! vector(0:ncells) of cell edges
       real(rk), allocatable :: center(:)
@@ -23,8 +27,6 @@ module grids
         !! vector(ncells) of left cell boundaries, \( x_{i-1/2} \)
       real(rk), dimension(:), pointer :: right => null()
         !! vector(ncells) of right cell boundaries, \( x_{i+1/2} \)
-      integer :: ncells
-        !! number of cells
    contains
       procedure, pass(self) :: linear => grid1_linear
       procedure, pass(self) :: bilinear => grid1_bilinear

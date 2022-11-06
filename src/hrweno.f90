@@ -64,8 +64,8 @@ contains
          !! numerical smoothing factor
       real(rk), intent(in), optional :: xedges(0:)
          !! vector(0:ncells) of cell edges;
-         !! xedges(i) is the value of x at right boundary of cell i, \( x_{i+1/2} \);
-         !! xedges(i-1) is the value of x at left boundary of cell i, \( x_{i-1/2} \).
+         !! xedges(i) is the value of x at the right boundary of cell i, \( x_{i+1/2} \);
+         !! xedges(i-1) is the value of x at the left boundary of cell i, \( x_{i-1/2} \).
 
       ! Check inputs
       if (ncells > 0) then
@@ -127,7 +127,7 @@ contains
    !!   This subroutine implements the (2k-1)th order WENO method for *arbitrary* (uniform or
    !! non-uniform) finite volume/difference schemes described in ICASE 97-65 (Shu, 1997).
    !!   The method is applicable to scalar as well as multicomponent problems. In the later
-   !! case, the reconstruction is applied in a component by component fashion.
+   !! case, the reconstruction is applied in a component-by-component fashion.
    !!   The scheme below depics a generic finite *volume* discretization and the notation
    !! used (see Arguments).
    !!```
