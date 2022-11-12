@@ -21,10 +21,10 @@ program example1_burgers_1d_fv
 !! try other orders, we can change the parameter 'k'.
    use, intrinsic :: iso_fortran_env, only: stderr => error_unit, stdout => output_unit
    use hrweno_kinds, only: rk
-   use tvdode, only: rktvd
-   use hrweno, only: weno
-   use fluxes, only: godunov, lax_friedrichs
-   use grids, only: grid1
+   use hrweno_tvdode, only: rktvd
+   use hrweno_weno, only: weno
+   use hrweno_fluxes, only: godunov, lax_friedrichs
+   use hrweno_grids, only: grid1
    use stdlib_strings, only: to_string
    implicit none
 

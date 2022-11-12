@@ -14,10 +14,10 @@ program example_pbe_2d_fv
 !! in procedure 'rhs'.
    use, intrinsic :: iso_fortran_env, only: stderr => error_unit, stdout => output_unit
    use hrweno_kinds, only: rk
-   use tvdode, only: mstvd
-   use hrweno, only: weno
-   use fluxes, only: godunov
-   use grids, only: grid1
+   use hrweno_tvdode, only: mstvd
+   use hrweno_weno, only: weno
+   use hrweno_fluxes, only: godunov
+   use hrweno_grids, only: grid1
    use stdlib_strings, only: to_string
    implicit none
 

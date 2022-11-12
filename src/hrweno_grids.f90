@@ -1,4 +1,4 @@
-module grids
+module hrweno_grids
 !!   This module implements a convenience 1D grid class. The module is mostly indented to help
 !! write the examples. The WENO schemes themselves are completely independent from this module,
 !! so that they can be used anywhere.
@@ -266,4 +266,4 @@ contains
 
    end subroutine grid1_clear
 
-end module grids
+end module hrweno_grids

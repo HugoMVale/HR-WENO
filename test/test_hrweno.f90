@@ -2,7 +2,7 @@ module test_hrweno
 !! Test for module 'hrweno' using test-drive.
    use, intrinsic :: iso_fortran_env, only: stderr => error_unit
    use hrweno_kinds, only: rk
-   use hrweno, only: weno, c1, c2, c3
+   use hrweno_weno, only: weno, c1, c2, c3
    use testdrive, only: new_unittest, unittest_type, error_type, check
    implicit none
    private

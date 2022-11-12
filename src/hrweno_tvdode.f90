@@ -1,4 +1,4 @@
-module tvdode
+module hrweno_tvdode
 !!   This module contains two total variation diminishing (TVD) high-order schemes for solving
 !! initial value problems. It is very important to use TVD schemes for time integration. Even
 !! with a TVD spacial discretization, if the time discretization is done by a non-TVD method,
@@ -287,4 +287,4 @@ contains
 
    end function is_done
 
-end module tvdode
+end module hrweno_tvdode

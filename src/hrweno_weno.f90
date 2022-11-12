@@ -1,4 +1,4 @@
-module hrweno
+module hrweno_weno
 !!   This module contains a collection of high-resolution weighted essentially non-oscillatory
 !! (WENO) schemes for *arbitrary* (uniform or non-uniform) finite volume/difference methods.
 !!   Source: ICASE 97-65 by Shu, 1997.
@@ -293,4 +293,4 @@ contains
       end associate
    end subroutine weno_calc_cnu
 
-end module hrweno
+end module hrweno_weno

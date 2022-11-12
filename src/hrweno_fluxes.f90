@@ -1,4 +1,4 @@
-module fluxes
+module hrweno_fluxes
 !!   This module contains basic flux schemes for *scalar* problems. They are mostly
 !! intented to help test the other modules. The WENO schemes themselves are applicable to
 !! scalar and multiple component problems.
@@ -75,4 +75,4 @@ contains
 
    end function godunov
 
-end module fluxes
+end module hrweno_fluxes

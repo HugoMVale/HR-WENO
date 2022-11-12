@@ -2,7 +2,7 @@ module test_tvdode
 !! Test for module 'tvdode' using test-drive.
    use, intrinsic :: iso_fortran_env, only: stderr => error_unit
    use hrweno_kinds, only: rk
-   use tvdode, only: rktvd, mstvd
+   use hrweno_tvdode, only: rktvd, mstvd
    use testdrive, only: new_unittest, unittest_type, error_type, check
    implicit none
    private
