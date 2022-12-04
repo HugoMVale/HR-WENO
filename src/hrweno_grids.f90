@@ -13,7 +13,7 @@ module hrweno_grids
     !! 1D grid class.
       character(:), allocatable :: name
         !! variable name
-      character(:), allocatable :: scl
+      character(:), allocatable :: scale
         !! scale type
       integer :: ncells
         !! number of cells
@@ -78,7 +78,7 @@ contains
          xedges(i) = xmin + rx*i
       end do
 
-      self%scl = "linear"
+      self%scale = "linear"
       call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_linear
@@ -130,7 +130,7 @@ contains
          xedges(ncells(1) + i) = xcross + rx*i
       end do
 
-      self%scl = "bilinear"
+      self%scale = "bilinear"
       call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_bilinear
@@ -174,7 +174,7 @@ contains
       end do
       xedges = exp(xedges)
 
-      self%scl = "log"
+      self%scale = "log"
       call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_log
@@ -224,7 +224,7 @@ contains
          xedges(i) = xmin + a*(ratio**i - 1)
       end do
 
-      self%scl = "geometric"
+      self%scale = "geometric"
       call self%compute(xedges, optval(name, ""))
 
    end subroutine grid1_geometric
@@ -262,7 +262,7 @@ contains
       if (associated(self%left)) nullify (self%left)
       if (associated(self%right)) nullify (self%right)
       self%ncells = 0
-      self%scl = ""
+      self%scale = ""
 
    end subroutine grid1_clear
 
