@@ -26,10 +26,10 @@ module hrweno_weno
          !! error message
       integer :: ierr = 0
          !! error status
-      integer :: k
-         !! order of reconstruction within the cell (k = 1, 2 or 3)
       integer :: ncells
          !! number of cells
+      integer :: k = 3
+         !! order of reconstruction within the cell (k = 1, 2 or 3)
       real(rk) :: eps = 1e-6_rk
          !! numerical smoothing factor
       real(rk), allocatable, private :: d(:)
@@ -58,7 +58,7 @@ contains
    !! If the grid is not uniform, the user must supply the edges of the grid.
       integer, intent(in) :: ncells
          !! number of cells
-      integer, intent(in) :: k
+      integer, intent(in), optional :: k
          !! order of reconstruction within the cell (1 <= k <= 3)
       real(rk), intent(in), optional :: eps
          !! numerical smoothing factor
@@ -76,19 +76,21 @@ contains
          error stop self%msg
       end if
 
-      if ((k >= 1) .and. (k <= 3)) then
-         self%k = k
-      else
-         self%msg = "Invalid input 'k'. Valid range: 1 <= k <= 3."
-         self%ierr = 1
-         error stop self%msg
+      if (present(k)) then
+         if ((k >= 1) .and. (k <= 3)) then
+            self%k = k
+         else
+            self%msg = "Invalid input 'k'. Valid range: 1 <= k <= 3."
+            self%ierr = 1
+            error stop self%msg
+         end if
       end if
 
       if (present(eps)) then
-         if (eps > 0._rk) then
+         if (eps > epsilon(1._rk)) then
             self%eps = eps
          else
-            self%msg = "Invalid input 'eps'. Valid range: eps > 0."
+            self%msg = "Invalid input 'eps'. Valid range: eps > epsilon."
             self%ierr = 1
             error stop self%msg
          end if
