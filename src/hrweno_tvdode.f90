@@ -11,7 +11,7 @@ module hrweno_tvdode
 
    public :: rktvd, mstvd
 
-   type, abstract :: tvdode_class
+   type, abstract :: tvdode
    !! Abstract class for TVD ODE solvers.
       procedure(integrand), pointer, nopass, private :: fu => null()
          !! subroutine with the derivative \( u'(t,u) \)
@@ -29,15 +29,17 @@ module hrweno_tvdode
          !! error message
       real(rk), allocatable, private :: ui(:)
       real(rk), allocatable, private :: udot(:)
-   end type tvdode_class
+   contains
+      procedure, pass(self) :: error_msg
+   end type tvdode
 
-   type, extends(tvdode_class) :: rktvd
+   type, extends(tvdode) :: rktvd
    !! Runge-Kutta TVD ODE solver class.
    contains
       procedure, pass(self) :: integrate => rktvd_integrate
    end type rktvd
 
-   type, extends(tvdode_class) :: mstvd
+   type, extends(tvdode) :: mstvd
    !! Multi-step TVD ODE solver class.
       real(rk), allocatable, private :: uold(:, :)
       real(rk), allocatable, private :: udotold(:, :)
@@ -78,17 +80,13 @@ contains
       if (neq > 0) then
          self%neq = neq
       else
-         self%msg = "Invalid input 'neq'. Valid range: neq >= 1."
-         self%istate = -1
-         error stop self%msg
+         call self%error_msg("Invalid input 'neq'. Valid range: neq >= 1.")
       end if
 
       if ((order >= 1) .and. (order <= 3)) then
          self%order = order
       else
-         self%msg = "Invalid input 'order' in 'rktvd'. Valid range: 1 <= k <= 3."
-         self%istate = -1
-         error stop self%msg
+         call self%error_msg("Invalid input 'order' in 'rktvd'. Valid range: 1 <= k <= 3.")
       end if
 
       allocate (self%ui(self%neq), self%udot(self%neq))
@@ -191,9 +189,7 @@ contains
       if (neq > 0) then
          self%neq = neq
       else
-         self%msg = "Invalid input 'neq'. Valid range: neq >= 1."
-         self%istate = -1
-         error stop self%msg
+         call self%error_msg("Invalid input 'neq'. Valid range: neq >= 1.")
       end if
 
       self%order = 3
@@ -286,5 +282,18 @@ contains
       is_done = (t - tout)*sign(1._rk, dt) > 0._rk
 
    end function is_done
+
+   pure subroutine error_msg(self, msg)
+   !! Error method.
+      class(tvdode), intent(inout) :: self
+         !! object
+      character(*), intent(in) :: msg
+         !! message
+
+      self%msg = msg
+      self%istate = -1
+      error stop self%msg
+
+   end subroutine
 
 end module hrweno_tvdode
