@@ -136,16 +136,17 @@ contains
    !! Auxiliary routine to save results to file.
       integer, intent(in) :: action
          !! parameter to select output action
-      integer :: i, funit_x = 0, funit_u = 0
-      real(rk) :: cpu_start = 0._rk, cpu_end = 0._rk
       character(*), parameter :: folder = "./output/example1/"
+      real(rk), save :: cpu_start = 0._rk, cpu_end = 0._rk
+      integer, save :: funit_x = 0, funit_u = 0
+      integer :: i
 
       select case (action)
 
          ! Open files and write headers and grid
       case (1)
 
-         write (stdout, '(1x, a)') "Running example1..."
+         write (stdout, '(1x, a)') "Running example1 ..."
          call cpu_time(cpu_start)
 
          ! Write grid
@@ -180,7 +181,7 @@ contains
          close (funit_x)
          close (funit_u)
          call cpu_time(cpu_end)
-         write (stdout, '(1x, a, 1x, f6.1)') "Elaspsed time (ms) :", 1e3*(cpu_end - cpu_start)
+         write (stdout, '(1x, a, 1x, f6.1)') "Elapsed time (ms) :", 1e3_rk*(cpu_end - cpu_start)
 
       end select
 
