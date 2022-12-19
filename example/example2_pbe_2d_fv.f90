@@ -172,15 +172,16 @@ contains
          !! parameter to select output action
 
       character(*), parameter :: folder = "./output/example2/"
-      real(rk) :: cpu_start = 0._rk, cpu_end = 0._rk
-      integer :: i, j, funit_x(size(nc)) = 0, funit_u = 0
+      real(rk), save :: cpu_start = 0._rk, cpu_end = 0._rk
+      integer, save :: funit_x(size(nc)) = 0, funit_u = 0
+      integer :: i, j
 
       select case (action)
 
          ! Open files and write headers and grid
       case (1)
 
-         write (stdout, '(1x, a)') "Running example2..."
+         write (stdout, '(1x, a)') "Running example2 ..."
          call cpu_time(cpu_start)
 
          ! Write grid
@@ -219,7 +220,7 @@ contains
          end do
          close (funit_u)
          call cpu_time(cpu_end)
-         write (stdout, '(1x, a, 1x, f7.1)') "Elaspsed time (ms) :", 1e3*(cpu_end - cpu_start)
+         write (stdout, '(1x, a, 1x, f5.1)') "Elapsed time (s) :", (cpu_end - cpu_start)
 
       end select
 
