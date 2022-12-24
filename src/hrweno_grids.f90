@@ -39,7 +39,7 @@ module hrweno_grids
 contains
 
    pure subroutine grid1_linear(self, xmin, xmax, ncells, name)
-    !! Initialize *linear* grid. <br>
+    !! Initialize **linear** grid. <br>
     !! Constant width: \( width(i) = width(i+1) \)
     !!
     !!```
@@ -56,7 +56,7 @@ contains
       integer, intent(in) :: ncells
         !! number of grid cells
       character(*), intent(in), optional :: name
-        !! grid name
+        !! grid name (default="")
 
       real(rk) :: xedges(0:ncells), rx
       integer :: i
@@ -84,7 +84,7 @@ contains
    end subroutine grid1_linear
 
    pure subroutine grid1_bilinear(self, xmin, xcross, xmax, ncells, name)
-    !! Initialize *bilinear* grid.
+    !! Initialize **bilinear** grid.
     !! Equivalent to 2 linear grids in series.
     !!
     !!```
@@ -103,7 +103,7 @@ contains
       integer, intent(in) :: ncells(2)
         !! number of grid cells in range [xmin, xcross] and [xcross, xmax]
       character(*), intent(in), optional :: name
-        !! grid name
+        !! grid name (default="")
 
       real(rk) :: xedges(0:sum(ncells)), rx
       integer :: i
@@ -136,7 +136,7 @@ contains
    end subroutine grid1_bilinear
 
    pure subroutine grid1_log(self, xmin, xmax, ncells, name)
-   !! Initialize *logarithmic* grid. <br>
+   !! Initialize **logarithmic** grid. <br>
    !! Equivalent to a linear grid in terms of \( y=\log(x) \).
    !!
       class(grid1), intent(inout) :: self
@@ -148,7 +148,7 @@ contains
       integer, intent(in) :: ncells
         !! number of grid cells
       character(*), intent(in), optional :: name
-        !! grid name
+        !! grid name (default="")
 
       real(rk) :: xedges(0:ncells), rx
       integer :: i
@@ -180,7 +180,7 @@ contains
    end subroutine grid1_log
 
    subroutine grid1_geometric(self, xmin, xmax, ratio, ncells, name)
-    !! Initialize *geometric* grid. <br>
+    !! Initialize **geometric** grid. <br>
     !! Geometrically increasing/decreasing width: \( width(i+1) = R \; width(i) \)
     !!
     !!```
@@ -199,7 +199,7 @@ contains
       integer, intent(in) :: ncells
         !! number of grid cells
       character(*), intent(in), optional :: name
-        !! grid name
+        !! grid name (default="")
 
       real(rk) :: xedges(0:ncells), a
       integer :: i

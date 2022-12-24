@@ -49,7 +49,7 @@ module hrweno_tvdode
 
    abstract interface
       subroutine integrand(t, u, udot)
-      !!  Integrand for 'tvdode_class'
+      !!  Integrand for `tvdode` class
          import :: rk
          real(rk), intent(in) :: t, u(:)
          real(rk), intent(out) :: udot(:)
@@ -67,7 +67,7 @@ module hrweno_tvdode
 contains
 
    type(rktvd) function rktvd_init(fu, neq, order) result(self)
-   !! Initialize 'rktvd' object.
+   !! Initialize `rktvd` object.
       procedure(integrand) :: fu
          !! subroutine with the derivative \( u'(t,u) \)
       integer, intent(in) :: neq
@@ -118,7 +118,7 @@ contains
       integer, intent(in), optional :: itask
          !! flag indicating the task to be performed:
          !! 1 normal integration until tout;
-         !! 2 single dt step.
+         !! 2 single `dt` step.
 
       integer :: itask_
 
@@ -178,7 +178,7 @@ contains
    end subroutine rktvd_integrate
 
    type(mstvd) function mstvd_init(fu, neq) result(self)
-   !! Initialize 'mstvd' object.
+   !! Initialize `mstvd` object.
       procedure(integrand) :: fu
          !! subroutine with the derivative \( u'(t,u) \)
       integer, intent(in) :: neq

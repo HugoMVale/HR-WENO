@@ -52,16 +52,16 @@ module hrweno_weno
 contains
 
    pure type(weno) function weno_init(ncells, k, eps, xedges) result(self)
-   !! Initialize 'weno' object.
+   !! Initialize `weno` object.
    !!
    !! @note
    !! If the grid is not uniform, the user must supply the edges of the grid.
       integer, intent(in) :: ncells
          !! number of cells
       integer, intent(in), optional :: k
-         !! order of reconstruction within the cell (1 <= k <= 3)
+         !! order (1 <= k <= 3) of reconstruction within the cell (default=5)
       real(rk), intent(in), optional :: eps
-         !! numerical smoothing factor
+         !! numerical smoothing factor (default=1e-6)
       real(rk), intent(in), optional :: xedges(0:)
          !! vector(0:ncells) of cell edges;
          !! xedges(i) is the value of x at the right boundary of cell i, \( x_{i+1/2} \);

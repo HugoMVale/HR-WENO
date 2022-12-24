@@ -34,11 +34,11 @@ contains
       real(rk), intent(in) :: vp
         !! right (plus) reconstruction, \( v_{i+1/2}^+ = v_{(i+1)-1/2}^- \)
       real(rk), intent(in) :: x(:)
-        !! x at flux interface, \( x_{i+1/2} \)
+        !! \(x\) at flux interface, \( x_{i+1/2} \)
       real(rk), intent(in) :: t
         !! time, \( t \)
       real(rk), intent(in) :: alpha
-        !! \( \max(\|f'(v)\|) \) in the domain on the problem
+        !! \( \max(|f'(v)|) \) in the domain on the problem
 
       lax_friedrichs = (f(vm, x, t) + f(vp, x, t) - alpha*(vp - vm))/2
 
@@ -58,7 +58,7 @@ contains
       real(rk), intent(in) :: vp
         !! right (plus) reconstruction, \( v_{i+1/2}^+ = v_{(i+1)-1/2}^- \)
       real(rk), intent(in) :: x(:)
-        !! x at flux interface, \( x_{i+1/2} \)
+        !! \(x\) at flux interface, \( x_{i+1/2} \)
       real(rk), intent(in) :: t
         !! time, \( t \)
 
