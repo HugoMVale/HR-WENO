@@ -171,7 +171,7 @@ contains
       integer, intent(in) :: action
          !! parameter to select output action
 
-      character(*), parameter :: folder = "./output/example2/"
+      character(*), parameter :: folder = ".\output\example2\"
       real(rk), save :: cpu_start = 0._rk, cpu_end = 0._rk
       integer, save :: funit_x(size(nc)) = 0, funit_u = 0
       integer :: i, j
