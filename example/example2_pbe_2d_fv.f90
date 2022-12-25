@@ -19,6 +19,7 @@ program example_pbe_2d_fv
    use hrweno_fluxes, only: godunov
    use hrweno_grids, only: grid1
    use stdlib_strings, only: to_string
+   use omp_lib
    implicit none
 
    integer, parameter :: nc(2) = [250, 250]
@@ -66,7 +67,7 @@ program example_pbe_2d_fv
 
 contains
 
-   pure subroutine rhs(t, v, vdot)
+   subroutine rhs(t, v, vdot)
    !! This subroutine computes the *numerical approximation* to the right hand side of:
    !!```
    !!     du(i,j,t)/dt = -1/dx1(i)*( f1(u(x1(i+1/2),x2(j),t)) - f1(u(x1(i-1/2),x2(j),t)) )
@@ -83,34 +84,33 @@ contains
       real(rk), intent(out) :: vdot(:)
          !! vector(N) with v'(z,t) values
 
-      real(rk), allocatable :: vl(:), vr(:)
       real(rk) :: varray(nc(1), nc(2)), fedges(0:nc(1), 0:nc(2), 2)
+      real(rk):: vl1(nc(1)), vl2(nc(2)), vr1(nc(1)), vr2(nc(2))
       integer :: i, j
 
       ! Reshape v to array
       varray = reshape(v, [shape(varray)])
 
-      ! Fluxes along x1 at interior cell boundaries
+      ! Fluxes along x1 and x2 at interior cell boundaries
       fedges = 0
-      allocate (vl(nc(1)), vr(nc(1)))
-      do concurrent(j=1:nc(2))
-         call myweno(1)%reconstruct(varray(:, j), vl, vr)
-         do concurrent(i=1:nc(1) - 1)
-            fedges(i, j, 1) = godunov(flux1, vr(i), vl(i + 1), &
+      !$omp parallel sections shared(fedges)
+      !$omp section
+      do j = 1, nc(2)
+         call myweno(1)%reconstruct(varray(:, j), vl1, vr1)
+         do i = 1, nc(1) - 1
+            fedges(i, j, 1) = godunov(flux1, vr1(i), vl1(i + 1), &
                                       [gx(1)%right(i), gx(2)%center(j)], t)
          end do
       end do
-
-      ! Fluxes along x2 at interior cell boundaries
-      deallocate (vl, vr)
-      allocate (vl(nc(2)), vr(nc(2)))
-      do concurrent(i=1:nc(1))
-         call myweno(2)%reconstruct(varray(i, :), vl, vr)
-         do concurrent(j=1:nc(2) - 1)
-            fedges(i, j, 2) = godunov(flux2, vr(j), vl(j + 1), &
+      !!$omp section
+      do i = 1, nc(1)
+         call myweno(2)%reconstruct(varray(i, :), vl2, vr2)
+         do j = 1, nc(2) - 1
+            fedges(i, j, 2) = godunov(flux2, vr2(j), vl2(j + 1), &
                                       [gx(1)%center(i), gx(2)%right(j)], t)
          end do
       end do
+      !$omp end parallel sections
 
       ! Apply problem-specific flux constraints at domain boundaries
       fedges(0, :, 1) = 0
