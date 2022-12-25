@@ -39,14 +39,14 @@ jobs:
       run: |
         gfortran --version
         rm -rf ./build/gfortran*
-        fpm test --profile debug --flag --coverage
+        fpm test --profile debug --flag "--coverage -fopenmp"
         gcov ./build/gfortran*/hrweno/src*.gcda -r ./src/ -b -w
                
     - name: Run examples
       run: |
         gfortran --version
-        fpm run --profile release --example "example1*"
-        fpm run --profile release --example "example2*"
+        fpm run --example "example1*" --profile release --flag "-fopenmp"
+        fpm run --example "example2*" --profile release --flag "-fopenmp"
         
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
