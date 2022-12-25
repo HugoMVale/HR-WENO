@@ -30,6 +30,9 @@ program example_pbe_2d_fv
    real(rk) :: dt, time, time_out, time_start, time_end
    integer :: num_time_points, ii, jj
 
+   ! OMP settings
+   call omp_set_num_threads(min(2, omp_get_num_procs()))
+
    ! Define grids for x1 and x2
    ! In this example, we use linear grids, but any smooth grid can be used
    call gx(1)%linear(xmin=0._rk, xmax=10._rk, ncells=nc(1))
@@ -182,6 +185,7 @@ contains
       case (1)
 
          write (stdout, '(1x, a)') "Running example2 ..."
+         write (stdout, '(1x, a, i3)') "Max # threads: ", omp_get_max_threads()
          call cpu_time(cpu_start)
 
          ! Write grid
