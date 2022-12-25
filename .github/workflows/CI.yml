@@ -45,7 +45,7 @@ jobs:
     - name: Run examples
       run: |
         gfortran --version
-        fpm run --example "example1*" --profile release
+        fpm run --example "example1*" --profile release --flag "-fopenmp"
         fpm run --example "example2*" --profile release --flag "-fopenmp"
         
     - name: Upload coverage to Codecov
