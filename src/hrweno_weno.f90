@@ -59,7 +59,8 @@ contains
       integer, intent(in) :: ncells
          !! number of cells
       integer, intent(in), optional :: k
-         !! order (1 <= k <= 3) of reconstruction within the cell (default=5)
+         !! (2k - 1) is the order of reconstruction within the cell (1 <= k <= 3). By default,
+         !! k = 3, i.e. 5th order reconstruction.
       real(rk), intent(in), optional :: eps
          !! numerical smoothing factor (default=1e-6)
       real(rk), intent(in), optional :: xedges(0:)
