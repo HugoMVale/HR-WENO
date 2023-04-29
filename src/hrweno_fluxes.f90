@@ -19,7 +19,7 @@ module hrweno_fluxes
 
 contains
 
-   pure real(rk) function lax_friedrichs(f, vm, vp, x, t, alpha)
+   pure real(rk) function lax_friedrichs(f, vm, vp, x, t, alpha) result(res)
     !!   Monotone Lax-Friedrichs flux. It is more dissipative than the Godunov method, but
     !! computationally less demanding.
     !!   Source: Equation 2.72, page 21.
@@ -40,11 +40,11 @@ contains
       real(rk), intent(in) :: alpha
         !! \( \max(|f'(v)|) \) in the domain on the problem
 
-      lax_friedrichs = (f(vm, x, t) + f(vp, x, t) - alpha*(vp - vm))/2
+      res = (f(vm, x, t) + f(vp, x, t) - alpha*(vp - vm))/2
 
    end function lax_friedrichs
 
-   pure real(rk) function godunov(f, vm, vp, x, t)
+   pure real(rk) function godunov(f, vm, vp, x, t) result(res)
     !!   Monotone Godunov flux. It is less dissipative than the Lax-Friedrichs method, but
     !! computationally more demanding because of the if constructs.
     !!   Source: Equation 2.70, page 21.
@@ -68,9 +68,9 @@ contains
       fp = f(vp, x, t)
 
       if (vm <= vp) then
-         godunov = min(fm, fp)
+         res = min(fm, fp)
       else
-         godunov = max(fm, fp)
+         res = max(fm, fp)
       end if
 
    end function godunov
