@@ -4,3 +4,4 @@
 *.venv
 *gcov.sh
 _site
+*.bat
