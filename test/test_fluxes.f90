@@ -8,7 +8,7 @@ module test_fluxes
    private
 
    public :: collect_tests_fluxes
-
+   
    logical, parameter :: verbose = .false.
 
 contains
