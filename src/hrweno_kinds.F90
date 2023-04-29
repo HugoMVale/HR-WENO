@@ -6,14 +6,14 @@ module hrweno_kinds
 
    public :: rk
 
-! #ifdef REAL32
-!    integer, parameter :: rk = real32
-! #elif REAL64
+#ifdef REAL32
+   integer, parameter :: rk = real32
+#elif REAL64
    integer, parameter :: rk = real64
-! #elif REAL128
-!    integer, parameter :: rk = real128
-! #else
-!    integer, parameter :: rk = real64
-! #endif
+#elif REAL128
+   integer, parameter :: rk = real128
+#else
+   integer, parameter :: rk = real64
+#endif
 
 end module hrweno_kinds
