@@ -22,7 +22,7 @@ program example_pbe_2d_fv
    use omp_lib
    implicit none
 
-   integer, parameter :: nc(2) = [250, 250]
+   integer, parameter :: nc(2) = [250, 250], k = 3
    real(rk) :: u(product(nc))
    type(grid1) :: gx(2)
    type(weno) :: myweno(2)
@@ -39,8 +39,8 @@ program example_pbe_2d_fv
    call gx(2)%linear(xmin=0._rk, xmax=10._rk, ncells=nc(2))
 
    ! Init weno objects
-   myweno(1) = weno(ncells=nc(1), k=3, eps=1e-6_rk)
-   myweno(2) = weno(ncells=nc(2), k=3, eps=1e-6_rk)
+   myweno(1) = weno(ncells=nc(1), k=k, eps=1e-6_rk)
+   myweno(2) = weno(ncells=nc(2), k=k, eps=1e-6_rk)
 
    ! Open file where results will be stored
    call output(1)
@@ -87,45 +87,43 @@ contains
       real(rk), intent(out) :: vdot(:)
          !! vector(N) with v'(z,t) values
 
-      real(rk) :: varray(nc(1), nc(2)), fedges(0:nc(1), 0:nc(2), 2)
-      real(rk):: vl1(nc(1)), vl2(nc(2)), vr1(nc(1)), vr2(nc(2))
+      real(rk) :: vl1(nc(1)), vl2(nc(2)), vr1(nc(1)), vr2(nc(2))
+      real(rk) :: fedges1(0:nc(1), 0:nc(2)), fedges2(0:nc(2), 0:nc(1))
       integer :: i, j
 
-      ! Reshape v to array
-      varray = reshape(v, [shape(varray)])
-
       ! Fluxes along x1 and x2 at interior cell boundaries
-      fedges = 0
-      !$omp parallel sections shared(fedges)
-      !$omp section
+      !$omp parallel
+      !$omp do private(vl1, vr1)
       do j = 1, nc(2)
-         call myweno(1)%reconstruct(varray(:, j), vl1, vr1)
+         call myweno(1)%reconstruct(v(1+(j-1)*nc(1):j*nc(1)), vl1, vr1)
          do i = 1, nc(1) - 1
-            fedges(i, j, 1) = godunov(flux1, vr1(i), vl1(i + 1), &
-                                      [gx(1)%right(i), gx(2)%center(j)], t)
+            fedges1(i, j) = godunov(flux1, vr1(i), vl1(i + 1), &
+                                    [gx(1)%right(i), gx(2)%center(j)], t)
          end do
       end do
-      !!$omp section
+      !$omp end do nowait
+      !$omp do private(vl2, vr2)
       do i = 1, nc(1)
-         call myweno(2)%reconstruct(varray(i, :), vl2, vr2)
+         call myweno(2)%reconstruct(v(i:i+(nc(2)-1)*nc(1):nc(1)), vl2, vr2)
          do j = 1, nc(2) - 1
-            fedges(i, j, 2) = godunov(flux2, vr2(j), vl2(j + 1), &
-                                      [gx(1)%center(i), gx(2)%right(j)], t)
+            fedges2(j, i) = godunov(flux2, vr2(j), vl2(j + 1), &
+                                    [gx(1)%center(i), gx(2)%right(j)], t)
          end do
       end do
-      !$omp end parallel sections
+      !$omp end do
+      !$omp end parallel
 
       ! Apply problem-specific flux constraints at domain boundaries
-      fedges(0, :, 1) = 0
-      fedges(nc(1), :, 1) = 0
-      fedges(:, 0, 2) = 0
-      fedges(:, nc(2), 2) = 0
+      fedges1(0, :) = 0
+      fedges1(nc(1), :) = 0
+      fedges2(0, :) = 0
+      fedges2(nc(2), :) = 0
 
       ! Evaluate du/dt
       do concurrent(i=1:nc(1), j=1:nc(2))
          vdot((j - 1)*nc(1) + i) = &
-            -(fedges(i, j, 1) - fedges(i - 1, j, 1))/gx(1)%width(i) &
-            - (fedges(i, j, 2) - fedges(i, j - 1, 2))/gx(2)%width(j)
+            - (fedges1(i, j) - fedges1(i - 1, j))/gx(1)%width(i) &
+            - (fedges2(j, i) - fedges2(j - 1, i))/gx(2)%width(j)
       end do
 
    end subroutine rhs
@@ -175,7 +173,7 @@ contains
          !! parameter to select output action
 
       character(*), parameter :: folder = ".\output\example2\"
-      real(rk), save :: cpu_start = 0._rk, cpu_end = 0._rk
+      real(rk) :: time_elapsed
       integer, save :: funit_x(size(nc)) = 0, funit_u = 0
       integer :: i, j
 
@@ -186,8 +184,7 @@ contains
 
          write (stdout, '(1x, a)') "Running example2 ..."
          write (stdout, '(1x, a, i3)') "Max # threads: ", omp_get_max_threads()
-         call cpu_time(cpu_start)
-
+         
          ! Write grid
          do concurrent(j=1:size(nc))
             open (newunit=funit_x(j), file=folder//"x"//to_string(j)//".txt", &
@@ -198,6 +195,8 @@ contains
                write (funit_x(j), '(i5, 2(1x, es15.5))') i, gx(j)%center(i), gx(j)%width(i)
             end do
          end do
+         
+         call timer()
 
          ! Write header u
          open (newunit=funit_u, file=folder//"u.txt", status="replace", &
@@ -223,11 +222,35 @@ contains
             close (funit_x(j))
          end do
          close (funit_u)
-         call cpu_time(cpu_end)
-         write (stdout, '(1x, a, 1x, f5.1)') "Elapsed time (s) :", (cpu_end - cpu_start)
+         call timer(time_elapsed)
+         write (stdout, '(1x, a, 1x, f5.2)') "Elapsed time (s) :", time_elapsed
 
       end select
 
    end subroutine output
 
+   subroutine timer(res)
+      !! Quick and dirty timer
+      real(rk), intent(out), optional :: res
+      real(rk) :: res_
+      logical, save :: first_call = .true.
+      integer, save :: values_previous(8)
+      integer :: values_now(8), delta(8)
+
+      call date_and_time(values=values_now)
+      if (first_call) then
+         values_previous = values_now
+         first_call = .false.
+      end if
+
+      delta = values_now - values_previous
+      res_ = 1._rk*delta(3)*24*60**2 + 1._rk*delta(5)*60**2 + 1._rk*delta(6)*60 &
+            + 1._rk*delta(7) + 1._rk*delta(8)/1000
+      
+      if (present(res)) res = res_
+
+   end subroutine
+
 end program example_pbe_2d_fv
+
+
