@@ -11,7 +11,7 @@ program example_pbe_2d_fv
 !! and the time variable 't' is left continuous (method of lines). See example1 for notation.
 !!   In this particular example, we use the 3rd order 'mstvd' ode solver. The reconstruction
 !! is done with the 5th order WENO scheme; to try other orders, we can change the parameter 'k'
-!! in procedure 'rhs'.
+!! below.
    use, intrinsic :: iso_fortran_env, only: stderr => error_unit, stdout => output_unit
    use hrweno_kinds, only: rk
    use hrweno_tvdode, only: mstvd
@@ -31,7 +31,7 @@ program example_pbe_2d_fv
    integer :: num_time_points, ii, jj
 
    ! OMP settings
-   call omp_set_num_threads(min(2, omp_get_num_procs()))
+   ! call omp_set_num_threads(min(2, omp_get_num_procs()))
 
    ! Define grids for x1 and x2
    ! In this example, we use linear grids, but any smooth grid can be used
