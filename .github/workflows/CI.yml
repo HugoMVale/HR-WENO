@@ -33,13 +33,13 @@ jobs:
       uses: fortran-lang/setup-fpm@v5
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        fpm-version: 'latest'
+        fpm-version: '0.8.2'
 
     - name: Build with coverage info
       run: |
         gfortran --version
         rm -rf ./build/gfortran*
-        fpm test --profile debug --flag "--coverage -fopenmp"
+        fpm test --profile debug --flag "--coverage -fopenmp" --verbose
         gcov ./build/gfortran*/hrweno/src*.gcda -r ./src/ -b -w
                
     - name: Run examples
