@@ -148,7 +148,7 @@ contains
             do
                call self%fu(t, u, udot)
                ui = u + dt*udot
-               call self%fu(t, ui, udot)
+               call self%fu(t + dt, ui, udot)
                u = (u + ui + dt*udot)/2
                t = t + dt
                self%fevals = self%fevals + 2
@@ -161,9 +161,9 @@ contains
             do
                call self%fu(t, u, udot)
                ui = u + dt*udot
-               call self%fu(t, ui, udot)
+               call self%fu(t + dt, ui, udot)
                ui = (3*u + ui + dt*udot)/4
-               call self%fu(t, ui, udot)
+               call self%fu(t + dt/2, ui, udot)
                u = (u + 2*ui + 2*dt*udot)/3
                t = t + dt
                self%fevals = self%fevals + 3
