@@ -33,7 +33,7 @@ jobs:
       uses: fortran-lang/setup-fpm@v5
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
-        fpm-version: '0.8.2'
+        fpm-version: 'v0.8.2'
 
     - name: Build with coverage info
       run: |
