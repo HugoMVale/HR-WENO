@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/HugoMVale/HR-WENO/actions/workflows/CI.yml/badge.svg)](https://github.com/HugoMVale/HR-WENO/actions)
 [![codecov](https://codecov.io/gh/HugoMVale/HR-WENO/branch/main/graph/badge.svg?token=1XL5LQSO9P)](https://codecov.io/gh/HugoMVale/HR-WENO)
+[![Language](https://img.shields.io/badge/-Fortran-734f96?logo=fortran&logoColor=white)](https://github.com/topics/fortran)
 
 <p align="center">
   <img src="output/example1/example1d.gif" width="500" alt="Solution of Burger's equation with 5th order WENO">
