@@ -6,6 +6,7 @@ coverage:
   ignore:
   - test
   - doc
+  - example
   status:
     patch:
       default:
