@@ -18,7 +18,7 @@ jobs:
       uses: fortran-lang/setup-fortran@v1
       with:
         compiler: gcc
-        version: 13 
+        version: 10 
     
     - name: Install fpm
       uses: fortran-lang/setup-fpm@v5
