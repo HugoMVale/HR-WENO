@@ -40,7 +40,7 @@ jobs:
         fpm run --example "example2*" --profile release --flag "-fopenmp"
         
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v4
+      uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         verbose: true
