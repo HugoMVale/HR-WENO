@@ -76,8 +76,8 @@ contains
       integer :: i, k
 
       ! Allocate and define an abritrary uniform grid
-      xmin = 0._rk
-      xmax = 3._rk
+      xmin = 0.0_rk
+      xmax = 3.0_rk
       do i = 0, nc
          xedges(i) = xmin + (xmax - xmin)*i/nc
       end do
@@ -120,8 +120,8 @@ contains
       integer :: i, k
 
       ! Allocate and define an abritrary non-uniform grid
-      xmin = 0._rk
-      xmax = 1._rk
+      xmin = 0.0_rk
+      xmax = 1.0_rk
       do i = 0, nc
          xedges(i) = xmin + (xmax - xmin)*i/nc
       end do

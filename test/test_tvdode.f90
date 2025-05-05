@@ -12,7 +12,7 @@ module test_tvdode
    logical, parameter :: verbose = .false.
    integer, parameter :: nu = 10
    integer :: ii
-   real(rk), parameter :: a(nu) = [(-1._rk + real(ii - 1, rk)*4/(nu - 1), ii=1, nu)]
+   real(rk), parameter :: a(nu) = [(-1.0_rk + real(ii - 1, rk)*4/(nu - 1), ii=1, nu)]
 
 contains
 

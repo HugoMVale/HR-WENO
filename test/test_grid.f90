@@ -35,7 +35,7 @@ contains
       integer :: nc
 
       ! General settings
-      xmin = 1._rk
+      xmin = 1.0_rk
       xmax = 1e3_rk
       nc = 10**6
 
@@ -132,7 +132,7 @@ contains
       integer :: nc(2), ncsum
 
       ! General settings
-      xmin = 0._rk
+      xmin = 0.0_rk
       xcross = 1e1_rk
       xmax = 1e3_rk
       nc = [124, 365]

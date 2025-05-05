@@ -13,13 +13,14 @@
 This package is a modern-Fortran implementation of selected high-resolution [weighted essentially non-oscillatory (WENO)](https://en.wikipedia.org/wiki/WENO_methods) schemes and [total variation diminishing (TVD)](https://en.wikipedia.org/wiki/Total_variation_diminishing) integration methods for solving [hyperbolic conservation equations](https://en.wikipedia.org/wiki/Hyperbolic_partial_differential_equation).
 
 In particular, the package includes:
+
 * WENO schemes up to 5th order;
 * explicit Runge-Kutta TVD methods up to 3rd order;
 * explicit 3rd order multi-step TVD method.  
 
 All numerical methods are described in detail by [Shu (1997)](doc/Shu-WENO-notes.pdf).
 
-## Documentation 
+## Documentation
 
 * This readme (start with that).
 * [API Reference](https://hugomvale.github.io/HR-WENO/).
@@ -30,7 +31,7 @@ All numerical methods are described in detail by [Shu (1997)](doc/Shu-WENO-notes
 
 The easiest way to build/test the code and run the examples is by means of [`fpm`](https://fpm.fortran-lang.org/en/index.html). To run a given example, just do:
 
-```
+```sh
 fpm run --example "example-filename"
 ```
 
@@ -49,8 +50,8 @@ type(rktvd) :: ode
 ode = rktvd(rhs, neq=size(u), order=3)
 
 ! Integrate
-time_start = 0._rk
-time_end = 12._rk
+time_start = 0.0_rk
+time_end = 12.0_rk
 dt = 1e-2_rk
 time = time_start
 num_time_points = 100
@@ -61,9 +62,9 @@ do i = 0, num_time_points
 end do
  ...
  ```
- 
+
  The WENO reconstruction is even simpler to call:
- 
+
  ```fortran
 use hrweno, only: weno
 ...
@@ -89,4 +90,3 @@ This example ([`example2_pbe_2d_fv.f90`](/example/example2_pbe_2d_fv.f90)) illus
 <p align="center">
   <img src="output/example2/example2d.gif" width="600" alt="Solution of 2D PBE with 5th order WENO">
 </p>
-

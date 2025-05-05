@@ -38,7 +38,7 @@ program example1_burgers_1d_fv
 
    ! Define the spatial grid
    ! In this example, we use a linear grid, but any smooth grid can be used
-   call gx%linear(xmin=-5._rk, xmax=5._rk, ncells=nc)
+   call gx%linear(xmin=-5.0_rk, xmax=5.0_rk, ncells=nc)
 
    ! Init weno object
    myweno = weno(ncells=nc, k=3, eps=1e-6_rk)
@@ -52,8 +52,8 @@ program example1_burgers_1d_fv
    ! Call ODE time solver
    ode = rktvd(rhs, nc, order=3)
 
-   time_start = 0._rk
-   time_end = 12._rk
+   time_start = 0.0_rk
+   time_end = 12.0_rk
    dt = 1e-2_rk
 
    time = time_start
@@ -95,7 +95,7 @@ contains
       ! Fluxes at interior cell boundaries
       ! One can use the Lax-Friedrichs or the Godunov method
       do concurrent(i=1:nc - 1)
-         !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), gx%r(i), t, alpha = 1._rk)
+         !fedges(i) = lax_friedrichs(flux, vr(i), vl(i+1), gx%r(i), t, alpha = 1.0_rk)
          fedges(i) = godunov(flux, vr(i), vl(i + 1), [gx%right(i)], t)
       end do
 
@@ -125,7 +125,7 @@ contains
    !! Initial condition. Here we used a limited linear profile.
       real(rk), intent(in) :: x
          !! spatial variable
-      real(rk), parameter :: xa = -4._rk, xb = 2._rk, va = 1._rk, vb = -0.5_rk
+      real(rk), parameter :: xa = -4.0_rk, xb = 2.0_rk, va = 1.0_rk, vb = -0.5_rk
 
       ic = va + (vb - va)/(xb - xa)*(x - xa)
       ic = max(min(ic, va), vb)
@@ -137,7 +137,7 @@ contains
       integer, intent(in) :: action
          !! parameter to select output action
       character(*), parameter :: folder = ".\output\example1\"
-      real(rk), save :: cpu_start = 0._rk, cpu_end = 0._rk
+      real(rk), save :: cpu_start = 0.0_rk, cpu_end = 0.0_rk
       integer, save :: funit_x = 0, funit_u = 0
       integer :: i
 

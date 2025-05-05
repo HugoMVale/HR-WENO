@@ -35,8 +35,8 @@ program example_pbe_2d_fv
 
    ! Define grids for x1 and x2
    ! In this example, we use linear grids, but any smooth grid can be used
-   call gx(1)%linear(xmin=0._rk, xmax=10._rk, ncells=nc(1))
-   call gx(2)%linear(xmin=0._rk, xmax=10._rk, ncells=nc(2))
+   call gx(1)%linear(xmin=0.0_rk, xmax=10.0_rk, ncells=nc(1))
+   call gx(2)%linear(xmin=0.0_rk, xmax=10.0_rk, ncells=nc(2))
 
    ! Init weno objects
    myweno(1) = weno(ncells=nc(1), k=k, eps=1e-6_rk)
@@ -53,8 +53,8 @@ program example_pbe_2d_fv
    ! Call ODE time solver
    ode = mstvd(rhs, size(u))
 
-   time_start = 0._rk
-   time_end = 5._rk
+   time_start = 0.0_rk
+   time_end = 5.0_rk
    dt = 5e-3_rk
 
    time = time_start
@@ -159,10 +159,10 @@ contains
       real(rk), intent(in) :: x(2)
          !! vector of internal coordinates
 
-      if ((x(1) >= 1._rk .and. x(1) <= 3._rk) .and. (x(2) >= 1._rk .and. x(2) <= 3._rk)) then
-         ic = 1._rk
+      if ((x(1) >= 1.0_rk .and. x(1) <= 3.0_rk) .and. (x(2) >= 1.0_rk .and. x(2) <= 3.0_rk)) then
+         ic = 1.0_rk
       else
-         ic = 0._rk
+         ic = 0.0_rk
       end if
 
    end function ic
@@ -179,7 +179,7 @@ contains
 
       select case (action)
 
-         ! Open files and write headers and grid
+      ! Open files and write headers and grid
       case (1)
 
          write (stdout, '(1x, a)') "Running example2 ..."
@@ -208,7 +208,7 @@ contains
          end do
          write (funit_u, *) ""
 
-         ! Write values u(x,t)
+      ! Write values u(x,t)
       case (2)
          write (funit_u, '(es16.5e3)', advance="no") time
          do i = 1, size(u)
@@ -216,7 +216,7 @@ contains
          end do
          write (funit_u, *) ""
 
-         ! Close files
+      ! Close files
       case (3)
          do concurrent(j=1:size(nc))
             close (funit_x(j))
@@ -244,8 +244,8 @@ contains
       end if
 
       delta = values_now - values_previous
-      res_ = 1._rk*delta(3)*24*60**2 + 1._rk*delta(5)*60**2 + 1._rk*delta(6)*60 &
-            + 1._rk*delta(7) + 1._rk*delta(8)/1000
+      res_ = 1.0_rk*delta(3)*24*60**2 + 1.0_rk*delta(5)*60**2 + 1.0_rk*delta(6)*60 &
+            + 1.0_rk*delta(7) + 1.0_rk*delta(8)/1000
       
       if (present(res)) res = res_
 

@@ -154,7 +154,7 @@ contains
       integer :: i
 
       ! Check input
-      if (xmin <= 0._rk) then
+      if (xmin <= 0.0_rk) then
          error stop "Invalid input 'xmin'. Valid range: xmin > 0."
       end if
       if (.not. (xmax > xmin)) then
@@ -208,7 +208,7 @@ contains
       if (xmax <= xmin) then
          error stop "Invalid input 'xmin', 'xmax'. Valid range: xmax > xmin"
       end if
-      if (ratio <= 0._rk) then
+      if (ratio <= 0.0_rk) then
          error stop "Invalid input 'ratio'. Valid range: ratio > 0"
       end if
       if (ncells < 1) then
@@ -219,7 +219,7 @@ contains
       call self%clear
 
       ! Compute mesh
-      a = (xmax - xmin)/(ratio**ncells - 1._rk)
+      a = (xmax - xmin)/(ratio**ncells - 1.0_rk)
       do concurrent(i=0:ncells)
          xedges(i) = xmin + a*(ratio**i - 1)
       end do

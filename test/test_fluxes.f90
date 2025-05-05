@@ -29,9 +29,9 @@ contains
       real(rk) :: h, href, vm, vp, x(1), t, rtol
 
       ! General settings
-      vm = 2._rk
-      x = 3._rk
-      t = 5._rk
+      vm = 2.0_rk
+      x = 3.0_rk
+      t = 5.0_rk
       rtol = 1e-8_rk
 
       ! Check h(a,a) = h(a)

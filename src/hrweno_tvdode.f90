@@ -279,7 +279,7 @@ contains
       real(rk), intent(in) :: dt
         !! time step
 
-      is_done = (t - tout)*sign(1._rk, dt) > 0._rk
+      is_done = (t - tout)*sign(1.0_rk, dt) > 0.0_rk
 
    end function is_done
 

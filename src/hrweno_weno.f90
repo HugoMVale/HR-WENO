@@ -9,15 +9,15 @@ module hrweno_weno
    public :: weno, c1, c2, c3
 
    !> Parameter arrays for WENO methods
-   real(rk), parameter :: d1(0:0) = 1._rk, &
-                          d2(0:1) = [2._rk/3, 1._rk/3], &
+   real(rk), parameter :: d1(0:0) = 1.0_rk, &
+                          d2(0:1) = [2.0_rk/3, 1.0_rk/3], &
                           d3(0:2) = [0.3_rk, 0.6_rk, 0.1_rk]
    real(rk), parameter :: &
-      c1(0:0, -1:0) = reshape([1._rk, 1._rk], [1, 2], order=[1, 2]), &
-      c2(0:1, -1:1) = reshape([3._rk/2, -1._rk/2, 1._rk/2, 1._rk/2, -1._rk/2, 3._rk/2], &
+      c1(0:0, -1:0) = reshape([1.0_rk, 1.0_rk], [1, 2], order=[1, 2]), &
+      c2(0:1, -1:1) = reshape([3.0_rk/2, -1.0_rk/2, 1.0_rk/2, 1.0_rk/2, -1.0_rk/2, 3.0_rk/2], &
                               [2, 3], order=[1, 2]), &
-      c3(0:2, -1:2) = reshape([11._rk/6, -7._rk/6, 1._rk/3, 1._rk/3, 5._rk/6, -1._rk/6, &
-                               -1._rk/6, 5._rk/6, 1._rk/3, 1._rk/3, -7._rk/6, 11._rk/6], &
+      c3(0:2, -1:2) = reshape([11.0_rk/6, -7.0_rk/6, 1.0_rk/3, 1.0_rk/3, 5.0_rk/6, -1.0_rk/6, &
+                               -1.0_rk/6, 5.0_rk/6, 1.0_rk/3, 1.0_rk/3, -7.0_rk/6, 11.0_rk/6], &
                               [3, 4], order=[1, 2])
 
    type :: weno
@@ -88,7 +88,7 @@ contains
       end if
 
       if (present(eps)) then
-         if (eps > epsilon(1._rk)) then
+         if (eps > epsilon(1.0_rk)) then
             self%eps = eps
          else
             self%msg = "Invalid input 'eps'. Valid range: eps > epsilon."
@@ -183,23 +183,23 @@ contains
             select case (k)
 
             case (1)
-               beta(0) = 0._rk
+               beta(0) = 0.0_rk
 
-               ! Equation 2.62
+            ! Equation 2.62
             case (2)
                beta(0) = (vext(i + 1) - vext(i))**2
                beta(1) = (vext(i) - vext(i - 1))**2
 
-               ! Equation 2.63
+            ! Equation 2.63
             case (3)
-               beta(0) = 13._rk/12*(vext(i) - 2*vext(i + 1) + vext(i + 2))**2 &
-                         + 1._rk/4*(3*vext(i) - 4*vext(i + 1) + vext(i + 2))**2
+               beta(0) = 13.0_rk/12*(vext(i) - 2*vext(i + 1) + vext(i + 2))**2 &
+                         + 1.0_rk/4*(3*vext(i) - 4*vext(i + 1) + vext(i + 2))**2
 
-               beta(1) = 13._rk/12*(vext(i - 1) - 2*vext(i) + vext(i + 1))**2 &
-                         + 1._rk/4*(vext(i - 1) - vext(i + 1))**2
+               beta(1) = 13.0_rk/12*(vext(i - 1) - 2*vext(i) + vext(i + 1))**2 &
+                         + 1.0_rk/4*(vext(i - 1) - vext(i + 1))**2
 
-               beta(2) = 13._rk/12*(vext(i - 2) - 2*vext(i - 1) + vext(i))**2 &
-                         + 1._rk/4*(vext(i - 2) - 4*vext(i - 1) + 3*vext(i))**2
+               beta(2) = 13.0_rk/12*(vext(i - 2) - 2*vext(i - 1) + vext(i))**2 &
+                         + 1.0_rk/4*(vext(i - 2) - 4*vext(i - 1) + 3*vext(i))**2
 
             end select
 
@@ -262,21 +262,21 @@ contains
          ! Equation 2.20, page 6.
          do concurrent(i=1:nc, r=-1:k - 1, j=0:k - 1)
 
-            sum2 = 0._rk
+            sum2 = 0.0_rk
             do m = j + 1, k
 
-               prod2 = 1._rk
+               prod2 = 1.0_rk
                do l = 0, k
                   if (l == m) cycle
                   prod2 = prod2*(xl(i - r + m) - xl(i - r + l))
                end do
 
-               sum1 = 0._rk
+               sum1 = 0.0_rk
                do l = 0, k
 
                   if (l == m) cycle
 
-                  prod1 = 1._rk
+                  prod1 = 1.0_rk
                   do q = 0, k
                      if (q == m .or. q == l) cycle
                      prod1 = prod1*(xr(i) - xl(i - r + q))
