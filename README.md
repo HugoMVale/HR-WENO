@@ -32,7 +32,7 @@ All numerical methods are described in detail by [Shu (1997)](doc/Shu-WENO-notes
 The easiest way to build/test the code and run the examples is by means of [`fpm`](https://fpm.fortran-lang.org/en/index.html). To run a given example, just do:
 
 ```sh
-fpm run --example "example-filename"
+fpm run --example "example-filename" --profile release --flag "-fopenmp"
 ```
 
 and the numerical results will be stored in the [`output`](/output) subfolder. You can then use the provided Python script to read the data and plot the results.
