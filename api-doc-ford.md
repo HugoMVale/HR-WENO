@@ -30,4 +30,4 @@ This package is a modern-Fortran implementation of selected high-resolution [wei
 
 In particular, the package includes WENO schemes up to 5th order, explicit Runge-Kutta TVD methods up to 3rd order, and an explicit 3rd order multi-step TVD method.  
 
-All numerical methods are described in detail by [Shu (1997)](/doc/Shu-WENO-notes.pdf).
+All numerical methods are described in detail by [Shu (1997)](https://github.com/HugoMVale/HR-WENO/blob/main/doc/Shu-WENO-notes.pdf).
