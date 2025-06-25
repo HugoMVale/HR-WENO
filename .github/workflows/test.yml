@@ -18,7 +18,7 @@ jobs:
       uses: fortran-lang/setup-fortran@v1
       with:
         compiler: gcc
-        version: 11 
+        version: 14 
     
     - name: Install fpm
       uses: fortran-lang/setup-fpm@v5
@@ -29,9 +29,11 @@ jobs:
     - name: Build with coverage info
       run: |
         gfortran --version
+        gcov --version
+        pip install gcovr
         rm -rf ./build/gfortran*
-        fpm test --profile debug --flag "--coverage -fopenmp" --verbose
-        gcov ./build/gfortran*/hrweno/src*.gcda -r ./src/ -b -w
+        fpm test --profile debug --flag "--coverage -fprofile-abs-path -fopenmp" --verbose
+        gcovr --filter src --cobertura-pretty --output coverage.xml
                
     - name: Run examples
       run: |
