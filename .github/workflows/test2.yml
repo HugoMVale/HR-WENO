@@ -6,9 +6,6 @@ permissions:
   contents: write
   pull-requests: write
 
-env:
-  FLAGS: -Wno-unused-dummy-argument -fopenmp
-  
 jobs:
 
   # Quick test in Ubuntu+GCC
@@ -28,7 +25,7 @@ jobs:
         run: |
           gcov --version
           pip install gcovr
-          fpm test --compiler ${{ matrix.compiler }} --profile debug --flag "$FLAGS --coverage -fprofile-abs-path"
+          fpm test --compiler ${{ matrix.compiler }} --profile debug --flag "--coverage -fprofile-abs-path"
           gcovr --filter src --cobertura-pretty --output coverage.xml
       
       - name: Upload coverage to Codecov
@@ -70,14 +67,14 @@ jobs:
           extra-packages: ${{ matrix.extra-packages }}
 
       - name: Test debug mode
-        run: fpm test --compiler ${{ matrix.compiler }} --profile debug --flag "$FLAGS" --verbose
+        run: fpm test --compiler ${{ matrix.compiler }} --profile debug --verbose
 
       - name: Test release mode
-        run: fpm test --compiler ${{ matrix.compiler }} --profile release --flag "$FLAGS" --verbose
+        run: fpm test --compiler ${{ matrix.compiler }} --profile release --verbose
       
       - name: Run examples
         run: |
           gfortran --version
-          fpm run --example "example1*" --profile release --flag "$FLAGS"
-          fpm run --example "example2*" --profile release --flag "$FLAGS"
+          fpm run --example "example1*" --profile release
+          fpm run --example "example2*" --profile release
 
