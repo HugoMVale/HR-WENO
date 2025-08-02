@@ -49,7 +49,7 @@ jobs:
             extra-packages: ""
           - compiler: lfortran
             os: ubuntu-latest
-            extra-packages: "
+            extra-packages: ""
 
     steps:
       - name: Set up Fortran
