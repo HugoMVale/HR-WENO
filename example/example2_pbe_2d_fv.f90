@@ -183,7 +183,7 @@ contains
       case (1)
 
          write (stdout, '(1x, a)') "Running example2 ..."
-         write (stdout, '(1x, a, i3)') "Max # threads: ", omp_get_max_threads()
+         ! write (stdout, '(1x, a, i3)') "Max # threads: ", omp_get_max_threads()
          
          ! Write grid
          do concurrent(j=1:size(nc))
