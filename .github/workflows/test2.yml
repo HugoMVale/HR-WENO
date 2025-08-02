@@ -15,13 +15,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # os: [ubuntu-latest] # [ubuntu-latest, macos-latest, windows-latest]
-        # compiler: [gfortran] # [gfortran, ifx, lfortran, flang-new, nvfortran]
+        os: [ubuntu-latest] # [ubuntu-latest, macos-latest, windows-latest]
+        compiler: [gfortran] # [gfortran, ifx, lfortran, flang-new, nvfortran]
         include:
           - os: ubuntu-latest
-          - compiler: gfortran
-          - compiler-version: 14.2.0
-          - extra-packages: ""
+            compiler: gfortran
+            compiler-version: 14.2.0
+            extra-packages: ""
           # - os: windows-latest
           #   extra-packages: ""
           # - os: macos-latest
