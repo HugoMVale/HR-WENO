@@ -21,7 +21,7 @@ jobs:
         run: |
           gcov --version
           pip install gcovr
-          fpm test --compiler ${{ matrix.compiler }} --profile debug --flag "--coverage -fprofile-abs-path"
+          fpm test --profile debug --flag "--coverage -fprofile-abs-path"
           gcovr --filter src --cobertura-pretty --output coverage.xml
       
       - name: Upload coverage to Codecov
