@@ -2,10 +2,6 @@ name: Build and test pkg
 
 on: [push, pull_request, workflow_dispatch]
 
-permissions:
-  contents: write
-  pull-requests: write
-
 jobs:
 
   # Quick test in Ubuntu+GCC
@@ -42,11 +38,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gfortran]
-        os: [ubuntu-latest, windows-latest]
-        # exclude:
-        #   - compiler: lfortran
-        #     os: windows-latest
         include:
           - compiler: gfortran
             os: ubuntu-latest
@@ -56,7 +47,10 @@ jobs:
             os: windows-latest
             compiler-version: 14.2.0
             extra-packages: ""
-            
+          - compiler: lfortran
+            os: ubuntu-latest
+            extra-packages: "
+
     steps:
       - name: Set up Fortran
         uses: gha3mi/setup-fortran-conda@latest
@@ -77,4 +71,3 @@ jobs:
           gfortran --version
           fpm run --example "example1*" --profile release
           fpm run --example "example2*" --profile release
-
