@@ -47,10 +47,12 @@ jobs:
             os: windows-latest
             compiler-version: 14.2.0
             extra-packages: ""
-          - compiler: lfortran
+          # - compiler: lfortran
+          #   os: ubuntu-latest
+          #   extra-packages: ""
+          - compiler: flang-new
             os: ubuntu-latest
             extra-packages: ""
-
     steps:
       - name: Set up Fortran
         uses: gha3mi/setup-fortran-conda@latest
