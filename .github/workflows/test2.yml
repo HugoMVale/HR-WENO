@@ -14,16 +14,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest] # [ubuntu-latest, macos-latest, windows-latest]
-        compiler: [gfortran] # [gfortran, lfortran]
+        compiler: [gfortran, lfortran]
+        os: [ubuntu-latest, windows-latest]
+        exclude:
+          - compiler: lfortran
+            os: windows-latest
         include:
-          - os: ubuntu-latest
-            compiler: gfortran
+          - compiler: gfortran
+            os: ubuntu-latest
             compiler-version: 14.2.0
             extra-packages: ""
-          - os: windows-latest
-            compiler: gfortran
+          - compiler: gfortran
+            os: windows-latest
             compiler-version: 14.2.0
+            extra-packages: ""
+          - compiler: lfortran
+            os: ubuntu-latest
             extra-packages: ""
           
     steps:
@@ -40,6 +46,12 @@ jobs:
 
       - name: Test release mode
         run: fpm test --compiler ${{ matrix.compiler }} --profile release --flag "-fopenmp" --verbose
+
+      - name: Run examples
+        run: |
+          gfortran --version
+          fpm run --example "example1*" --profile release --flag "-fopenmp"
+          fpm run --example "example2*" --profile release --flag "-fopenmp"
 
   # Generate STATUS.md from FPM job results
   status_fpm:
