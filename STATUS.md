@@ -1,0 +1,1 @@
+ ![macos-latest__fpm](https://img.shields.io/badge/macos--latest__fpm-failing-red) ![windows-latest__fpm](https://img.shields.io/badge/windows--latest__fpm-failing-red) ![ubuntu-latest_gfortran_fpm](https://img.shields.io/badge/ubuntu--latest_gfortran_fpm-failing-red)
