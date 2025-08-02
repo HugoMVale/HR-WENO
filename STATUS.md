@@ -1,1 +1,1 @@
- ![ubuntu-latest_gfortran_fpm](https://img.shields.io/badge/ubuntu--latest_gfortran_fpm-passing-brightgreen)
+ ![windows-latest_gfortran_fpm](https://img.shields.io/badge/windows--latest_gfortran_fpm-passing-brightgreen) ![ubuntu-latest_gfortran_fpm](https://img.shields.io/badge/ubuntu--latest_gfortran_fpm-passing-brightgreen)
