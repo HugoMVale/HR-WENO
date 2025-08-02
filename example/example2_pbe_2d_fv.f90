@@ -19,7 +19,7 @@ program example_pbe_2d_fv
    use hrweno_fluxes, only: godunov
    use hrweno_grids, only: grid1
    use stdlib_strings, only: to_string
-   use omp_lib
+   ! use omp_lib
    implicit none
 
    integer, parameter :: nc(2) = [250, 250], k = 3
