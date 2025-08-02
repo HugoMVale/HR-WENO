@@ -20,7 +20,7 @@ jobs:
       - name: Test debug with coverage
         run: |
           gcov --version
-          pip install gcovr
+          conda install -c conda-forge gcovr
           fpm test --profile debug --flag "--coverage -fprofile-abs-path"
           gcovr --filter src --cobertura-pretty --output coverage.xml
       
