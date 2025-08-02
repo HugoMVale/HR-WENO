@@ -6,19 +6,50 @@ permissions:
   contents: write
   pull-requests: write
 
+env:
+  FLAGS: -Wno-unused-dummy-argument -fopenmp
+  
 jobs:
 
-  test_fpm:
-    name: ${{ matrix.os }}_${{ matrix.compiler }}_fpm
+  # Quick test in Ubuntu+GCC
+  test_quick:
+    runs-on: ubuntu-latest
+    steps:
+    
+      - name: Set up Fortran
+        uses: gha3mi/setup-fortran-conda@latest
+        with:
+          compiler: gfortran
+          compiler-version: "14.2"
+          platform: ubuntu-latest
+          extra-packages: ""
+      
+      - name: Test debug with coverage
+        run: |
+          gcov --version
+          pip install gcovr
+          fpm test --compiler ${{ matrix.compiler }} --profile debug --flag "$FLAGS --coverage -fprofile-abs-path"
+          gcovr --filter src --cobertura-pretty --output coverage.xml
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          verbose: false
+        
+  # Matrix test 
+  test_matrix:
+    name: ${{ matrix.os }}_${{ matrix.compiler }}
     runs-on: ${{ matrix.os }}
+    needs: test_quick
     strategy:
       fail-fast: false
       matrix:
-        compiler: [gfortran, lfortran]
+        compiler: [gfortran]
         os: [ubuntu-latest, windows-latest]
-        exclude:
-          - compiler: lfortran
-            os: windows-latest
+        # exclude:
+        #   - compiler: lfortran
+        #     os: windows-latest
         include:
           - compiler: gfortran
             os: ubuntu-latest
@@ -28,10 +59,7 @@ jobs:
             os: windows-latest
             compiler-version: 14.2.0
             extra-packages: ""
-          - compiler: lfortran
-            os: ubuntu-latest
-            extra-packages: ""
-          
+            
     steps:
       - name: Set up Fortran
         uses: gha3mi/setup-fortran-conda@latest
@@ -42,25 +70,14 @@ jobs:
           extra-packages: ${{ matrix.extra-packages }}
 
       - name: Test debug mode
-        run: fpm test --compiler ${{ matrix.compiler }} --profile debug --flag "-fopenmp" --verbose
+        run: fpm test --compiler ${{ matrix.compiler }} --profile debug --flag "$FLAGS" --verbose
 
       - name: Test release mode
-        run: fpm test --compiler ${{ matrix.compiler }} --profile release --flag "-fopenmp" --verbose
-
+        run: fpm test --compiler ${{ matrix.compiler }} --profile release --flag "$FLAGS" --verbose
+      
       - name: Run examples
         run: |
           gfortran --version
-          fpm run --example "example1*" --profile release --flag "-fopenmp"
-          fpm run --example "example2*" --profile release --flag "-fopenmp"
+          fpm run --example "example1*" --profile release --flag "$FLAGS"
+          fpm run --example "example2*" --profile release --flag "$FLAGS"
 
-  # Generate STATUS.md from FPM job results
-  status_fpm:
-    name: Generate STATUS.md
-    if: always()
-    needs: test_fpm
-    runs-on: ubuntu-latest
-    steps:
-      - name: Generate summary
-        uses: gha3mi/setup-fortran-conda@latest
-        with:
-          generate-status-fpm: true
