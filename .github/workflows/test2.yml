@@ -1,4 +1,4 @@
-name: Setup Fortran Conda CI/CD
+name: Build and test pkg
 
 on: [push, pull_request, workflow_dispatch]
 
@@ -8,36 +8,26 @@ permissions:
 
 jobs:
 
-  # Run FPM tests (debug + release) on all OS/compiler combinations
   test_fpm:
     name: ${{ matrix.os }}_${{ matrix.compiler }}_fpm
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest] # [ubuntu-latest, macos-latest, windows-latest]
-        compiler: [gfortran] # [gfortran, ifx, lfortran, flang-new, nvfortran]
+        os: [ubuntu-latest, windows-latest] # [ubuntu-latest, macos-latest, windows-latest]
+        compiler: [gfortran] # [gfortran, lfortran]
         include:
           - os: ubuntu-latest
             compiler: gfortran
             compiler-version: 14.2.0
             extra-packages: ""
-          # - os: windows-latest
-          #   extra-packages: ""
-          # - os: macos-latest
-          #   extra-packages: ""
-        # exclude:
-        #   - os: macos-latest
-        #     compiler: flang-new
-        #   - os: macos-latest
-        #     compiler: ifx
-        #   - os: macos-latest
-        #     compiler: nvfortran
-        #   - os: windows-latest
-        #     compiler: nvfortran
-
+          - os: windows-latest
+            compiler: gfortran
+            compiler-version: 14.2.0
+            extra-packages: ""
+          
     steps:
-      - name: Setup Fortran
+      - name: Set up Fortran
         uses: gha3mi/setup-fortran-conda@latest
         with:
           compiler: ${{ matrix.compiler }}
@@ -45,10 +35,10 @@ jobs:
           platform: ${{ matrix.os }}
           extra-packages: ${{ matrix.extra-packages }}
 
-      - name: fpm test (debug)
+      - name: Test debug mode
         run: fpm test --compiler ${{ matrix.compiler }} --profile debug --flag "-fopenmp" --verbose
 
-      - name: fpm test (release)
+      - name: Test release mode
         run: fpm test --compiler ${{ matrix.compiler }} --profile release --flag "-fopenmp" --verbose
 
   # Generate STATUS.md from FPM job results
