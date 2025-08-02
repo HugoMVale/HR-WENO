@@ -1,0 +1,61 @@
+name: Setup Fortran Conda CI/CD
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+
+  # Run FPM tests (debug + release) on all OS/compiler combinations
+  test_fpm:
+    name: ${{ matrix.os }}_${{ matrix.compiler }}_fpm
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest] # [ubuntu-latest, macos-latest, windows-latest]
+        compiler: [gfortran] # [gfortran, ifx, lfortran, flang-new, nvfortran]
+        include:
+          - os: ubuntu-latest
+            extra-packages: ""
+          - os: windows-latest
+            extra-packages: ""
+          - os: macos-latest
+            extra-packages: ""
+        # exclude:
+        #   - os: macos-latest
+        #     compiler: flang-new
+        #   - os: macos-latest
+        #     compiler: ifx
+        #   - os: macos-latest
+        #     compiler: nvfortran
+        #   - os: windows-latest
+        #     compiler: nvfortran
+
+    steps:
+      - name: Setup Fortran
+        uses: gha3mi/setup-fortran-conda@latest
+        with:
+          compiler: ${{ matrix.compiler }}
+          platform: ${{ matrix.os }}
+          extra-packages: ${{ matrix.extra-packages }}
+
+      - name: fpm test (debug)
+        run: fpm test --compiler ${{ matrix.compiler }} --profile debug --flag "-fopenmp" --verbose
+
+      - name: fpm test (release)
+        run: fpm test --compiler ${{ matrix.compiler }} --profile release --flag "-fopenmp" --verbose
+
+  # Generate STATUS.md from FPM job results
+  status_fpm:
+    name: Generate STATUS.md
+    if: always()
+    needs: test_fpm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate summary
+        uses: gha3mi/setup-fortran-conda@latest
+        with:
+          generate-status-fpm: true
