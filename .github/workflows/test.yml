@@ -22,6 +22,7 @@ jobs:
           gcov --version
           fpm test --profile debug --flag "--coverage -fprofile-abs-path"
           gcovr --filter src --cobertura-pretty --output coverage.xml
+          gcovr --filter src --cobertura-pretty
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
