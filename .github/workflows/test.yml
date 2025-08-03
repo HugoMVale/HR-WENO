@@ -15,14 +15,12 @@ jobs:
           compiler: gfortran
           compiler-version: "14.2"
           platform: ubuntu-latest
-          extra-packages: "gcovr"
+          extra-packages: "coverage"
       
       - name: Test debug with coverage
         run: |
           gcov --version
           fpm test --profile debug --flag "--coverage -fprofile-abs-path"
-          gcovr --filter src --cobertura-pretty --output coverage.xml
-          gcovr --filter src --cobertura-pretty
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
