@@ -13,14 +13,16 @@ jobs:
         uses: gha3mi/setup-fortran-conda@latest
         with:
           compiler: gfortran
-          compiler-version: "14.2"
+          compiler-version: "14.3"
           platform: ubuntu-latest
-          extra-packages: "coverage"
+          extra-packages: ""
       
       - name: Test debug with coverage
         run: |
           gcov --version
+          pip install gcovr coverage
           fpm test --profile debug --flag "--coverage -fprofile-abs-path"
+          gcovr --filter src --cobertura-pretty --output coverage.xml
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v5
@@ -39,11 +41,11 @@ jobs:
         include:
           - compiler: gfortran
             os: ubuntu-latest
-            compiler-version: 14.2.0
+            compiler-version: 14.3.0
             extra-packages: ""
           - compiler: gfortran
             os: windows-latest
-            compiler-version: 14.2.0
+            compiler-version: 14.3.0
             extra-packages: ""
           # - compiler: lfortran # error associate
           #   os: ubuntu-latest
